@@ -2,8 +2,15 @@
   boot.initrd.availableKernelModules = ["sd_mod" "sr_mod"];
 
   fileSystems."/" = {
+    device = "none";
+    fsType = "tmpfs";
+    options = ["defaults" "size=2G" "mode=755"];
+  };
+
+  fileSystems."/persist" = {
     device = "sampo/nixos";
     fsType = "zfs";
+    neededForBoot = true;
   };
 
   fileSystems."/nix" = {

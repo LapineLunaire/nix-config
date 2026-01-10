@@ -18,5 +18,22 @@
     networkmanager.enable = true;
   };
 
+  # Persist system state across reboots (root is tmpfs)
+  environment.persistence."/persist" = {
+    hideMounts = true;
+    directories = [
+      "/var/lib/nixos"
+      "/var/lib/systemd"
+      "/var/lib/NetworkManager"
+      "/var/log"
+      "/etc/ssh"
+    ];
+    files = [
+      "/etc/machine-id"
+      "/etc/shadow"
+      "/etc/nixos"
+    ];
+  };
+
   system.stateVersion = "25.11";
 }

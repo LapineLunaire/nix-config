@@ -8,12 +8,15 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    impermanence.url = "github:nix-community/impermanence";
   };
 
   outputs = {
     self,
     nixpkgs,
     home-manager,
+    impermanence,
   } @ inputs: let
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux"];
   in {
@@ -26,6 +29,7 @@
         modules = [
           {nixpkgs.config.allowUnfree = true;}
 
+          impermanence.nixosModules.impermanence
           ./hosts/sampo
 
           home-manager.nixosModules.home-manager
