@@ -9,6 +9,7 @@
       "networkmanager"
       "video"
       "audio"
+      "input"
     ];
     # FIDO2 hardware key
     openssh.authorizedKeys.keys = [

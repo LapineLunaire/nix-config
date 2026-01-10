@@ -7,6 +7,13 @@
 
   programs.zsh.enable = true;
 
+  programs.neovim = {
+    enable = true;
+    defaultEditor = true;
+    viAlias = true;
+    vimAlias = true;
+  };
+
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
     noto-fonts-cjk-sans
@@ -23,7 +30,6 @@
     grim
     htop
     lf
-    neovim
     nvimpager
     playerctl
     ripgrep

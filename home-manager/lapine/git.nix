@@ -13,8 +13,6 @@
         pager = "nvimpager";
       };
 
-      pager.options = "--always";
-
       pull.rebase = true;
 
       init.defaultBranch = "main";

@@ -1,7 +1,7 @@
 {pkgs, ...}: {
   imports = [
     ../generic
-    ../generic/users/lapine.nix
+    ../../users/lapine.nix
     ./hardware-configuration.nix
   ];
 

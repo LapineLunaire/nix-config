@@ -26,9 +26,9 @@
       grep = "grep --color=auto";
       egrep = "egrep --color=auto";
       fgrep = "fgrep --color=auto";
-      ls = "ls --color=auto";
-      ll = "ls -lh --color=auto";
-      la = "ls -lah --color=auto";
+      ls = "eza";
+      ll = "eza -l";
+      la = "eza -la";
       # CoW copy on btrfs/zfs
       cp = "cp --reflink=auto --sparse=always";
     };

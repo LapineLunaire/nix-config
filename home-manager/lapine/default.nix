@@ -22,8 +22,6 @@
       socat
     ];
     sessionVariables = {
-      EDITOR = "nvim";
-      VISUAL = "nvim";
       PAGER = "nvimpager";
       MANPAGER = "nvimpager";
     };
