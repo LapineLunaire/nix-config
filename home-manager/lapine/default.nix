@@ -20,6 +20,7 @@
       nmap
       rclone
       socat
+      yt-dlp
     ];
     sessionVariables = {
       PAGER = "nvimpager";

@@ -25,15 +25,18 @@
     bat
     brightnessctl
     curl
+    duf
     eza
     fd
     fzf
+    gping
     htop
     lf
     nvimpager
     playerctl
     ripgrep
     rsync
+    tealdeer
     tree
 
     # Wayland tools
