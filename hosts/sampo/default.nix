@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{pkgs, lib, ...}: {
   imports = [
     ../generic
     ./hardware-configuration.nix
@@ -37,6 +37,9 @@
 
   # /etc/nixos symlink to persisted config
   environment.etc."nixos".source = "/persist/nix-config";
+
+  # Disable smartd (VM has no physical disks)
+  services.smartd.enable = lib.mkForce false;
 
   system.stateVersion = "25.11";
 }
