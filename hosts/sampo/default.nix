@@ -23,8 +23,8 @@
     directories = [
       "/var/lib/nixos"
       "/var/lib/systemd"
-      "/var/lib/NetworkManager"
       "/var/log"
+      "/etc/NetworkManager/system-connections"
     ];
     files = [
       "/etc/machine-id"
