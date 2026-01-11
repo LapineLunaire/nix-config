@@ -21,23 +21,27 @@
   ];
 
   environment.systemPackages = with pkgs; [
+    # CLI utilities
     bat
     brightnessctl
     curl
     eza
     fd
     fzf
-    grim
     htop
     lf
     nvimpager
     playerctl
     ripgrep
     rsync
-    slurp
     tree
+
+    # Wayland tools
+    grim
+    slurp
     wl-clipboard
 
+    # Qt theming
     gruvbox-kvantum
     kdePackages.qtstyleplugin-kvantum
     qt6Packages.qt6ct

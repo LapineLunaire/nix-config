@@ -28,11 +28,9 @@
         specialArgs = {inherit inputs;};
         modules = [
           {nixpkgs.config.allowUnfree = true;}
-
           impermanence.nixosModules.impermanence
-          ./hosts/sampo
-
           home-manager.nixosModules.home-manager
+          ./hosts/sampo
           {
             home-manager = {
               useGlobalPkgs = true;

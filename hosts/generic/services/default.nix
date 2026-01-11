@@ -1,7 +1,7 @@
 {...}: {
   imports = [
     ./chrony.nix
-    ./ly.nix
+    ./greetd.nix
     ./openssh.nix
     ./pipewire.nix
   ];

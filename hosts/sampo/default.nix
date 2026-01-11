@@ -30,10 +30,11 @@
     ];
     files = [
       "/etc/machine-id"
-      "/etc/shadow"
-      "/etc/nixos"
     ];
   };
+
+  # /etc/nixos symlink to persisted config
+  environment.etc."nixos".source = "/persist/nix-config";
 
   system.stateVersion = "25.11";
 }

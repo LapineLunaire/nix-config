@@ -3,7 +3,8 @@
     isNormalUser = true;
     description = "Lapine";
     shell = pkgs.zsh;
-    initialPassword = "usagi";
+    # Generate with: nix-shell -p mkpasswd --run 'mkpasswd -m sha-512'
+    hashedPassword = "$6$h.m1Ftri0Zjsinfs$jKmYsiTrcWzTOCVGSeKA53p/1twd0buX/qxzS08aB6Dgm7PVl9jQTeiZEmb4MIBWrZHEsyLt/ejQsko4b.abf/";
     extraGroups = [
       "wheel"
       "networkmanager"
