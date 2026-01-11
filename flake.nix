@@ -44,9 +44,9 @@
               useGlobalPkgs = true;
               useUserPackages = true;
               extraSpecialArgs = {inherit inputs;};
-              users.lapine = import ./home-manager/lapine;
             };
           }
+          ./users/lapine
         ];
       };
     };
