@@ -1,5 +1,6 @@
 {pkgs, ...}: {
   imports = [
+    ./aagl.nix
     ./direnv.nix
     ./nh.nix
     ./obs.nix

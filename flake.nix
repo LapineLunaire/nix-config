@@ -12,6 +12,11 @@
     impermanence.url = "github:nix-community/impermanence";
 
     nixd.url = "github:nix-community/nixd";
+
+    aagl = {
+      url = "github:ezKEa/aagl-gtk-on-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -20,6 +25,7 @@
     home-manager,
     impermanence,
     nixd,
+    aagl,
   } @ inputs: let
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
     pkgsFor = system:
@@ -38,6 +44,7 @@
           {nixpkgs.pkgs = pkgsFor "x86_64-linux";}
           impermanence.nixosModules.impermanence
           home-manager.nixosModules.home-manager
+          aagl.nixosModules.default
           ./hosts/sampo
           {
             home-manager = {
