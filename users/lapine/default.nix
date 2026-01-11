@@ -22,8 +22,14 @@
   # Home Manager configuration
   home-manager.users.lapine = {
     imports = [
+      ./ghostty.nix
       ./git.nix
+      ./rofi.nix
       ./sway.nix
+      ./swaync.nix
+      ./swaylock.nix
+      ./waybar.nix
+      ./yazi.nix
       ./zed.nix
       ./zsh.nix
     ];

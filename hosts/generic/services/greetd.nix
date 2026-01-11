@@ -1,5 +1,4 @@
 {pkgs, ...}: {
-  # greetd with tuigreet - only shows normal users (not nixbld)
   services.greetd = {
     enable = true;
     settings = {
@@ -9,7 +8,4 @@
       };
     };
   };
-
-  # Provides session file and handles Wayland/portals setup
-  programs.sway.enable = true;
 }

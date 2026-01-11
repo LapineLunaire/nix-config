@@ -2,19 +2,13 @@
   imports = [
     ./aagl.nix
     ./direnv.nix
+    ./neovim.nix
     ./nh.nix
     ./obs.nix
     ./steam.nix
+    ./sway.nix
+    ./zsh.nix
   ];
-
-  programs.zsh.enable = true;
-
-  programs.neovim = {
-    enable = true;
-    defaultEditor = true;
-    viAlias = true;
-    vimAlias = true;
-  };
 
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
@@ -23,7 +17,6 @@
   ];
 
   environment.systemPackages = with pkgs; [
-    # CLI utilities
     bat
     brightnessctl
     curl
@@ -32,23 +25,15 @@
     fd
     fzf
     gping
+    grim
     htop
-    lf
     nvimpager
     playerctl
     ripgrep
     rsync
+    slurp
     tealdeer
     tree
-
-    # Wayland tools
-    grim
-    slurp
     wl-clipboard
-
-    # Qt theming
-    gruvbox-kvantum
-    kdePackages.qtstyleplugin-kvantum
-    qt6Packages.qt6ct
   ];
 }

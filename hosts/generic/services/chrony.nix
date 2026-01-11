@@ -1,5 +1,5 @@
-# NTS provides authenticated, encrypted time synchronization
 {...}: {
+  # NTS = authenticated, encrypted time sync
   services.chrony = {
     enable = true;
     enableNTS = true;

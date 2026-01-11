@@ -17,6 +17,11 @@
       url = "github:ezKEa/aagl-gtk-on-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    stylix = {
+      url = "github:nix-community/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -26,6 +31,7 @@
     impermanence,
     nixd,
     aagl,
+    stylix,
   } @ inputs: let
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
     pkgsFor = system:
@@ -45,6 +51,7 @@
           impermanence.nixosModules.impermanence
           home-manager.nixosModules.home-manager
           aagl.nixosModules.default
+          stylix.nixosModules.stylix
           ./hosts/sampo
           {
             home-manager = {

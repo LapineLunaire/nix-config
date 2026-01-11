@@ -3,6 +3,7 @@
     ./pkgs
     ./security.nix
     ./services
+    ./stylix.nix
   ];
 
   nix.settings = {
