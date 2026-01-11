@@ -11,9 +11,12 @@
     auto-optimise-store = true;
   };
 
-  boot.loader = {
-    systemd-boot.enable = true;
-    efi.canTouchEfiVariables = true;
+  boot = {
+    loader = {
+      systemd-boot.enable = true;
+      efi.canTouchEfiVariables = true;
+    };
+    kernelModules = ["ntsync"];
   };
 
   # dbus-broker is faster and more secure than dbus-daemon
