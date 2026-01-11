@@ -66,6 +66,8 @@
       };
     };
 
+    services.easyeffects.enable = true;
+
     # dconf not needed for Sway
     dconf.enable = false;
     programs.home-manager.enable = true;

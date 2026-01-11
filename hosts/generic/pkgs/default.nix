@@ -2,6 +2,7 @@
   imports = [
     ./direnv.nix
     ./nh.nix
+    ./obs.nix
     ./steam.nix
   ];
 
