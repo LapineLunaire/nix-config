@@ -153,41 +153,4 @@ in {
       };
     };
   };
-
-  services.swayidle = {
-    enable = true;
-    events = {
-      before-sleep = "swaylock -f";
-      lock = "swaylock -f";
-    };
-    timeouts = [
-      {
-        timeout = 300;
-        command = "swaymsg 'output * power off'";
-        resumeCommand = "swaymsg 'output * power on'";
-      }
-      {
-        timeout = 600;
-        command = "swaylock -f";
-      }
-    ];
-  };
-
-  services.kanshi = {
-    enable = true;
-    systemdTarget = "sway-session.target";
-  };
-
-  services.swayosd.enable = true;
-
-  gtk.iconTheme = {
-    name = "Papirus-Dark";
-    package = pkgs.papirus-icon-theme;
-  };
-
-  xdg.portal = {
-    enable = true;
-    extraPortals = [pkgs.xdg-desktop-portal-wlr pkgs.xdg-desktop-portal-gtk];
-    config.common.default = ["wlr" "gtk"];
-  };
 }

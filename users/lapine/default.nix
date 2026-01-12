@@ -22,13 +22,19 @@
   # Home Manager configuration
   home-manager.users.lapine = {
     imports = [
+      ./easyeffects.nix
       ./ghostty.nix
       ./git.nix
+      ./gtk.nix
+      ./kanshi.nix
       ./rofi.nix
       ./sway.nix
+      ./swayidle.nix
       ./swaync.nix
       ./swaylock.nix
+      ./swayosd.nix
       ./waybar.nix
+      ./xdg.nix
       ./yazi.nix
       ./zed.nix
       ./zsh.nix
@@ -68,24 +74,6 @@
         MANPAGER = "nvimpager";
       };
     };
-
-    xdg = {
-      enable = true;
-      userDirs = {
-        enable = true;
-        createDirectories = true;
-        desktop = "$HOME/desktop";
-        documents = "$HOME/documents";
-        download = "$HOME/downloads";
-        music = "$HOME/music";
-        pictures = "$HOME/pictures";
-        publicShare = "$HOME/public";
-        templates = "$HOME/templates";
-        videos = "$HOME/videos";
-      };
-    };
-
-    services.easyeffects.enable = true;
 
     programs.home-manager.enable = true;
     # Restart services on config change
