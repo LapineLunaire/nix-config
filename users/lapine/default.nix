@@ -47,6 +47,8 @@
         minisign
         mpv
         nmap
+        protonmail-desktop
+        protonvpn-gui
         rclone
         socat
         yt-dlp
