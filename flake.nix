@@ -63,6 +63,27 @@
           ./users/lapine
         ];
       };
+
+      camellya = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = {inherit inputs;};
+        modules = [
+          {nixpkgs.pkgs = pkgsFor "x86_64-linux";}
+          impermanence.nixosModules.impermanence
+          home-manager.nixosModules.home-manager
+          aagl.nixosModules.default
+          stylix.nixosModules.stylix
+          ./hosts/camellya
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              extraSpecialArgs = {inherit inputs;};
+            };
+          }
+          ./users/lapine
+        ];
+      };
     };
 
     homeConfigurations = {
