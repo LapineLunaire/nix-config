@@ -17,18 +17,22 @@ in {
   home.sessionVariables = {
     NIXOS_OZONE_WL = "1";
     QT_QPA_PLATFORM = "wayland";
-    MOZ_ENABLE_WAYLAND = "1";
-    XDG_CURRENT_DESKTOP = "sway";
+    WLR_RENDERER = "vulkan";
   };
 
   wayland.windowManager.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
+    extraConfig = "include /etc/sway/config.d/*";
 
     config = {
       modifier = mod;
       terminal = "ghostty";
       menu = "rofi -show drun";
+
+      output."*" = {
+        render_bit_depth = "10";
+      };
 
       gaps = {
         inner = 8;
@@ -175,8 +179,8 @@ in {
   };
 
   gtk.iconTheme = {
-    name = "Gruvbox-Plus-Dark";
-    package = pkgs.gruvbox-plus-icons;
+    name = "Papirus-Dark";
+    package = pkgs.papirus-icon-theme;
   };
 
   xdg.portal = {

@@ -22,6 +22,11 @@
       url = "github:nix-community/stylix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nixpkgs-wayland = {
+      url = "github:nix-community/nixpkgs-wayland";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -32,12 +37,14 @@
     nixd,
     aagl,
     stylix,
+    nixpkgs-wayland,
   } @ inputs: let
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
     pkgsFor = system:
       import nixpkgs {
         inherit system;
         config.allowUnfree = true;
+        overlays = [nixpkgs-wayland.overlay];
       };
   in {
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
