@@ -42,8 +42,8 @@
         discord
         fastfetch
         firefox
+        heroic
         jq
-        legendary-gl
         minisign
         mpv
         nmap
@@ -77,8 +77,6 @@
 
     services.easyeffects.enable = true;
 
-    # dconf not needed for Sway
-    dconf.enable = false;
     programs.home-manager.enable = true;
     # Restart services on config change
     systemd.user.startServices = "sd-switch";
