@@ -17,22 +17,17 @@
   ];
 
   environment.systemPackages = with pkgs; [
-    bat
     brightnessctl
     curl
-    duf
-    eza
     fd
     fzf
-    gping
     grim
-    htop
-    nvimpager
+    jq
     playerctl
     ripgrep
     rsync
     slurp
-    tealdeer
+    socat
     tree
     wl-clipboard
   ];

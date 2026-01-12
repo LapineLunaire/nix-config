@@ -39,18 +39,28 @@
       homeDirectory = "/home/lapine";
       stateVersion = "25.11";
       packages = with pkgs; [
+        bat
         discord
+        duf
+        eza
         fastfetch
         firefox
+        gping
         heroic
-        jq
+        htop
+        imv
+        ldns
         minisign
         mpv
+        mtr
         nmap
+        nvimpager
+        traceroute
+        whois
         protonmail-desktop
         protonvpn-gui
         rclone
-        socat
+        tealdeer
         yt-dlp
       ];
       sessionVariables = {
