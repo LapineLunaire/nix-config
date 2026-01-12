@@ -19,6 +19,6 @@
   };
 
   home.packages = [
-    inputs.nixd.packages.${pkgs.system}.nixd
+    inputs.nixd.packages.${pkgs.stdenv.hostPlatform.system}.nixd
   ];
 }
