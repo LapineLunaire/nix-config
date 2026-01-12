@@ -39,6 +39,7 @@
       homeDirectory = "/home/lapine";
       stateVersion = "25.11";
       packages = with pkgs; [
+        discord
         fastfetch
         firefox
         jq
