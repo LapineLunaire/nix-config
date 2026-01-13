@@ -14,6 +14,20 @@ in {
   };
 
   config = lib.mkMerge [
+    {
+      programs.yazi = {
+        enable = true;
+        enableZshIntegration = true;
+        settings = {
+          manager = {
+            show_hidden = true;
+            sort_by = "natural";
+            sort_dir_first = true;
+          };
+        };
+      };
+    }
+
     (lib.mkIf cfg.gui.enable {
       programs.ghostty = {
         enable = true;
@@ -31,18 +45,6 @@ in {
           modi = "drun,run";
           show-icons = true;
           drun-display-format = "{name}";
-        };
-      };
-
-      programs.yazi = {
-        enable = true;
-        enableZshIntegration = true;
-        settings = {
-          manager = {
-            show_hidden = true;
-            sort_by = "natural";
-            sort_dir_first = true;
-          };
         };
       };
 
