@@ -9,6 +9,7 @@
 in {
   options.userConfig.programs = {
     gui.enable = lib.mkEnableOption "GUI applications";
+    gaming.enable = lib.mkEnableOption "gaming applications";
     nixd.enable = lib.mkEnableOption "nixd LSP";
   };
 

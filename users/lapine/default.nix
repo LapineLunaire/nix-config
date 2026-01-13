@@ -34,6 +34,7 @@
 
     userConfig.desktop.enable = true;
     userConfig.programs.gui.enable = true;
+    userConfig.programs.gaming.enable = true;
     userConfig.programs.nixd.enable = true;
 
     home = {
@@ -63,11 +64,13 @@
         ++ lib.optionals config.userConfig.programs.gui.enable [
           discord
           firefox
-          heroic
           imv
           mpv
           protonmail-desktop
           protonvpn-gui
+        ]
+        ++ lib.optionals config.userConfig.programs.gaming.enable [
+          heroic
         ];
 
       sessionVariables = {
