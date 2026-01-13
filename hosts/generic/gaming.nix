@@ -8,6 +8,8 @@
   options.myConfig.gaming.enable = lib.mkEnableOption "gaming support";
 
   config = lib.mkIf config.myConfig.gaming.enable {
+    boot.kernelModules = ["ntsync"];
+
     nix.settings = inputs.aagl.nixConfig;
 
     programs.honkers-railway-launcher.enable = true;

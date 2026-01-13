@@ -2,9 +2,9 @@
   imports = [
     ./desktop.nix
     ./gaming.nix
-    ./pkgs
+    ./packages.nix
     ./security.nix
-    ./services
+    ./services.nix
     ./stylix.nix
   ];
 
@@ -13,12 +13,9 @@
     auto-optimise-store = true;
   };
 
-  boot = {
-    loader = {
-      systemd-boot.enable = true;
-      efi.canTouchEfiVariables = true;
-    };
-    kernelModules = ["ntsync"];
+  boot.loader = {
+    systemd-boot.enable = true;
+    efi.canTouchEfiVariables = true;
   };
 
   zramSwap = {
