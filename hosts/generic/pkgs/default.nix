@@ -1,8 +1,4 @@
 {pkgs, ...}: {
-  imports = [
-    ./nh.nix
-  ];
-
   programs.zsh.enable = true;
   programs.direnv = {
     enable = true;
@@ -13,6 +9,16 @@
     defaultEditor = true;
     viAlias = true;
     vimAlias = true;
+  };
+
+  programs.nh = {
+    enable = true;
+    clean = {
+      enable = true;
+      extraArgs = "--keep 3";
+      dates = "daily";
+    };
+    flake = "/etc/nixos";
   };
 
   fonts.packages = with pkgs; [

@@ -1,5 +1,7 @@
 {...}: {
   imports = [
+    ./desktop.nix
+    ./gaming.nix
     ./pkgs
     ./security.nix
     ./services
@@ -18,9 +20,6 @@
     };
     kernelModules = ["ntsync"];
   };
-
-  # dbus-broker is faster and more secure than dbus-daemon
-  services.dbus.implementation = "broker";
 
   zramSwap = {
     enable = true;
@@ -46,10 +45,4 @@
     font = "Lat2-Terminus16";
     keyMap = "colemak";
   };
-
-  # Required for Home Manager XDG portal integration
-  environment.pathsToLink = [
-    "/share/applications"
-    "/share/xdg-desktop-portal"
-  ];
 }

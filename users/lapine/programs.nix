@@ -1,13 +1,8 @@
-{pkgs, ...}: {
-  programs.obs-studio = {
-    enable = true;
-    plugins = with pkgs.obs-studio-plugins; [
-      obs-pipewire-audio-capture
-      obs-vaapi
-      wlrobs
-    ];
-  };
-
+{
+  pkgs,
+  inputs,
+  ...
+}: {
   programs.ghostty = {
     enable = true;
     settings = {
@@ -39,8 +34,36 @@
     };
   };
 
+  programs.zed-editor = {
+    enable = true;
+
+    userSettings = {
+      telemetry.metrics = false;
+      load_direnv = "shell_hook";
+      vim_mode = true;
+      hour_format = "hour24";
+      lsp.nixd.settings.nixpkgs.expr = "import <nixpkgs> {}";
+    };
+    extensions = [
+      "nix"
+    ];
+  };
+
+  programs.obs-studio = {
+    enable = true;
+    plugins = with pkgs.obs-studio-plugins; [
+      obs-pipewire-audio-capture
+      obs-vaapi
+      wlrobs
+    ];
+  };
+
   gtk.iconTheme = {
     name = "Papirus-Dark";
     package = pkgs.papirus-icon-theme;
   };
+
+  home.packages = [
+    inputs.nixd.packages.${pkgs.stdenv.hostPlatform.system}.nixd
+  ];
 }

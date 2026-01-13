@@ -24,26 +24,14 @@
     imports = [
       ./desktop.nix
       ./programs.nix
-      ./git.nix
-      ./swaync.nix
-      ./waybar.nix
-      ./zed.nix
-      ./zsh.nix
+      ./shell.nix
     ];
-
-    services.easyeffects.enable = true;
-    services.swayosd.enable = true;
-    services.kanshi = {
-      enable = true;
-      systemdTarget = "sway-session.target";
-    };
-
-    programs.swaylock.enable = true;
 
     home = {
       username = "lapine";
       homeDirectory = "/home/lapine";
       stateVersion = "25.11";
+
       packages = with pkgs; [
         bat
         discord
@@ -61,14 +49,15 @@
         mtr
         nmap
         nvimpager
-        traceroute
-        whois
         protonmail-desktop
         protonvpn-gui
         rclone
         tealdeer
+        traceroute
+        whois
         yt-dlp
       ];
+
       sessionVariables = {
         PAGER = "nvimpager";
         MANPAGER = "nvimpager";
@@ -76,6 +65,15 @@
     };
 
     programs.home-manager.enable = true;
+    programs.swaylock.enable = true;
+
+    services.easyeffects.enable = true;
+    services.swayosd.enable = true;
+    services.kanshi = {
+      enable = true;
+      systemdTarget = "sway-session.target";
+    };
+
     # Restart services on config change
     systemd.user.startServices = "sd-switch";
   };

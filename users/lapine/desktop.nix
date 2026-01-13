@@ -189,4 +189,127 @@ in {
       config.common.default = ["wlr" "gtk"];
     };
   };
+
+  services.swaync = {
+    enable = true;
+    settings = {
+      positionX = "right";
+      positionY = "top";
+      layer = "overlay";
+      control-center-layer = "top";
+      layer-shell = true;
+      cssPriority = "application";
+      control-center-margin-top = 8;
+      control-center-margin-bottom = 8;
+      control-center-margin-right = 8;
+      control-center-margin-left = 8;
+      notification-2fa-action = true;
+      notification-inline-replies = false;
+      notification-icon-size = 64;
+      notification-body-image-height = 100;
+      notification-body-image-width = 200;
+      timeout = 5;
+      timeout-low = 3;
+      timeout-critical = 0;
+      fit-to-screen = true;
+      control-center-width = 400;
+      notification-window-width = 400;
+      keyboard-shortcuts = true;
+      image-visibility = "when-available";
+      transition-time = 200;
+      hide-on-clear = false;
+      hide-on-action = true;
+      script-fail-notify = true;
+      widgets = [
+        "title"
+        "dnd"
+        "notifications"
+      ];
+      widget-config = {
+        title = {
+          text = "Notifications";
+          clear-all-button = true;
+        };
+        dnd = {
+          text = "Do Not Disturb";
+        };
+      };
+    };
+  };
+
+  programs.waybar = {
+    enable = true;
+    systemd = {
+      enable = true;
+      target = "sway-session.target";
+    };
+    style = ''
+      #workspaces button {
+        color: @base05;
+        background: transparent;
+      }
+      #workspaces button.focused {
+        color: @base0D;
+        background: @base02;
+        font-weight: bold;
+      }
+      #workspaces button.urgent {
+        color: @base08;
+        background: @base01;
+      }
+    '';
+    settings = {
+      mainBar = {
+        layer = "top";
+        position = "top";
+        height = 30;
+        spacing = 8;
+
+        modules-left = ["sway/workspaces" "sway/mode"];
+        modules-center = ["clock"];
+        modules-right = ["tray" "network" "cpu" "memory" "temperature"];
+
+        tray = {
+          spacing = 8;
+        };
+
+        "sway/workspaces" = {
+          format = "{name}";
+          disable-scroll = true;
+        };
+
+        "sway/mode" = {
+          format = "{}";
+        };
+
+        clock = {
+          format = "{:%Y-%m-%d %H:%M:%S}";
+          interval = 1;
+          tooltip-format = "<tt>{calendar}</tt>";
+        };
+
+        cpu = {
+          format = "CPU {usage}%";
+          interval = 2;
+        };
+
+        memory = {
+          format = "RAM {percentage}%";
+          interval = 2;
+        };
+
+        temperature = {
+          format = "{temperatureC}°C";
+          critical-threshold = 80;
+        };
+
+        network = {
+          format-wifi = "{ipaddr}";
+          format-ethernet = "{ipaddr}";
+          format-disconnected = "Offline";
+          tooltip-format = "{ifname}: {essid}";
+        };
+      };
+    };
+  };
 }

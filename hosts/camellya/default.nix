@@ -2,20 +2,21 @@
   imports = [
     ../generic
     ./hardware-configuration.nix
-    ./gaming.nix
-    ./desktop.nix
   ];
 
-  boot = {
-    kernelPackages = pkgs.linuxPackages_zen;
-    kernelParams = ["amd_pstate=active"];
-  };
+  myConfig.desktop.enable = true;
+  myConfig.gaming.enable = true;
 
   networking = {
     hostName = "camellya";
     # TODO: Generate with: head -c4 /dev/urandom | od -A none -t x4 | tr -d ' '
     hostId = "00000000";
     networkmanager.enable = true;
+  };
+
+  boot = {
+    kernelPackages = pkgs.linuxPackages_zen;
+    kernelParams = ["amd_pstate=active"];
   };
 
   # Persist system state across reboots (root is tmpfs)
