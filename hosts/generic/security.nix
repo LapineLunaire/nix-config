@@ -1,4 +1,7 @@
 {...}: {
+  users.users.root.hashedPassword = "!";
+  users.mutableUsers = false;
+
   security.polkit = {
     enable = true;
     extraConfig = ''

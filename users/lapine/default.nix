@@ -22,23 +22,23 @@
   # Home Manager configuration
   home-manager.users.lapine = {
     imports = [
-      ./easyeffects.nix
-      ./ghostty.nix
+      ./desktop.nix
+      ./programs.nix
       ./git.nix
-      ./gtk.nix
-      ./kanshi.nix
-      ./rofi.nix
-      ./sway.nix
-      ./swayidle.nix
       ./swaync.nix
-      ./swaylock.nix
-      ./swayosd.nix
       ./waybar.nix
-      ./xdg.nix
-      ./yazi.nix
       ./zed.nix
       ./zsh.nix
     ];
+
+    services.easyeffects.enable = true;
+    services.swayosd.enable = true;
+    services.kanshi = {
+      enable = true;
+      systemdTarget = "sway-session.target";
+    };
+
+    programs.swaylock.enable = true;
 
     home = {
       username = "lapine";

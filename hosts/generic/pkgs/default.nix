@@ -1,14 +1,19 @@
 {pkgs, ...}: {
   imports = [
-    ./aagl.nix
-    ./direnv.nix
-    ./neovim.nix
     ./nh.nix
-    ./obs.nix
-    ./steam.nix
-    ./sway.nix
-    ./zsh.nix
   ];
+
+  programs.zsh.enable = true;
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+  };
+  programs.neovim = {
+    enable = true;
+    defaultEditor = true;
+    viAlias = true;
+    vimAlias = true;
+  };
 
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
@@ -27,6 +32,7 @@
     ripgrep
     rsync
     slurp
+    smartmontools
     socat
     tree
     wl-clipboard

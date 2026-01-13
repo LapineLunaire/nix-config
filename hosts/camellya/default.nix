@@ -2,6 +2,8 @@
   imports = [
     ../generic
     ./hardware-configuration.nix
+    ./gaming.nix
+    ./desktop.nix
   ];
 
   boot = {

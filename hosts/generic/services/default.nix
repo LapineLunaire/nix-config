@@ -1,12 +1,24 @@
 {...}: {
   imports = [
-    ./chrony.nix
-    ./earlyoom.nix
-    ./fstrim.nix
-    ./fwupd.nix
     ./greetd.nix
     ./openssh.nix
     ./pipewire.nix
-    ./smartd.nix
   ];
+
+  services.fstrim.enable = true;
+  services.fwupd.enable = true;
+
+  services.chrony = {
+    enable = true;
+    enableNTS = true;
+    servers = ["time.cloudflare.com"];
+  };
+
+  services.earlyoom = {
+    enable = true;
+    freeMemThreshold = 2;
+    freeSwapThreshold = 2;
+  };
+
+  services.smartd.enable = true;
 }

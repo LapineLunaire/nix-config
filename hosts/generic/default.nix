@@ -1,7 +1,7 @@
 {...}: {
   imports = [
     ./pkgs
-    ./security
+    ./security.nix
     ./services
     ./stylix.nix
   ];

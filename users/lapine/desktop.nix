@@ -1,8 +1,5 @@
 {pkgs, ...}: let
-  # Mod1 = Alt, Mod4 = Super
   mod = "Mod1";
-
-  # Workspace names (Chinese numerals)
   ws1 = "1:一";
   ws2 = "2:二";
   ws3 = "3:三";
@@ -63,7 +60,6 @@ in {
         {command = "swaymsg workspace ${ws1}";}
       ];
 
-      # Colemak home row: h/n/e/i instead of h/j/k/l
       keybindings = {
         "${mod}+h" = "focus left";
         "${mod}+n" = "focus down";
@@ -151,6 +147,46 @@ in {
         border = 2;
         titlebar = false;
       };
+    };
+  };
+
+  services.swayidle = {
+    enable = true;
+    events = {
+      before-sleep = "swaylock -f";
+      lock = "swaylock -f";
+    };
+    timeouts = [
+      {
+        timeout = 300;
+        command = "swaymsg 'output * power off'";
+        resumeCommand = "swaymsg 'output * power on'";
+      }
+      {
+        timeout = 600;
+        command = "swaylock -f";
+      }
+    ];
+  };
+
+  xdg = {
+    enable = true;
+    userDirs = {
+      enable = true;
+      createDirectories = true;
+      desktop = "$HOME/desktop";
+      documents = "$HOME/documents";
+      download = "$HOME/downloads";
+      music = "$HOME/music";
+      pictures = "$HOME/pictures";
+      publicShare = "$HOME/public";
+      templates = "$HOME/templates";
+      videos = "$HOME/videos";
+    };
+    portal = {
+      enable = true;
+      extraPortals = [pkgs.xdg-desktop-portal-wlr pkgs.xdg-desktop-portal-gtk];
+      config.common.default = ["wlr" "gtk"];
     };
   };
 }
