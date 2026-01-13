@@ -1,4 +1,10 @@
-{pkgs, ...}: let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
+  cfg = config.userConfig.desktop;
   mod = "Mod1";
   ws1 = "1:一";
   ws2 = "2:二";
@@ -11,303 +17,307 @@
   ws9 = "9:九";
   ws10 = "10:十";
 in {
-  home.sessionVariables = {
-    NIXOS_OZONE_WL = "1";
-    QT_QPA_PLATFORM = "wayland";
-    WLR_RENDERER = "vulkan";
-  };
+  options.userConfig.desktop.enable = lib.mkEnableOption "desktop environment configuration";
 
-  wayland.windowManager.sway = {
-    enable = true;
-    wrapperFeatures.gtk = true;
-    extraConfig = "include /etc/sway/config.d/*";
+  config = lib.mkIf cfg.enable {
+    home.sessionVariables = {
+      NIXOS_OZONE_WL = "1";
+      QT_QPA_PLATFORM = "wayland";
+      WLR_RENDERER = "vulkan";
+    };
 
-    config = {
-      modifier = mod;
-      terminal = "ghostty";
-      menu = "rofi -show drun";
+    wayland.windowManager.sway = {
+      enable = true;
+      wrapperFeatures.gtk = true;
+      extraConfig = "include /etc/sway/config.d/*";
 
-      output."*" = {
-        render_bit_depth = "10";
-      };
+      config = {
+        modifier = mod;
+        terminal = "ghostty";
+        menu = "rofi -show drun";
 
-      gaps = {
-        inner = 8;
-        outer = 4;
-      };
-
-      bars = [];
-
-      input = {
-        "type:keyboard" = {
-          xkb_layout = "us";
-          xkb_variant = "colemak";
-          repeat_delay = "300";
-          repeat_rate = "50";
+        output."*" = {
+          render_bit_depth = "10";
         };
-        "type:pointer" = {
-          accel_profile = "flat";
+
+        gaps = {
+          inner = 8;
+          outer = 4;
         };
-        "type:touchpad" = {
-          tap = "enabled";
-          natural_scroll = "enabled";
-          dwt = "enabled";
+
+        bars = [];
+
+        input = {
+          "type:keyboard" = {
+            xkb_layout = "us";
+            xkb_variant = "colemak";
+            repeat_delay = "300";
+            repeat_rate = "50";
+          };
+          "type:pointer" = {
+            accel_profile = "flat";
+          };
+          "type:touchpad" = {
+            tap = "enabled";
+            natural_scroll = "enabled";
+            dwt = "enabled";
+          };
+        };
+
+        startup = [
+          {command = "${pkgs.kdePackages.polkit-kde-agent-1}/libexec/polkit-kde-authentication-agent-1";}
+          {command = "swaymsg workspace ${ws1}";}
+        ];
+
+        keybindings = {
+          "${mod}+h" = "focus left";
+          "${mod}+n" = "focus down";
+          "${mod}+e" = "focus up";
+          "${mod}+i" = "focus right";
+          "${mod}+Shift+h" = "move left";
+          "${mod}+Shift+n" = "move down";
+          "${mod}+Shift+e" = "move up";
+          "${mod}+Shift+i" = "move right";
+
+          "${mod}+b" = "splith";
+          "${mod}+v" = "splitv";
+          "${mod}+r" = "layout stacking";
+          "${mod}+w" = "layout tabbed";
+          "${mod}+f" = "layout toggle split";
+          "${mod}+t" = "fullscreen toggle";
+          "${mod}+Shift+space" = "floating toggle";
+          "${mod}+space" = "focus mode_toggle";
+          "${mod}+a" = "focus parent";
+
+          "${mod}+Return" = "exec ghostty";
+          "${mod}+s" = "exec rofi -show drun";
+          "${mod}+k" = "exec swaync-client -t";
+          "${mod}+Escape" = "exec swaylock -f";
+          "${mod}+Shift+q" = "kill";
+
+          "Print" = "exec grim - | wl-copy";
+          "Shift+Print" = "exec grim -g \"$(slurp)\" - | wl-copy";
+
+          "${mod}+1" = "workspace ${ws1}";
+          "${mod}+2" = "workspace ${ws2}";
+          "${mod}+3" = "workspace ${ws3}";
+          "${mod}+4" = "workspace ${ws4}";
+          "${mod}+5" = "workspace ${ws5}";
+          "${mod}+6" = "workspace ${ws6}";
+          "${mod}+7" = "workspace ${ws7}";
+          "${mod}+8" = "workspace ${ws8}";
+          "${mod}+9" = "workspace ${ws9}";
+          "${mod}+0" = "workspace ${ws10}";
+          "${mod}+Shift+1" = "move container to workspace ${ws1}";
+          "${mod}+Shift+2" = "move container to workspace ${ws2}";
+          "${mod}+Shift+3" = "move container to workspace ${ws3}";
+          "${mod}+Shift+4" = "move container to workspace ${ws4}";
+          "${mod}+Shift+5" = "move container to workspace ${ws5}";
+          "${mod}+Shift+6" = "move container to workspace ${ws6}";
+          "${mod}+Shift+7" = "move container to workspace ${ws7}";
+          "${mod}+Shift+8" = "move container to workspace ${ws8}";
+          "${mod}+Shift+9" = "move container to workspace ${ws9}";
+          "${mod}+Shift+0" = "move container to workspace ${ws10}";
+
+          "${mod}+Shift+minus" = "move scratchpad";
+          "${mod}+minus" = "scratchpad show";
+          "${mod}+p" = "mode resize";
+          "${mod}+Shift+c" = "reload";
+          "${mod}+Shift+f" = "exec swaymsg exit";
+
+          "XF86AudioRaiseVolume" = "exec swayosd-client --output-volume raise";
+          "XF86AudioLowerVolume" = "exec swayosd-client --output-volume lower";
+          "XF86AudioMute" = "exec swayosd-client --output-volume mute-toggle";
+          "XF86AudioMicMute" = "exec swayosd-client --input-volume mute-toggle";
+          "XF86MonBrightnessUp" = "exec swayosd-client --brightness raise";
+          "XF86MonBrightnessDown" = "exec swayosd-client --brightness lower";
+          "XF86AudioPlay" = "exec playerctl play-pause";
+          "XF86AudioNext" = "exec playerctl next";
+          "XF86AudioPrev" = "exec playerctl previous";
+        };
+
+        modes = {
+          resize = {
+            "h" = "resize shrink width 10 px";
+            "n" = "resize grow height 10 px";
+            "e" = "resize shrink height 10 px";
+            "i" = "resize grow width 10 px";
+            "Return" = "mode default";
+            "Escape" = "mode default";
+          };
+        };
+
+        window = {
+          border = 2;
+          titlebar = false;
+        };
+
+        floating = {
+          border = 2;
+          titlebar = false;
         };
       };
+    };
 
-      startup = [
-        {command = "${pkgs.kdePackages.polkit-kde-agent-1}/libexec/polkit-kde-authentication-agent-1";}
-        {command = "swaymsg workspace ${ws1}";}
+    services.swayidle = {
+      enable = true;
+      events = {
+        before-sleep = "swaylock -f";
+        lock = "swaylock -f";
+      };
+      timeouts = [
+        {
+          timeout = 300;
+          command = "swaymsg 'output * power off'";
+          resumeCommand = "swaymsg 'output * power on'";
+        }
+        {
+          timeout = 600;
+          command = "swaylock -f";
+        }
       ];
-
-      keybindings = {
-        "${mod}+h" = "focus left";
-        "${mod}+n" = "focus down";
-        "${mod}+e" = "focus up";
-        "${mod}+i" = "focus right";
-        "${mod}+Shift+h" = "move left";
-        "${mod}+Shift+n" = "move down";
-        "${mod}+Shift+e" = "move up";
-        "${mod}+Shift+i" = "move right";
-
-        "${mod}+b" = "splith";
-        "${mod}+v" = "splitv";
-        "${mod}+r" = "layout stacking";
-        "${mod}+w" = "layout tabbed";
-        "${mod}+f" = "layout toggle split";
-        "${mod}+t" = "fullscreen toggle";
-        "${mod}+Shift+space" = "floating toggle";
-        "${mod}+space" = "focus mode_toggle";
-        "${mod}+a" = "focus parent";
-
-        "${mod}+Return" = "exec ghostty";
-        "${mod}+s" = "exec rofi -show drun";
-        "${mod}+k" = "exec swaync-client -t";
-        "${mod}+Escape" = "exec swaylock -f";
-        "${mod}+Shift+q" = "kill";
-
-        "Print" = "exec grim - | wl-copy";
-        "Shift+Print" = "exec grim -g \"$(slurp)\" - | wl-copy";
-
-        "${mod}+1" = "workspace ${ws1}";
-        "${mod}+2" = "workspace ${ws2}";
-        "${mod}+3" = "workspace ${ws3}";
-        "${mod}+4" = "workspace ${ws4}";
-        "${mod}+5" = "workspace ${ws5}";
-        "${mod}+6" = "workspace ${ws6}";
-        "${mod}+7" = "workspace ${ws7}";
-        "${mod}+8" = "workspace ${ws8}";
-        "${mod}+9" = "workspace ${ws9}";
-        "${mod}+0" = "workspace ${ws10}";
-        "${mod}+Shift+1" = "move container to workspace ${ws1}";
-        "${mod}+Shift+2" = "move container to workspace ${ws2}";
-        "${mod}+Shift+3" = "move container to workspace ${ws3}";
-        "${mod}+Shift+4" = "move container to workspace ${ws4}";
-        "${mod}+Shift+5" = "move container to workspace ${ws5}";
-        "${mod}+Shift+6" = "move container to workspace ${ws6}";
-        "${mod}+Shift+7" = "move container to workspace ${ws7}";
-        "${mod}+Shift+8" = "move container to workspace ${ws8}";
-        "${mod}+Shift+9" = "move container to workspace ${ws9}";
-        "${mod}+Shift+0" = "move container to workspace ${ws10}";
-
-        "${mod}+Shift+minus" = "move scratchpad";
-        "${mod}+minus" = "scratchpad show";
-        "${mod}+p" = "mode resize";
-        "${mod}+Shift+c" = "reload";
-        "${mod}+Shift+f" = "exec swaymsg exit";
-
-        "XF86AudioRaiseVolume" = "exec swayosd-client --output-volume raise";
-        "XF86AudioLowerVolume" = "exec swayosd-client --output-volume lower";
-        "XF86AudioMute" = "exec swayosd-client --output-volume mute-toggle";
-        "XF86AudioMicMute" = "exec swayosd-client --input-volume mute-toggle";
-        "XF86MonBrightnessUp" = "exec swayosd-client --brightness raise";
-        "XF86MonBrightnessDown" = "exec swayosd-client --brightness lower";
-        "XF86AudioPlay" = "exec playerctl play-pause";
-        "XF86AudioNext" = "exec playerctl next";
-        "XF86AudioPrev" = "exec playerctl previous";
-      };
-
-      modes = {
-        resize = {
-          "h" = "resize shrink width 10 px";
-          "n" = "resize grow height 10 px";
-          "e" = "resize shrink height 10 px";
-          "i" = "resize grow width 10 px";
-          "Return" = "mode default";
-          "Escape" = "mode default";
-        };
-      };
-
-      window = {
-        border = 2;
-        titlebar = false;
-      };
-
-      floating = {
-        border = 2;
-        titlebar = false;
-      };
     };
-  };
 
-  services.swayidle = {
-    enable = true;
-    events = {
-      before-sleep = "swaylock -f";
-      lock = "swaylock -f";
-    };
-    timeouts = [
-      {
-        timeout = 300;
-        command = "swaymsg 'output * power off'";
-        resumeCommand = "swaymsg 'output * power on'";
-      }
-      {
-        timeout = 600;
-        command = "swaylock -f";
-      }
-    ];
-  };
-
-  xdg = {
-    enable = true;
-    userDirs = {
+    xdg = {
       enable = true;
-      createDirectories = true;
-      desktop = "$HOME/desktop";
-      documents = "$HOME/documents";
-      download = "$HOME/downloads";
-      music = "$HOME/music";
-      pictures = "$HOME/pictures";
-      publicShare = "$HOME/public";
-      templates = "$HOME/templates";
-      videos = "$HOME/videos";
+      userDirs = {
+        enable = true;
+        createDirectories = true;
+        desktop = "$HOME/desktop";
+        documents = "$HOME/documents";
+        download = "$HOME/downloads";
+        music = "$HOME/music";
+        pictures = "$HOME/pictures";
+        publicShare = "$HOME/public";
+        templates = "$HOME/templates";
+        videos = "$HOME/videos";
+      };
+      portal = {
+        enable = true;
+        extraPortals = [pkgs.xdg-desktop-portal-wlr pkgs.xdg-desktop-portal-gtk];
+        config.common.default = ["wlr" "gtk"];
+      };
     };
-    portal = {
-      enable = true;
-      extraPortals = [pkgs.xdg-desktop-portal-wlr pkgs.xdg-desktop-portal-gtk];
-      config.common.default = ["wlr" "gtk"];
-    };
-  };
 
-  services.swaync = {
-    enable = true;
-    settings = {
-      positionX = "right";
-      positionY = "top";
-      layer = "overlay";
-      control-center-layer = "top";
-      layer-shell = true;
-      cssPriority = "application";
-      control-center-margin-top = 8;
-      control-center-margin-bottom = 8;
-      control-center-margin-right = 8;
-      control-center-margin-left = 8;
-      notification-2fa-action = true;
-      notification-inline-replies = false;
-      notification-icon-size = 64;
-      notification-body-image-height = 100;
-      notification-body-image-width = 200;
-      timeout = 5;
-      timeout-low = 3;
-      timeout-critical = 0;
-      fit-to-screen = true;
-      control-center-width = 400;
-      notification-window-width = 400;
-      keyboard-shortcuts = true;
-      image-visibility = "when-available";
-      transition-time = 200;
-      hide-on-clear = false;
-      hide-on-action = true;
-      script-fail-notify = true;
-      widgets = [
-        "title"
-        "dnd"
-        "notifications"
-      ];
-      widget-config = {
-        title = {
-          text = "Notifications";
-          clear-all-button = true;
-        };
-        dnd = {
-          text = "Do Not Disturb";
+    services.swaync = {
+      enable = true;
+      settings = {
+        positionX = "right";
+        positionY = "top";
+        layer = "overlay";
+        control-center-layer = "top";
+        layer-shell = true;
+        cssPriority = "application";
+        control-center-margin-top = 8;
+        control-center-margin-bottom = 8;
+        control-center-margin-right = 8;
+        control-center-margin-left = 8;
+        notification-2fa-action = true;
+        notification-inline-replies = false;
+        notification-icon-size = 64;
+        notification-body-image-height = 100;
+        notification-body-image-width = 200;
+        timeout = 5;
+        timeout-low = 3;
+        timeout-critical = 0;
+        fit-to-screen = true;
+        control-center-width = 400;
+        notification-window-width = 400;
+        keyboard-shortcuts = true;
+        image-visibility = "when-available";
+        transition-time = 200;
+        hide-on-clear = false;
+        hide-on-action = true;
+        script-fail-notify = true;
+        widgets = [
+          "title"
+          "dnd"
+          "notifications"
+        ];
+        widget-config = {
+          title = {
+            text = "Notifications";
+            clear-all-button = true;
+          };
+          dnd = {
+            text = "Do Not Disturb";
+          };
         };
       };
     };
-  };
 
-  programs.waybar = {
-    enable = true;
-    systemd = {
+    programs.waybar = {
       enable = true;
-      target = "sway-session.target";
-    };
-    style = ''
-      #workspaces button {
-        color: @base05;
-        background: transparent;
-      }
-      #workspaces button.focused {
-        color: @base0D;
-        background: @base02;
-        font-weight: bold;
-      }
-      #workspaces button.urgent {
-        color: @base08;
-        background: @base01;
-      }
-    '';
-    settings = {
-      mainBar = {
-        layer = "top";
-        position = "top";
-        height = 30;
-        spacing = 8;
-
-        modules-left = ["sway/workspaces" "sway/mode"];
-        modules-center = ["clock"];
-        modules-right = ["tray" "network" "cpu" "memory" "temperature"];
-
-        tray = {
+      systemd = {
+        enable = true;
+        target = "sway-session.target";
+      };
+      style = ''
+        #workspaces button {
+          color: @base05;
+          background: transparent;
+        }
+        #workspaces button.focused {
+          color: @base0D;
+          background: @base02;
+          font-weight: bold;
+        }
+        #workspaces button.urgent {
+          color: @base08;
+          background: @base01;
+        }
+      '';
+      settings = {
+        mainBar = {
+          layer = "top";
+          position = "top";
+          height = 30;
           spacing = 8;
-        };
 
-        "sway/workspaces" = {
-          format = "{name}";
-          disable-scroll = true;
-        };
+          modules-left = ["sway/workspaces" "sway/mode"];
+          modules-center = ["clock"];
+          modules-right = ["tray" "network" "cpu" "memory" "temperature"];
 
-        "sway/mode" = {
-          format = "{}";
-        };
+          tray = {
+            spacing = 8;
+          };
 
-        clock = {
-          format = "{:%Y-%m-%d %H:%M:%S}";
-          interval = 1;
-          tooltip-format = "<tt>{calendar}</tt>";
-        };
+          "sway/workspaces" = {
+            format = "{name}";
+            disable-scroll = true;
+          };
 
-        cpu = {
-          format = "CPU {usage}%";
-          interval = 2;
-        };
+          "sway/mode" = {
+            format = "{}";
+          };
 
-        memory = {
-          format = "RAM {percentage}%";
-          interval = 2;
-        };
+          clock = {
+            format = "{:%Y-%m-%d %H:%M:%S}";
+            interval = 1;
+            tooltip-format = "<tt>{calendar}</tt>";
+          };
 
-        temperature = {
-          format = "{temperatureC}°C";
-          critical-threshold = 80;
-        };
+          cpu = {
+            format = "CPU {usage}%";
+            interval = 2;
+          };
 
-        network = {
-          format-wifi = "{ipaddr}";
-          format-ethernet = "{ipaddr}";
-          format-disconnected = "Offline";
-          tooltip-format = "{ifname}: {essid}";
+          memory = {
+            format = "RAM {percentage}%";
+            interval = 2;
+          };
+
+          temperature = {
+            format = "{temperatureC}°C";
+            critical-threshold = 80;
+          };
+
+          network = {
+            format-wifi = "{ipaddr}";
+            format-ethernet = "{ipaddr}";
+            format-disconnected = "Offline";
+            tooltip-format = "{ifname}: {essid}";
+          };
         };
       };
     };
