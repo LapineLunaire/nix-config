@@ -1,6 +1,11 @@
-{pkgs, ...}: {
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   # Display manager
-  services.greetd = {
+  services.greetd = lib.mkIf config.myConfig.desktop.enable {
     enable = true;
     settings = {
       default_session = {
@@ -11,8 +16,8 @@
   };
 
   # Audio
-  security.rtkit.enable = true;
-  services.pipewire = {
+  security.rtkit.enable = lib.mkIf config.myConfig.desktop.enable true;
+  services.pipewire = lib.mkIf config.myConfig.desktop.enable {
     enable = true;
     alsa.enable = true;
     alsa.support32Bit = true;

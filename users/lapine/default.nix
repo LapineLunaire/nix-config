@@ -21,6 +21,11 @@
 
   # Home Manager configuration
   home-manager.users.lapine = {
+    lib,
+    config,
+    pkgs,
+    ...
+  }: {
     imports = [
       ./desktop.nix
       ./programs.nix
@@ -36,31 +41,34 @@
       homeDirectory = "/home/lapine";
       stateVersion = "25.11";
 
-      packages = with pkgs; [
-        bat
-        discord
-        duf
-        eza
-        fastfetch
-        firefox
-        gping
-        heroic
-        htop
-        imv
-        ldns
-        minisign
-        mpv
-        mtr
-        nmap
-        nvimpager
-        protonmail-desktop
-        protonvpn-gui
-        rclone
-        tealdeer
-        traceroute
-        whois
-        yt-dlp
-      ];
+      packages = with pkgs;
+        [
+          bat
+          duf
+          eza
+          fastfetch
+          gping
+          htop
+          ldns
+          minisign
+          mtr
+          nmap
+          nvimpager
+          rclone
+          tealdeer
+          traceroute
+          whois
+          yt-dlp
+        ]
+        ++ lib.optionals config.userConfig.programs.gui.enable [
+          discord
+          firefox
+          heroic
+          imv
+          mpv
+          protonmail-desktop
+          protonvpn-gui
+        ];
 
       sessionVariables = {
         PAGER = "nvimpager";
@@ -69,11 +77,11 @@
     };
 
     programs.home-manager.enable = true;
-    programs.swaylock.enable = true;
+    programs.swaylock.enable = lib.mkIf config.userConfig.desktop.enable true;
 
-    services.easyeffects.enable = true;
-    services.swayosd.enable = true;
-    services.kanshi = {
+    services.easyeffects.enable = lib.mkIf config.userConfig.desktop.enable true;
+    services.swayosd.enable = lib.mkIf config.userConfig.desktop.enable true;
+    services.kanshi = lib.mkIf config.userConfig.desktop.enable {
       enable = true;
       systemdTarget = "sway-session.target";
     };

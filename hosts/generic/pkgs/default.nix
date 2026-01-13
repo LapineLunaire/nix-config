@@ -1,4 +1,9 @@
-{pkgs, ...}: {
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   programs.zsh.enable = true;
   programs.direnv = {
     enable = true;
@@ -27,20 +32,23 @@
     noto-fonts-color-emoji
   ];
 
-  environment.systemPackages = with pkgs; [
-    brightnessctl
-    curl
-    fd
-    fzf
-    grim
-    jq
-    playerctl
-    ripgrep
-    rsync
-    slurp
-    smartmontools
-    socat
-    tree
-    wl-clipboard
-  ];
+  environment.systemPackages = with pkgs;
+    [
+      curl
+      fd
+      fzf
+      jq
+      ripgrep
+      rsync
+      smartmontools
+      socat
+      tree
+    ]
+    ++ lib.optionals config.myConfig.desktop.enable [
+      brightnessctl
+      grim
+      playerctl
+      slurp
+      wl-clipboard
+    ];
 }
