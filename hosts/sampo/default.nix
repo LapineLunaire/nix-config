@@ -12,6 +12,13 @@
   hostConfig.desktop.enable = true;
   hostConfig.gaming.enable = true;
 
+  home-manager.users.lapine = {
+    userConfig.desktop.enable = true;
+    userConfig.programs.gui.enable = true;
+    userConfig.programs.gaming.enable = true;
+    userConfig.programs.nixd.enable = true;
+  };
+
   networking = {
     hostName = "sampo";
     # hostId is required for ZFS

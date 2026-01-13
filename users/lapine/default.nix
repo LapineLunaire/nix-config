@@ -32,11 +32,6 @@
       ./shell.nix
     ];
 
-    userConfig.desktop.enable = true;
-    userConfig.programs.gui.enable = true;
-    userConfig.programs.gaming.enable = true;
-    userConfig.programs.nixd.enable = true;
-
     home = {
       username = "lapine";
       homeDirectory = "/home/lapine";
