@@ -44,7 +44,7 @@
       socat
       tree
     ]
-    ++ lib.optionals config.myConfig.desktop.enable [
+    ++ lib.optionals config.hostConfig.desktop.enable [
       brightnessctl
       grim
       playerctl

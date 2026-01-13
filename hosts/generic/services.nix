@@ -5,7 +5,7 @@
   ...
 }: {
   # Display manager
-  services.greetd = lib.mkIf config.myConfig.desktop.enable {
+  services.greetd = lib.mkIf config.hostConfig.desktop.enable {
     enable = true;
     settings = {
       default_session = {
@@ -16,8 +16,8 @@
   };
 
   # Audio
-  security.rtkit.enable = lib.mkIf config.myConfig.desktop.enable true;
-  services.pipewire = lib.mkIf config.myConfig.desktop.enable {
+  security.rtkit.enable = lib.mkIf config.hostConfig.desktop.enable true;
+  services.pipewire = lib.mkIf config.hostConfig.desktop.enable {
     enable = true;
     alsa.enable = true;
     alsa.support32Bit = true;

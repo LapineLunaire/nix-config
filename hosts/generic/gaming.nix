@@ -5,9 +5,9 @@
   pkgs,
   ...
 }: {
-  options.myConfig.gaming.enable = lib.mkEnableOption "gaming support";
+  options.hostConfig.gaming.enable = lib.mkEnableOption "gaming support";
 
-  config = lib.mkIf config.myConfig.gaming.enable {
+  config = lib.mkIf config.hostConfig.gaming.enable {
     boot.kernelModules = ["ntsync"];
 
     nix.settings = inputs.aagl.nixConfig;

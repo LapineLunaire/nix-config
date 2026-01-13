@@ -3,9 +3,9 @@
   lib,
   ...
 }: {
-  options.myConfig.desktop.enable = lib.mkEnableOption "desktop environment support";
+  options.hostConfig.desktop.enable = lib.mkEnableOption "desktop environment support";
 
-  config = lib.mkIf config.myConfig.desktop.enable {
+  config = lib.mkIf config.hostConfig.desktop.enable {
     programs.sway = {
       enable = true;
       extraPackages = [];

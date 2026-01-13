@@ -9,8 +9,8 @@
     ./persistence.nix
   ];
 
-  myConfig.desktop.enable = true;
-  myConfig.gaming.enable = true;
+  hostConfig.desktop.enable = true;
+  hostConfig.gaming.enable = true;
 
   networking = {
     hostName = "sampo";
