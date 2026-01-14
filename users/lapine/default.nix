@@ -58,7 +58,7 @@
           whois
           yt-dlp
         ]
-        ++ lib.optionals config.userConfig.programs.gui.enable [
+        ++ lib.optionals config.userConfig.gui.enable [
           discord
           firefox
           imv
@@ -66,7 +66,7 @@
           protonmail-desktop
           protonvpn-gui
         ]
-        ++ lib.optionals config.userConfig.programs.gaming.enable [
+        ++ lib.optionals config.userConfig.gaming.enable [
           heroic
         ];
 

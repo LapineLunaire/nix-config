@@ -4,7 +4,6 @@
   pkgs,
   ...
 }: let
-  cfg = config.userConfig.desktop;
   mod = "Mod1";
   ws1 = "1:一";
   ws2 = "2:二";
@@ -17,9 +16,7 @@
   ws9 = "9:九";
   ws10 = "10:十";
 in {
-  options.userConfig.desktop.enable = lib.mkEnableOption "desktop environment configuration";
-
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf config.userConfig.desktop.enable {
     home.sessionVariables = {
       NIXOS_OZONE_WL = "1";
       QT_QPA_PLATFORM = "wayland";

@@ -4,7 +4,7 @@
   ];
 
   programs.home-manager.enable = true;
-  userConfig.programs.nixd.enable = true;
+  userConfig.nixd.enable = true;
 
   home = {
     username = "lapine";

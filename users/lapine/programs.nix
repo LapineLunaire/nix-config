@@ -4,10 +4,9 @@
   pkgs,
   inputs,
   ...
-}: let
-  cfg = config.userConfig.programs;
-in {
-  options.userConfig.programs = {
+}: {
+  options.userConfig = {
+    desktop.enable = lib.mkEnableOption "desktop environment configuration";
     gui.enable = lib.mkEnableOption "GUI applications";
     gaming.enable = lib.mkEnableOption "gaming applications";
     nixd.enable = lib.mkEnableOption "nixd LSP";
@@ -28,7 +27,7 @@ in {
       };
     }
 
-    (lib.mkIf cfg.gui.enable {
+    (lib.mkIf config.userConfig.gui.enable {
       programs.ghostty = {
         enable = true;
         settings = {
@@ -78,7 +77,7 @@ in {
       };
     })
 
-    (lib.mkIf cfg.nixd.enable {
+    (lib.mkIf config.userConfig.nixd.enable {
       home.packages = [
         inputs.nixd.packages.${pkgs.stdenv.hostPlatform.system}.nixd
       ];
