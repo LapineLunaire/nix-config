@@ -3,6 +3,7 @@
     ../../users/lapine/programs.nix
   ];
 
+  programs.home-manager.enable = true;
   userConfig.programs.nixd.enable = true;
 
   home = {
@@ -10,6 +11,4 @@
     homeDirectory = "/Users/lapine";
     stateVersion = "25.11";
   };
-
-  programs.home-manager.enable = true;
 }
