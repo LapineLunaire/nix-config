@@ -1,8 +1,4 @@
-{
-  pkgs,
-  inputs,
-  ...
-}: {
+{...}: {
   imports = [
     ../../users/lapine/programs.nix
   ];
