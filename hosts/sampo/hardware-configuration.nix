@@ -26,7 +26,7 @@
   fileSystems."/boot" = {
     device = "/dev/disk/by-uuid/1FD6-2B0A";
     fsType = "vfat";
-    options = ["fmask=0022" "dmask=0022"];
+    options = ["umask=0077"];
   };
 
   # Using zramSwap instead, ZFS swap partitions can deadlock
