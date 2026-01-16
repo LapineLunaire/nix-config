@@ -46,7 +46,7 @@
         inherit system;
         config.allowUnfree = true;
         overlays = [
-          (final: prev: {inherit (inputs.nixpkgs-wayland.packages.${final.system});})
+          inputs.nixpkgs-wayland.overlays.default
         ];
       };
   in {
