@@ -5,23 +5,20 @@
     ./persistence.nix
   ];
 
-  hostConfig.desktop.enable = true;
+  hostConfig.desktop.enable = false;
 
   home-manager.users.lapine = {
-    userConfig.desktop.enable = true;
+    userConfig.desktop.enable = false;
     userConfig.nixd.enable = true;
   };
 
   networking = {
-    hostName = "camellya";
+    hostName = "sparkle";
     hostId = "00000000";
     networkmanager.enable = true;
   };
 
-  boot = {
-    kernelPackages = pkgs.linuxPackages_zen;
-    kernelParams = ["amd_pstate=active"];
-  };
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   system.stateVersion = "25.11";
 }

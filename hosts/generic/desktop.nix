@@ -1,10 +1,9 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: {
-  options.hostConfig.desktop.enable = lib.mkEnableOption "desktop environment support";
-
   config = lib.mkIf config.hostConfig.desktop.enable {
     programs.sway = {
       enable = true;
@@ -16,10 +15,18 @@
       enableVirtualCamera = true;
     };
 
-    # Required for Home Manager XDG portal integration
-    environment.pathsToLink = [
-      "/share/applications"
-      "/share/xdg-desktop-portal"
+    programs.gamemode.enable = true;
+    programs.honkers-railway-launcher.enable = true;
+
+    programs.steam = {
+      enable = true;
+      extraCompatPackages = [pkgs.proton-ge-bin];
+    };
+
+    fonts.packages = with pkgs; [
+      nerd-fonts.jetbrains-mono
+      noto-fonts-cjk-sans
+      noto-fonts-color-emoji
     ];
   };
 }

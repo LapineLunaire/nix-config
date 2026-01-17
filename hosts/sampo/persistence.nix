@@ -1,5 +1,4 @@
 {...}: {
-  # Persist system state across reboots (root is tmpfs)
   environment.persistence."/persist" = {
     hideMounts = true;
     directories = [
@@ -17,6 +16,5 @@
     ];
   };
 
-  # /etc/nixos symlink to persisted config
   environment.etc."nixos".source = "/persist/nix-config";
 }

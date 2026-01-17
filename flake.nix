@@ -41,23 +41,18 @@
   } @ inputs: let
     inherit (self) outputs;
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
-    pkgsFor = system:
+    pkgsFor = system: overlays:
       import nixpkgs {
-        inherit system;
+        inherit system overlays;
         config.allowUnfree = true;
-        overlays = [
-          inputs.nixpkgs-wayland.overlays.default
-        ];
       };
   in {
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
 
     nixosConfigurations = let
-      commonModules = [
+      baseModules = [
         impermanence.nixosModules.impermanence
         home-manager.nixosModules.home-manager
-        aagl.nixosModules.default
-        stylix.nixosModules.stylix
         {
           home-manager = {
             useGlobalPkgs = true;
@@ -66,17 +61,23 @@
           };
         }
       ];
+
+      desktopModules = [
+        aagl.nixosModules.default
+        stylix.nixosModules.stylix
+      ];
     in {
       sampo = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {inherit inputs outputs;};
         modules =
           [
-            {nixpkgs.pkgs = pkgsFor "x86_64-linux";}
+            {nixpkgs.pkgs = pkgsFor "x86_64-linux" [nixpkgs-wayland.overlays.default];}
             ./hosts/sampo
             ./users/lapine
           ]
-          ++ commonModules;
+          ++ baseModules
+          ++ desktopModules;
       };
 
       camellya = nixpkgs.lib.nixosSystem {
@@ -84,17 +85,30 @@
         specialArgs = {inherit inputs outputs;};
         modules =
           [
-            {nixpkgs.pkgs = pkgsFor "x86_64-linux";}
+            {nixpkgs.pkgs = pkgsFor "x86_64-linux" [nixpkgs-wayland.overlays.default];}
             ./hosts/camellya
             ./users/lapine
           ]
-          ++ commonModules;
+          ++ baseModules
+          ++ desktopModules;
+      };
+
+      sparkle = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = {inherit inputs outputs;};
+        modules =
+          [
+            {nixpkgs.pkgs = pkgsFor "x86_64-linux" [];}
+            ./hosts/sparkle
+            ./users/lapine
+          ]
+          ++ baseModules;
       };
     };
 
     homeConfigurations = {
       "lapine@aquafang" = home-manager.lib.homeManagerConfiguration {
-        pkgs = pkgsFor "aarch64-darwin";
+        pkgs = pkgsFor "aarch64-darwin" [];
         extraSpecialArgs = {inherit inputs outputs;};
         modules = [./home-manager/aquafang];
       };

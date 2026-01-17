@@ -4,89 +4,89 @@
   pkgs,
   ...
 }: {
-  # System user definition
-  users.users.lapine = {
-    isNormalUser = true;
-    description = "Lapine";
-    shell = pkgs.zsh;
-    # Generate with: nix-shell -p mkpasswd --run 'mkpasswd -m sha-512'
-    hashedPassword = "$6$h.m1Ftri0Zjsinfs$jKmYsiTrcWzTOCVGSeKA53p/1twd0buX/qxzS08aB6Dgm7PVl9jQTeiZEmb4MIBWrZHEsyLt/ejQsko4b.abf/";
-    extraGroups =
-      ["wheel"]
-      ++ lib.optionals config.networking.networkmanager.enable ["networkmanager"]
-      ++ lib.optionals config.hostConfig.desktop.enable ["video" "audio" "input"];
-    # FIDO2 hardware key
-    openssh.authorizedKeys.keys = [
-      "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIEes6fnuE4zIKuneekCyPzMYItOOgfnDo0Eiakvwf62mAAAACnNzaDpsYXBpbmU="
-    ];
-  };
+  config = {
+    users.users.lapine = {
+      isNormalUser = true;
+      description = "Lapine";
+      shell = pkgs.zsh;
+      hashedPassword = "$6$h.m1Ftri0Zjsinfs$jKmYsiTrcWzTOCVGSeKA53p/1twd0buX/qxzS08aB6Dgm7PVl9jQTeiZEmb4MIBWrZHEsyLt/ejQsko4b.abf/";
+      extraGroups =
+        ["wheel"]
+        ++ lib.optionals config.networking.networkmanager.enable ["networkmanager"]
+        ++ lib.optionals config.hostConfig.desktop.enable ["video" "audio" "input"];
+      openssh.authorizedKeys.keys = [
+        "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIEes6fnuE4zIKuneekCyPzMYItOOgfnDo0Eiakvwf62mAAAACnNzaDpsYXBpbmU="
+      ];
+    };
 
-  # Home Manager configuration
-  home-manager.users.lapine = {
-    lib,
-    config,
-    pkgs,
-    ...
-  }: {
-    imports = [
-      ./desktop.nix
-      ./programs.nix
-      ./shell.nix
-    ];
+    home-manager.users.lapine = {
+      lib,
+      config,
+      pkgs,
+      ...
+    }: {
+      imports = [
+        ./desktop.nix
+        ./programs.nix
+        ./services.nix
+      ];
 
-    home = {
-      username = "lapine";
-      homeDirectory = "/home/lapine";
-      stateVersion = "25.11";
+      options.userConfig = {
+        desktop.enable = lib.mkEnableOption "desktop environment configuration";
+        nixd.enable = lib.mkEnableOption "nixd LSP";
+      };
 
-      packages = with pkgs;
-        [
-          bat
-          duf
-          eza
-          fastfetch
-          gping
-          htop
-          ldns
-          minisign
-          mtr
-          nmap
-          nvimpager
-          rclone
-          tealdeer
-          traceroute
-          whois
-          yt-dlp
-        ]
-        ++ lib.optionals config.userConfig.gui.enable [
-          discord
-          firefox
-          imv
-          mpv
-          protonmail-desktop
-          protonvpn-gui
-        ]
-        ++ lib.optionals config.userConfig.gaming.enable [
-          heroic
-        ];
+      config = {
+        home = {
+          username = "lapine";
+          homeDirectory = "/home/lapine";
+          stateVersion = "25.11";
 
-      sessionVariables = {
-        PAGER = "nvimpager";
-        MANPAGER = "nvimpager";
+          packages = with pkgs;
+            [
+              curl
+              fd
+              fzf
+              htop
+              jq
+              ldns
+              mtr
+              nvimpager
+              ripgrep
+              rsync
+              socat
+              tealdeer
+              traceroute
+              tree
+              whois
+            ]
+            ++ lib.optionals config.userConfig.desktop.enable [
+              bat
+              brightnessctl
+              duf
+              eza
+              fastfetch
+              gping
+              grim
+              minisign
+              nmap
+              playerctl
+              rclone
+              slurp
+              wl-clipboard
+              yt-dlp
+            ];
+
+          sessionVariables = {
+            PAGER = "nvimpager";
+            MANPAGER = "nvimpager";
+          };
+        };
+
+        programs.home-manager.enable = true;
+
+        systemd.user.startServices = "sd-switch";
       };
     };
-
-    programs.home-manager.enable = true;
-    programs.swaylock.enable = lib.mkIf config.userConfig.desktop.enable true;
-
-    services.easyeffects.enable = lib.mkIf config.userConfig.desktop.enable true;
-    services.swayosd.enable = lib.mkIf config.userConfig.desktop.enable true;
-    services.kanshi = lib.mkIf config.userConfig.desktop.enable {
-      enable = true;
-      systemdTarget = "sway-session.target";
-    };
-
-    # Restart services on config change
-    systemd.user.startServices = "sd-switch";
   };
 }

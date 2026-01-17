@@ -1,7 +1,25 @@
-{lib, ...}: {
-  # TODO: Merge with nixos-generate-config output
+{
+  config,
+  lib,
+  ...
+}: {
+  boot.initrd.availableKernelModules = ["nvme" "xhci_pci" "ahci" "thunderbolt" "usbhid" "usb_storage" "sd_mod"];
+  boot.initrd.kernelModules = [];
+  boot.kernelModules = ["kvm-amd"];
+  boot.extraModulePackages = [];
 
-  hardware.cpu.amd.updateMicrocode = true;
+  fileSystems."/" = {
+    device = "tmpfs";
+    fsType = "tmpfs";
+  };
+
+  swapDevices = [];
+
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+
+  hardware.enableRedistributableFirmware = lib.mkDefault true;
+
+  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
   hardware.amdgpu = {
     initrd.enable = true;
@@ -12,17 +30,4 @@
     enable = true;
     enable32Bit = true;
   };
-
-  # Placeholder - replace with generated config
-  fileSystems."/" = {
-    device = "/dev/disk/by-label/nixos";
-    fsType = "ext4";
-  };
-
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-label/boot";
-    fsType = "vfat";
-  };
-
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 }

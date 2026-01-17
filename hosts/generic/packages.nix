@@ -5,10 +5,12 @@
   ...
 }: {
   programs.zsh.enable = true;
-  programs.direnv = {
+
+  programs.direnv = lib.mkIf config.hostConfig.desktop.enable {
     enable = true;
     nix-direnv.enable = true;
   };
+
   programs.neovim = {
     enable = true;
     defaultEditor = true;
@@ -26,29 +28,7 @@
     flake = "/etc/nixos";
   };
 
-  fonts.packages = with pkgs; [
-    nerd-fonts.jetbrains-mono
-    noto-fonts-cjk-sans
-    noto-fonts-color-emoji
+  environment.systemPackages = with pkgs; [
+    smartmontools
   ];
-
-  environment.systemPackages = with pkgs;
-    [
-      curl
-      fd
-      fzf
-      jq
-      ripgrep
-      rsync
-      smartmontools
-      socat
-      tree
-    ]
-    ++ lib.optionals config.hostConfig.desktop.enable [
-      brightnessctl
-      grim
-      playerctl
-      slurp
-      wl-clipboard
-    ];
 }

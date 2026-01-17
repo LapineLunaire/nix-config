@@ -1,4 +1,8 @@
-{...}: {
+{
+  config,
+  lib,
+  ...
+}: {
   users.users.root.hashedPassword = "!";
   users.mutableUsers = false;
 
@@ -19,5 +23,9 @@
         }
       });
     '';
+  };
+
+  security.rtkit = lib.mkIf config.hostConfig.desktop.enable {
+    enable = true;
   };
 }
