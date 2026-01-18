@@ -12,7 +12,7 @@
 
     systemd.user.services.easyeffects = {
       Unit = {
-        After = ["waybar.service"];
+        After = lib.mkForce ["graphical-session.target" "tray.target"];
       };
     };
     services.swayosd.enable = true;
