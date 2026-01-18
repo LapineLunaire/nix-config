@@ -54,7 +54,6 @@
               ripgrep
               rsync
               socat
-              tealdeer
               traceroute
               tree
               whois
