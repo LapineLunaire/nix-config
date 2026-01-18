@@ -29,7 +29,7 @@
     zfs.package = pkgs.zfs_unstable;
   };
 
-  powerManagement.cpuFreqGovernor = "schedutil";
+  powerManagement.cpuFreqGovernor = "performance";
 
   system.stateVersion = "25.11";
 }
