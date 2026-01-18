@@ -13,6 +13,12 @@
     fsType = "tmpfs";
   };
 
+  fileSystems."/tmp" = {
+    device = "none";
+    fsType = "tmpfs";
+    options = ["defaults" "size=4G" "mode=1777"];
+  };
+
   swapDevices = [];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";

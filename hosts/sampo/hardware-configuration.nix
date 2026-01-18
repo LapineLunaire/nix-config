@@ -7,6 +7,12 @@
     options = ["defaults" "size=2G" "mode=755"];
   };
 
+  fileSystems."/tmp" = {
+    device = "none";
+    fsType = "tmpfs";
+    options = ["defaults" "size=4G" "mode=1777"];
+  };
+
   fileSystems."/persist" = {
     device = "sampo/nixos";
     fsType = "zfs";
