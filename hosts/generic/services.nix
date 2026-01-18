@@ -9,6 +9,11 @@
   services.fwupd.enable = true;
   services.smartd.enable = true;
 
+  services.zfs = {
+    autoScrub.enable = true;
+    trim.enable = true;
+  };
+
   services.chrony = {
     enable = true;
     enableNTS = true;
