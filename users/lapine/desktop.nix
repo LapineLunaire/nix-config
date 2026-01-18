@@ -69,6 +69,10 @@ in {
         startup = [
           {command = "${pkgs.kdePackages.polkit-kde-agent-1}/libexec/polkit-kde-authentication-agent-1";}
           {command = "swaymsg workspace ${ws1}";}
+          {
+            command = ''${pkgs.swaybg}/bin/swaybg -i "$(${pkgs.findutils}/bin/find ~/pictures/wallpapers -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" \) 2>/dev/null | ${pkgs.coreutils}/bin/shuf -n 1)" -m fill'';
+            always = true;
+          }
         ];
 
         keybindings = {
