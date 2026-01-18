@@ -6,7 +6,15 @@
   config = lib.mkIf config.userConfig.desktop.enable {
     services.ssh-agent.enable = true;
 
-    services.easyeffects.enable = true;
+    services.easyeffects = {
+      enable = true;
+    };
+
+    systemd.user.services.easyeffects = {
+      Unit = {
+        After = ["waybar.service"];
+      };
+    };
     services.swayosd.enable = true;
 
     services.kanshi = {
