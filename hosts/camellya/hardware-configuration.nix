@@ -9,8 +9,34 @@
   boot.extraModulePackages = [];
 
   fileSystems."/" = {
-    device = "tmpfs";
+    device = "none";
     fsType = "tmpfs";
+    options = ["defaults" "size=2G" "mode=755"];
+  };
+
+  fileSystems."/nix" = {
+    device = "camellya/nix";
+    fsType = "zfs";
+    options = ["zfsutil"];
+  };
+
+  fileSystems."/persist" = {
+    device = "camellya/persist";
+    fsType = "zfs";
+    options = ["zfsutil"];
+    neededForBoot = true;
+  };
+
+  fileSystems."/home" = {
+    device = "camellya/home";
+    fsType = "zfs";
+    options = ["zfsutil"];
+  };
+
+  fileSystems."/boot" = {
+    device = "/dev/disk/by-uuid/9864-73D6";
+    fsType = "vfat";
+    options = ["umask=0077"];
   };
 
   swapDevices = [];
