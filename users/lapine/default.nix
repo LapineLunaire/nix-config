@@ -47,7 +47,6 @@
               curl
               fd
               fzf
-              htop
               jq
               ldns
               mtr
