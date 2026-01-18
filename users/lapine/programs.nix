@@ -20,6 +20,14 @@
         protonvpn-gui
       ]);
 
+    programs.ssh = lib.mkIf config.userConfig.desktop.enable {
+      enable = true;
+      matchBlocks."*" = {
+        identityFile = "~/.ssh/id_ed25519_sk_rk_lapine";
+        extraOptions.IdentityAgent = "none";
+      };
+    };
+
     programs.git = {
       enable = true;
       settings = {
