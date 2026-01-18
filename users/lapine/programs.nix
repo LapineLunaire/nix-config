@@ -229,5 +229,45 @@
         };
       };
     };
+
+    programs.fastfetch = lib.mkIf config.userConfig.desktop.enable {
+      enable = true;
+      settings = {
+        modules = [
+          "title"
+          "separator"
+          "os"
+          "kernel"
+          "uptime"
+          "packages"
+          "shell"
+          "terminal"
+          "terminalfont"
+          "wm"
+          "wmtheme"
+          {
+            type = "display";
+            compactType = "original";
+          }
+          "cpu"
+          "gpu"
+          {
+            type = "memory";
+            format = "{} / {}";
+          }
+          {
+            type = "disk";
+            folders = "/";
+          }
+          {
+            type = "disk";
+            folders = "/nix";
+          }
+          "localip"
+          "break"
+          "colors"
+        ];
+      };
+    };
   };
 }

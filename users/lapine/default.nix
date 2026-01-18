@@ -63,7 +63,6 @@
               brightnessctl
               duf
               eza
-              fastfetch
               gping
               grim
               minisign
