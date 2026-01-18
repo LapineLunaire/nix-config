@@ -10,6 +10,16 @@
       extraPackages = [];
     };
 
+    xdg.portal.wlr = {
+      enable = true;
+      settings = {
+        screencast = {
+          chooser_type = "dmenu";
+          chooser_cmd = "${pkgs.rofi}/bin/rofi -dmenu -p 'Select screen to share'";
+        };
+      };
+    };
+
     programs.obs-studio = {
       enable = true;
       enableVirtualCamera = true;
