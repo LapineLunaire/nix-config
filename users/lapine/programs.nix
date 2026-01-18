@@ -22,6 +22,7 @@
 
     programs.ssh = lib.mkIf config.userConfig.desktop.enable {
       enable = true;
+      enableDefaultConfig = false;
       matchBlocks."*" = {
         identityFile = "~/.ssh/id_ed25519_sk_rk_lapine";
         extraOptions.IdentityAgent = "none";
