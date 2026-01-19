@@ -4,13 +4,16 @@
   inputs,
   ...
 }: {
-  imports = [
-    ./desktop.nix
-    ./packages.nix
-    ./security.nix
-    ./services.nix
-    ./stylix.nix
-  ];
+  imports =
+    [
+      ./packages.nix
+      ./security.nix
+      ./services.nix
+    ]
+    ++ lib.optionals config.hostConfig.desktop.enable [
+      ./desktop.nix
+      ./stylix.nix
+    ];
 
   options.hostConfig.desktop.enable = lib.mkEnableOption "desktop environment support";
 
