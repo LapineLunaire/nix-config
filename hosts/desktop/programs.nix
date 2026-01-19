@@ -1,5 +1,10 @@
 {pkgs, ...}: {
   config = {
+    programs.direnv = {
+      enable = true;
+      nix-direnv.enable = true;
+    };
+
     programs.sway = {
       enable = true;
       extraPackages = [];
