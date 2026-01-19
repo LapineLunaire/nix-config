@@ -1,10 +1,5 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: {
-  config = lib.mkIf config.hostConfig.desktop.enable {
+{pkgs, ...}: {
+  config = {
     stylix = {
       enable = true;
       autoEnable = true;

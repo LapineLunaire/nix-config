@@ -1,10 +1,5 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: {
-  config = lib.mkIf config.hostConfig.desktop.enable {
+{pkgs, ...}: {
+  config = {
     programs.sway = {
       enable = true;
       extraPackages = [];

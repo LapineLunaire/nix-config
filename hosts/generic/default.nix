@@ -1,18 +1,9 @@
-{
-  config,
-  lib,
-  inputs,
-  ...
-}: {
+{...}: {
   imports = [
-    ./desktop.nix
     ./packages.nix
     ./security.nix
     ./services.nix
-    ./stylix.nix
   ];
-
-  options.hostConfig.desktop.enable = lib.mkEnableOption "desktop environment support";
 
   config = {
     boot.loader = {
@@ -20,14 +11,10 @@
       efi.canTouchEfiVariables = true;
     };
 
-    boot.kernelModules = lib.optionals config.hostConfig.desktop.enable ["ntsync"];
-
-    nix.settings =
-      {
-        experimental-features = ["nix-command" "flakes"];
-        auto-optimise-store = true;
-      }
-      // lib.optionalAttrs config.hostConfig.desktop.enable inputs.aagl.nixConfig;
+    nix.settings = {
+      experimental-features = ["nix-command" "flakes"];
+      auto-optimise-store = true;
+    };
 
     zramSwap = {
       enable = true;
@@ -49,17 +36,5 @@
     };
 
     console.font = "Lat2-Terminus16";
-    console.keyMap = lib.mkIf config.hostConfig.desktop.enable "colemak";
-
-    environment.sessionVariables = lib.mkIf config.hostConfig.desktop.enable {
-      PROTON_ENABLE_WAYLAND = "1";
-      PROTON_ENABLE_HDR = "1";
-      FREETYPE_PROPERTIES = "cff:no-stem-darkening=0 autofitter:no-stem-darkening=0";
-    };
-
-    environment.pathsToLink = lib.optionals config.hostConfig.desktop.enable [
-      "/share/applications"
-      "/share/xdg-desktop-portal"
-    ];
   };
 }

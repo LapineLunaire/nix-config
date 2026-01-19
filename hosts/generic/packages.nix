@@ -1,15 +1,5 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   programs.zsh.enable = true;
-
-  programs.direnv = lib.mkIf config.hostConfig.desktop.enable {
-    enable = true;
-    nix-direnv.enable = true;
-  };
 
   programs.neovim = {
     enable = true;

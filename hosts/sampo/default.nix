@@ -5,11 +5,10 @@
 }: {
   imports = [
     ../generic
+    ../desktop
     ./hardware-configuration.nix
     ./persistence.nix
   ];
-
-  hostConfig.desktop.enable = true;
 
   home-manager.users.lapine = {
     userConfig.desktop.enable = true;
