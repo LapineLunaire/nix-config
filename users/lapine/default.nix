@@ -46,6 +46,7 @@
               curl
               fd
               fzf
+              iperf3
               jq
               ldns
               mtr
