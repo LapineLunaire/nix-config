@@ -3,6 +3,7 @@
     ../generic
     ./hardware-configuration.nix
     ./persistence.nix
+    ./services.nix
   ];
 
   networking = {
