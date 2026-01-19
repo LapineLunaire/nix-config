@@ -6,11 +6,9 @@
   ...
 }: {
   config = {
-    home.packages =
-      lib.optionals config.userConfig.nixd.enable [
-        inputs.nixd.packages.${pkgs.stdenv.hostPlatform.system}.nixd
-      ]
-      ++ lib.optionals config.userConfig.desktop.enable (with pkgs; [
+    home.packages = lib.optionals config.userConfig.desktop.enable (
+      [inputs.nixd.packages.${pkgs.stdenv.hostPlatform.system}.nixd]
+      ++ (with pkgs; [
         discord
         firefox
         heroic
@@ -18,7 +16,8 @@
         mpv
         protonmail-desktop
         protonvpn-gui
-      ]);
+      ])
+    );
 
     programs.ssh = lib.mkIf config.userConfig.desktop.enable {
       enable = true;

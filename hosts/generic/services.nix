@@ -47,7 +47,7 @@
         "monitor.alsa.rules" = [
           {
             matches = [
-              { "device.name" = "alsa_card.usb-FIIO_FiiO_K11-01"; }
+              {"device.name" = "alsa_card.usb-FIIO_FiiO_K11-01";}
             ];
             actions = {
               "update-props" = {

@@ -13,7 +13,6 @@
 
   home-manager.users.lapine = {
     userConfig.desktop.enable = true;
-    userConfig.nixd.enable = true;
   };
 
   networking = {

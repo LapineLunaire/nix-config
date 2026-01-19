@@ -5,16 +5,9 @@
     ./persistence.nix
   ];
 
-  hostConfig.desktop.enable = false;
-
-  home-manager.users.lapine = {
-    userConfig.desktop.enable = false;
-    userConfig.nixd.enable = true;
-  };
-
   networking = {
     hostName = "sparkle";
-    hostId = "00000000";
+    hostId = "d38a0d1c";
     networkmanager.enable = true;
   };
 

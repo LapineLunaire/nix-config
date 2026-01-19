@@ -33,7 +33,6 @@
 
       options.userConfig = {
         desktop.enable = lib.mkEnableOption "desktop environment configuration";
-        nixd.enable = lib.mkEnableOption "nixd LSP";
       };
 
       config = {
