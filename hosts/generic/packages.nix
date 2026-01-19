@@ -20,5 +20,6 @@
 
   environment.systemPackages = with pkgs; [
     smartmontools
+    ghostty.terminfo
   ];
 }
