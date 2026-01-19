@@ -1,4 +1,4 @@
-{...}: {
+{lib, ...}: {
   imports = [
     ./packages.nix
     ./security.nix
@@ -6,6 +6,8 @@
   ];
 
   config = {
+    networking.wireless.enable = lib.mkForce false;
+
     boot.loader = {
       systemd-boot.enable = true;
       efi.canTouchEfiVariables = true;
