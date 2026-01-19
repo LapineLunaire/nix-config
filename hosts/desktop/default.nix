@@ -11,6 +11,8 @@
   ];
 
   config = {
+    home-manager.users.lapine.userConfig.desktop.enable = true;
+
     boot.kernelModules = ["ntsync"];
 
     nix.settings = inputs.aagl.nixConfig;

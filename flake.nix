@@ -67,19 +67,6 @@
         stylix.nixosModules.stylix
       ];
     in {
-      sampo = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = {inherit inputs outputs;};
-        modules =
-          [
-            {nixpkgs.pkgs = pkgsFor "x86_64-linux" [nixpkgs-wayland.overlays.default];}
-            ./hosts/sampo
-            ./users/lapine
-          ]
-          ++ baseModules
-          ++ desktopModules;
-      };
-
       camellya = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {inherit inputs outputs;};
