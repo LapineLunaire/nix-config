@@ -1,4 +1,6 @@
 {pkgs, ...}: {
+  services.speechd.enable = false;
+
   services.earlyoom = {
     enable = true;
     freeMemThreshold = 2;
