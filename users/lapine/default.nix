@@ -8,6 +8,7 @@
     users.users.lapine = {
       isNormalUser = true;
       description = "Lapine";
+      uid = 1000;
       shell = pkgs.zsh;
       hashedPassword = "$6$h.m1Ftri0Zjsinfs$jKmYsiTrcWzTOCVGSeKA53p/1twd0buX/qxzS08aB6Dgm7PVl9jQTeiZEmb4MIBWrZHEsyLt/ejQsko4b.abf/";
       extraGroups =
