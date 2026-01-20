@@ -5,6 +5,7 @@
     ./hardware-configuration.nix
     ./persistence.nix
     ./display.nix
+    ./services.nix
   ];
 
   networking = {
