@@ -21,6 +21,38 @@
     alsa.support32Bit = true;
     pulse.enable = true;
 
+    extraConfig.pipewire."99-mic-processing" = {
+      "context.modules" = [
+        {
+          name = "libpipewire-module-filter-chain";
+          args = {
+            "node.description" = "Processed Microphone";
+            "media.name" = "Processed Microphone";
+            "filter.graph" = {
+              nodes = [
+                {
+                  type = "ladspa";
+                  name = "rnnoise";
+                  plugin = "${pkgs.rnnoise-plugin}/lib/ladspa/librnnoise_ladspa.so";
+                  label = "noise_suppressor_stereo";
+                  control = {
+                    "VAD Threshold (%)" = 50.0;
+                  };
+                }
+              ];
+            };
+            "capture.props" = {
+              "node.passive" = true;
+              "node.target" = "alsa_input.usb-Generic_Blue_Microphones_2246BAH01D78-00.analog-stereo";
+            };
+            "playback.props" = {
+              "media.class" = "Audio/Source";
+            };
+          };
+        }
+      ];
+    };
+
     wireplumber.extraConfig = {
       "51-fiio-k11" = {
         "monitor.alsa.rules" = [

@@ -6,15 +6,6 @@
   config = lib.mkIf config.userConfig.desktop.enable {
     services.ssh-agent.enable = true;
 
-    services.easyeffects = {
-      enable = true;
-    };
-
-    systemd.user.services.easyeffects = {
-      Unit = {
-        After = lib.mkForce ["graphical-session.target" "tray.target"];
-      };
-    };
     services.swayosd.enable = true;
 
     services.kanshi = {
