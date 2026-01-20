@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   imports = [
     ../generic
     ../desktop
@@ -15,7 +19,13 @@
   };
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_latest;
+    kernelPackages = pkgs.linuxPackages_latest.extend (self: super: {
+      kernel = super.kernel.override {
+        structuredExtraConfig = with lib.kernel; {
+          X86_NATIVE_CPU = yes;
+        };
+      };
+    });
     kernelParams = ["amd_pstate=active"];
     zfs.package = pkgs.zfs_unstable;
   };
