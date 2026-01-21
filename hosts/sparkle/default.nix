@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   imports = [
     ../generic
     ./hardware-configuration.nix
@@ -13,7 +17,13 @@
   };
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_latest;
+    kernelPackages = pkgs.linuxPackages_latest.extend (self: super: {
+      kernel = super.kernel.override {
+        structuredExtraConfig = with lib.kernel; {
+          X86_NATIVE_CPU = yes;
+        };
+      };
+    });
     zfs.package = pkgs.zfs_unstable;
   };
 
