@@ -39,6 +39,12 @@
     options = ["zfsutil"];
   };
 
+  fileSystems."/mnt/samba/lapine" = {
+    device = "vault/lapine";
+    fsType = "zfs";
+    options = ["zfsutil"];
+  };
+
   fileSystems."/boot" = {
     device = "/dev/disk/by-uuid/B8BB-F5FD";
     fsType = "vfat";
