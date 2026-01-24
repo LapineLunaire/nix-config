@@ -4,11 +4,15 @@
   ...
 }: {
   imports = [
-    ../generic
+    ../../modules/nixos/generic
     ./hardware-configuration.nix
     ./persistence.nix
-    ./services.nix
+    ./database.nix
+    ./git.nix
+    ./proxy.nix
     ./qbittorrent.nix
+    ./services.nix
+    ./smb.nix
   ];
 
   networking = {

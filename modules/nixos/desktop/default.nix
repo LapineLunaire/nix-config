@@ -1,6 +1,6 @@
 {inputs, ...}: {
   imports = [
-    ./programs.nix
+    ./packages.nix
     ./security.nix
     ./services.nix
     ./stylix.nix

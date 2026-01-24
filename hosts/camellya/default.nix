@@ -4,11 +4,10 @@
   ...
 }: {
   imports = [
-    ../generic
-    ../desktop
+    ../../modules/nixos/generic
+    ../../modules/nixos/desktop
     ./hardware-configuration.nix
     ./persistence.nix
-    ./display.nix
     ./services.nix
   ];
 
