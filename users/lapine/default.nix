@@ -19,15 +19,11 @@
     ];
   };
 
-  home-manager.users.lapine = {
-    lib,
-    config,
-    pkgs,
-    ...
-  }: {
+  home-manager.users.lapine = {lib, ...}: {
     imports = [
       ./desktop.nix
       ./packages.nix
+      ./programs.nix
       ./services.nix
     ];
 
@@ -40,39 +36,6 @@
         username = "lapine";
         homeDirectory = "/home/lapine";
         stateVersion = "25.11";
-
-        packages = with pkgs;
-          [
-            curl
-            fd
-            fzf
-            iperf3
-            jq
-            ldns
-            mtr
-            nvimpager
-            ripgrep
-            rsync
-            socat
-            traceroute
-            tree
-            whois
-          ]
-          ++ lib.optionals config.userConfig.desktop.enable [
-            bat
-            brightnessctl
-            duf
-            eza
-            gping
-            grim
-            minisign
-            nmap
-            playerctl
-            rclone
-            slurp
-            wl-clipboard
-            yt-dlp
-          ];
 
         sessionVariables = {
           PAGER = "nvimpager";
