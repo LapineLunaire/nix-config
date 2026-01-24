@@ -16,7 +16,7 @@
         mpv
         protonmail-desktop
         protonvpn-gui
-        winbox
+        winbox4
       ])
     );
 
