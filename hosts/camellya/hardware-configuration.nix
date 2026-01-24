@@ -54,6 +54,21 @@
     ];
   };
 
+  fileSystems."/home/lapine/torrents" = {
+    device = "//10.28.32.25/torrents";
+    fsType = "cifs";
+    options = [
+      "credentials=/etc/samba-credentials"
+      "uid=1000"
+      "gid=100"
+      "x-systemd.automount"
+      "noauto"
+      "x-systemd.idle-timeout=60"
+      "x-systemd.device-timeout=5s"
+      "x-systemd.mount-timeout=5s"
+    ];
+  };
+
   fileSystems."/boot" = {
     device = "/dev/disk/by-uuid/9864-73D6";
     fsType = "vfat";
