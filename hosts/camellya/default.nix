@@ -8,7 +8,7 @@
     ../../modules/nixos/desktop
     ./hardware-configuration.nix
     ./persistence.nix
-    ./services.nix
+    ./services
   ];
 
   networking = {

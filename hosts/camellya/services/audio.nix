@@ -1,11 +1,4 @@
 {pkgs, ...}: {
-  home-manager.users.lapine = {
-    wayland.windowManager.sway.config.output."DP-2" = {
-      mode = "2560x1440@165.080Hz";
-      allow_tearing = "yes";
-    };
-  };
-
   services.pipewire = {
     extraConfig.pipewire."99-mic-processing" = {
       "context.modules" = [
