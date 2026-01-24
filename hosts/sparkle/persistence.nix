@@ -2,7 +2,11 @@
   environment.persistence."/persist" = {
     hideMounts = true;
     directories = [
+      "/var/lib/acme"
+      "/var/lib/caddy"
+      "/var/lib/forgejo"
       "/var/lib/nixos"
+      "/var/lib/postgresql"
       "/var/lib/samba"
       "/var/lib/systemd"
       "/var/log"
