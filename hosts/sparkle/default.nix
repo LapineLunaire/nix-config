@@ -8,6 +8,7 @@
     ./hardware-configuration.nix
     ./persistence.nix
     ./services.nix
+    ./qbittorrent.nix
   ];
 
   networking = {

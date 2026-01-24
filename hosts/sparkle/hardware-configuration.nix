@@ -45,6 +45,12 @@
     options = ["zfsutil"];
   };
 
+  fileSystems."/mnt/torrents" = {
+    device = "vault/torrents";
+    fsType = "zfs";
+    options = ["zfsutil"];
+  };
+
   fileSystems."/boot" = {
     device = "/dev/disk/by-uuid/B8BB-F5FD";
     fsType = "vfat";

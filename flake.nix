@@ -9,9 +9,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    impermanence.url = "github:nix-community/impermanence";
+    impermanence = {
+      url = "github:nix-community/impermanence";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    nixd.url = "github:nix-community/nixd";
+    nixd = {
+      url = "github:nix-community/nixd";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     aagl = {
       url = "github:ezKEa/aagl-gtk-on-nix";
@@ -27,6 +33,8 @@
       url = "github:nix-community/nixpkgs-wayland";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
   };
 
   outputs = {
@@ -38,6 +46,7 @@
     aagl,
     stylix,
     nixpkgs-wayland,
+    vpn-confinement,
   } @ inputs: let
     inherit (self) outputs;
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
@@ -86,6 +95,7 @@
         modules =
           [
             {nixpkgs.pkgs = pkgsFor "x86_64-linux" [];}
+            vpn-confinement.nixosModules.default
             ./hosts/sparkle
             ./users/lapine
           ]

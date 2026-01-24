@@ -7,6 +7,7 @@
       "/var/lib/forgejo"
       "/var/lib/nixos"
       "/var/lib/postgresql"
+      "/var/lib/qbittorrent"
       "/var/lib/samba"
       "/var/lib/systemd"
       "/var/log"
