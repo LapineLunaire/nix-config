@@ -114,6 +114,13 @@
         "fruit:aapl" = "yes";
         "vfs objects" = "catia fruit streams_xattr";
       };
+      torrents = {
+        "path" = "/mnt/samba/torrents";
+        "valid users" = "lapine";
+        "writeable" = "no";
+        "fruit:aapl" = "yes";
+        "vfs objects" = "catia fruit streams_xattr";
+      };
     };
   };
 

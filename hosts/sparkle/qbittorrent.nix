@@ -32,8 +32,8 @@
         Password_PBKDF2 = "@ByteArray(+WZc5S80KMQiHJ/0L/Ogsg==:4ohJt9PRpMsRMSbLwoNnGz8lUQM0zjyVnHOFFjZH3JxpEKnh274Cq2xT32ATsIFh2QJJEmm8ZMqp4P7HnHt90w==)";
       };
       BitTorrent.Session = {
-        DefaultSavePath = "/mnt/torrents";
-        TempPath = "/mnt/torrents/incomplete";
+        DefaultSavePath = "/mnt/samba/torrents";
+        TempPath = "/mnt/samba/torrents/incomplete";
         TempPathEnabled = true;
         AnonymousModeEnabled = true;
         GlobalMaxSeedingMinutes = -1;
@@ -59,7 +59,7 @@
   };
 
   systemd.tmpfiles.rules = [
-    "d /mnt/torrents 0755 qbittorrent qbittorrent - -"
-    "d /mnt/torrents/incomplete 0755 qbittorrent qbittorrent - -"
+    "d /mnt/samba/torrents 0755 qbittorrent qbittorrent - -"
+    "d /mnt/samba/torrents/incomplete 0755 qbittorrent qbittorrent - -"
   ];
 }

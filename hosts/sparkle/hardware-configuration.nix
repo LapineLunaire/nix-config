@@ -45,7 +45,7 @@
     options = ["zfsutil"];
   };
 
-  fileSystems."/mnt/torrents" = {
+  fileSystems."/mnt/samba/torrents" = {
     device = "vault/torrents";
     fsType = "zfs";
     options = ["zfsutil"];
