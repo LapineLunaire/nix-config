@@ -8,7 +8,8 @@
     ../../modules/nixos/desktop
     ./hardware-configuration.nix
     ./persistence.nix
-    ./services
+    ./audio.nix
+    ./display.nix
   ];
 
   networking = {
