@@ -7,12 +7,7 @@
     ../../modules/nixos/generic
     ./hardware-configuration.nix
     ./persistence.nix
-    ./database.nix
-    ./git.nix
-    ./proxy.nix
-    ./qbittorrent.nix
-    ./services.nix
-    ./smb.nix
+    ./services
   ];
 
   networking = {
