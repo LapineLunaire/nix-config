@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }: {
   programs.ssh = lib.mkIf config.userConfig.desktop.enable {
@@ -114,9 +115,11 @@
       load_direnv = "shell_hook";
       vim_mode = true;
       hour_format = "hour24";
+      languages.Nix.language_servers = ["nixd" "!nil"];
       lsp.nixd.settings.nixpkgs.expr = "import <nixpkgs> {}";
     };
     extensions = ["nix"];
+    extraPackages = [inputs.nixd.packages.${pkgs.stdenv.hostPlatform.system}.nixd];
   };
 
   programs.rofi = lib.mkIf config.userConfig.desktop.enable {
