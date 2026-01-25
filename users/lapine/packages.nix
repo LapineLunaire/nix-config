@@ -27,13 +27,14 @@
       discord
       duf
       eza
+      (ffmpeg-full.override {withUnfree = true;})
       firefox
       gping
       grim
       heroic
       imv
       minisign
-      mpv
+      (mpv.override {mpv-unwrapped = mpv-unwrapped.override {ffmpeg = ffmpeg-full.override {withUnfree = true;};};})
       nmap
       playerctl
       protonmail-desktop
