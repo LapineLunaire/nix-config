@@ -6,6 +6,7 @@
       "/var/lib/caddy"
       "/var/lib/forgejo"
       "/var/lib/nixos"
+      "/var/lib/pgadmin"
       "/var/lib/postgresql"
       "/var/lib/qbittorrent"
       "/var/lib/samba"
