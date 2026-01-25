@@ -9,6 +9,9 @@
       }
       {
         name = "lapine";
+        ensureClauses = {
+          superuser = true;
+        };
       }
     ];
     authentication = ''

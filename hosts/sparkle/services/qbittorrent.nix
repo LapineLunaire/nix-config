@@ -57,9 +57,4 @@
     enable = true;
     vpnNamespace = "qbtvpn";
   };
-
-  systemd.tmpfiles.rules = [
-    "d /mnt/samba/torrents 0755 qbittorrent qbittorrent - -"
-    "d /mnt/samba/torrents/incomplete 0755 qbittorrent qbittorrent - -"
-  ];
 }

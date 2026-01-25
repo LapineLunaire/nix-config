@@ -1,4 +1,4 @@
-{config, ...}: {
+{...}: {
   services.forgejo = {
     enable = true;
     database = {
@@ -14,9 +14,4 @@
       service.DISABLE_REGISTRATION = true;
     };
   };
-
-  systemd.tmpfiles.rules = [
-    "d '${config.services.forgejo.stateDir}' 0750 ${config.services.forgejo.user} ${config.services.forgejo.group} - -"
-    "d '${config.services.forgejo.customDir}' 0750 ${config.services.forgejo.user} ${config.services.forgejo.group} - -"
-  ];
 }

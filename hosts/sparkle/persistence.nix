@@ -3,12 +3,11 @@
     hideMounts = true;
     directories = [
       "/var/lib/acme"
-      "/var/lib/caddy"
       "/var/lib/forgejo"
       "/var/lib/nixos"
-      "/var/lib/pgadmin"
+      "/var/lib/private/pgadmin"
       "/var/lib/postgresql"
-      "/var/lib/qbittorrent"
+      "/var/lib/qBittorrent"
       "/var/lib/samba"
       "/var/lib/systemd"
       "/var/log"
