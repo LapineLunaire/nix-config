@@ -6,6 +6,8 @@
   config = lib.mkIf config.userConfig.desktop.enable {
     services.ssh-agent.enable = true;
 
+    services.easyeffects.enable = true;
+
     services.swayosd.enable = true;
 
     services.kanshi = {
