@@ -50,13 +50,17 @@
   } @ inputs: let
     inherit (self) outputs;
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
-    pkgsFor = system: overlays:
+    overlays = import ./overlays {inherit inputs;};
+    pkgsFor = system: extraOverlays:
       import nixpkgs {
-        inherit system overlays;
+        inherit system;
+        overlays = [overlays.additions overlays.modifications] ++ extraOverlays;
         config.allowUnfree = true;
       };
   in {
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
+
+    packages = forAllSystems (system: import ./pkgs (pkgsFor system []));
 
     nixosConfigurations = let
       baseModules = [

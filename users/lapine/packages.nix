@@ -26,6 +26,7 @@
       brightnessctl
       discord
       duf
+      elysia
       eza
       firefox
       gping
