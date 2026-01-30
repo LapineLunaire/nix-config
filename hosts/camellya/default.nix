@@ -32,5 +32,9 @@
 
   powerManagement.cpuFreqGovernor = "performance";
 
+  services.udev.packages = with pkgs; [
+    wooting-udev-rules
+  ];
+
   system.stateVersion = "25.11";
 }

@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  osConfig,
   ...
 }: {
   home.packages =
@@ -43,5 +44,8 @@
       winbox4
       wl-clipboard
       yt-dlp
+    ])
+    ++ lib.optionals (osConfig.networking.hostName == "camellya") (with pkgs; [
+      wootility
     ]);
 }
