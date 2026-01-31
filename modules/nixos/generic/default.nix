@@ -1,14 +1,19 @@
-{lib, ...}: {
+{
+  lib,
+  config,
+  ...
+}: {
   imports = [
     ./packages.nix
     ./security.nix
     ./services.nix
+    ../secureboot
   ];
 
   networking.wireless.enable = lib.mkForce false;
 
   boot.loader = {
-    systemd-boot.enable = true;
+    systemd-boot.enable = lib.mkDefault (!config.secureboot.enable);
     efi.canTouchEfiVariables = true;
   };
 
@@ -36,5 +41,8 @@
     };
   };
 
-  console.font = "Lat2-Terminus16";
+  console = {
+    font = "Lat2-Terminus16";
+    earlySetup = true;
+  };
 }

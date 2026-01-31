@@ -36,6 +36,11 @@
     };
 
     vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
+
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -48,6 +53,7 @@
     stylix,
     nixpkgs-wayland,
     vpn-confinement,
+    lanzaboote,
   } @ inputs: let
     inherit (self) outputs;
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
@@ -87,6 +93,7 @@
         modules =
           [
             {nixpkgs.pkgs = pkgsFor "x86_64-linux" [nixpkgs-wayland.overlays.default];}
+            lanzaboote.nixosModules.lanzaboote
             ./hosts/camellya
             ./users/lapine
           ]

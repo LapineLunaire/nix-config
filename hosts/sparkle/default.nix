@@ -7,6 +7,7 @@
     ../../modules/nixos/generic
     ./hardware-configuration.nix
     ./persistence.nix
+    ./tmpfiles.nix
     ./services
   ];
 

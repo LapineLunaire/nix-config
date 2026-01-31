@@ -6,6 +6,7 @@
       "/var/lib/systemd"
       "/var/log"
       "/etc/NetworkManager/system-connections"
+      "/var/lib/sbctl"
     ];
     files = [
       "/etc/machine-id"

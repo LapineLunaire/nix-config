@@ -8,9 +8,12 @@
     ../../modules/nixos/desktop
     ./hardware-configuration.nix
     ./persistence.nix
+    ./tmpfiles.nix
     ./audio.nix
     ./display.nix
   ];
+
+  secureboot.enable = true;
 
   networking = {
     hostName = "camellya";
