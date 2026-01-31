@@ -162,6 +162,17 @@ in {
           border = 2;
           titlebar = false;
         };
+
+        window.commands = [
+          {
+            criteria = {app_id = "elysia";};
+            command = "floating enable";
+          }
+          {
+            criteria = {app_id = "moe.launcher.the-honkers-railway-launcher";};
+            command = "floating enable";
+          }
+        ];
       };
     };
 
