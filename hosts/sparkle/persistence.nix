@@ -9,6 +9,7 @@
       "/var/lib/postgresql"
       "/var/lib/qBittorrent"
       "/var/lib/samba"
+      "/var/lib/sbctl"
       "/var/lib/systemd"
       "/var/log"
       "/etc/NetworkManager/system-connections"

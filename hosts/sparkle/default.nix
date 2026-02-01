@@ -11,6 +11,8 @@
     ./services
   ];
 
+  secureboot.enable = true;
+
   networking = {
     hostName = "sparkle";
     hostId = "d38a0d1c";

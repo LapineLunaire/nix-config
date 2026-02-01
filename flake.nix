@@ -107,6 +107,7 @@
         modules =
           [
             {nixpkgs.pkgs = pkgsFor "x86_64-linux" [];}
+            lanzaboote.nixosModules.lanzaboote
             vpn-confinement.nixosModules.default
             ./hosts/sparkle
             ./users/lapine

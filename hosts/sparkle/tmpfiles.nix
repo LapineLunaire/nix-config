@@ -11,5 +11,8 @@
     # qBittorrent download directories
     "d '/mnt/samba/torrents' 0755 qbittorrent qbittorrent - -"
     "d '/mnt/samba/torrents/incomplete' 0755 qbittorrent qbittorrent - -"
+
+    # Secure Boot keys directory
+    "d '/var/lib/sbctl' 0700 root root - -"
   ];
 }
