@@ -132,7 +132,13 @@
     };
   };
 
-  programs.swaylock.enable = lib.mkIf config.userConfig.desktop.enable true;
+  programs.swaylock = lib.mkIf config.userConfig.desktop.enable {
+    enable = true;
+    settings = {
+      image = "$(${pkgs.findutils}/bin/find ~/pictures/wallpapers -type f \\( -iname \"*.jpg\" -o -iname \"*.jpeg\" -o -iname \"*.png\" \\) 2>/dev/null | ${pkgs.coreutils}/bin/shuf -n 1)";
+      scaling = "fill";
+    };
+  };
 
   programs.obs-studio = lib.mkIf config.userConfig.desktop.enable {
     enable = true;
