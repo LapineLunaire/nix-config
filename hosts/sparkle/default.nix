@@ -1,6 +1,7 @@
 {
   pkgs,
   lib,
+  config,
   ...
 }: {
   imports = [
@@ -9,6 +10,7 @@
     ./persistence.nix
     ./tmpfiles.nix
     ./services
+    ./sops.nix
   ];
 
   secureboot.enable = true;
@@ -16,7 +18,10 @@
   networking = {
     hostName = "sparkle";
     hostId = "d38a0d1c";
-    networkmanager.enable = true;
+    networkmanager = {
+      enable = true;
+      unmanaged = ["ipmi0"];
+    };
   };
 
   boot = {

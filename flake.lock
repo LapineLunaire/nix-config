@@ -457,11 +457,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1769865958,
-        "narHash": "sha256-14TV8uuHtQj5JuB/VQ9TQc7zLvchLTotSHAFX4M7Ng0=",
+        "lastModified": 1769917174,
+        "narHash": "sha256-/SzwUMTvaZ0uAZFPVAk7QZKdlbU/jm3Xo27HJIGOAQw=",
         "owner": "nix-community",
         "repo": "nixpkgs-wayland",
-        "rev": "e396c40e5f841035a3ea26f29f65ac9dfa3736e8",
+        "rev": "0c0bb8c98c0e0d4678ad782b05e5aba28375eb63",
         "type": "github"
       },
       "original": {
@@ -543,6 +543,7 @@
         "nixd": "nixd",
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-wayland": "nixpkgs-wayland",
+        "sops-nix": "sops-nix",
         "stylix": "stylix",
         "vpn-confinement": "vpn-confinement"
       }
@@ -583,6 +584,26 @@
       "original": {
         "owner": "oxalica",
         "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "sops-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1769921679,
+        "narHash": "sha256-twBMKGQvaztZQxFxbZnkg7y/50BW9yjtCBWwdjtOZew=",
+        "owner": "Mic92",
+        "repo": "sops-nix",
+        "rev": "1e89149dcfc229e7e2ae24a8030f124a31e4f24f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Mic92",
+        "repo": "sops-nix",
         "type": "github"
       }
     },

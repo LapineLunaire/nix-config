@@ -19,7 +19,6 @@
       tpm2-tools
     ];
 
-    boot.initrd.systemd.enable = true;
     security.tpm2 = {
       enable = true;
       pkcs11.enable = true;

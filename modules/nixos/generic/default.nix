@@ -12,9 +12,12 @@
 
   networking.wireless.enable = lib.mkForce false;
 
-  boot.loader = {
-    systemd-boot.enable = lib.mkDefault (!config.secureboot.enable);
-    efi.canTouchEfiVariables = true;
+  boot = {
+    initrd.systemd.enable = true;
+    loader = {
+      systemd-boot.enable = lib.mkDefault (!config.secureboot.enable);
+      efi.canTouchEfiVariables = true;
+    };
   };
 
   nix.settings = {

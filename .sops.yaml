@@ -1,0 +1,8 @@
+keys:
+  - &sparkle_host age1sjl9kkr6ad558leph7l4cvgaphz6gsl8jwrkye3sf5qe6r2sh4qqynz6uk
+
+creation_rules:
+  - path_regex: hosts/sparkle/secrets\.yaml$
+    key_groups:
+      - age:
+          - *sparkle_host

@@ -41,6 +41,11 @@
       url = "github:nix-community/lanzaboote";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -54,6 +59,7 @@
     nixpkgs-wayland,
     vpn-confinement,
     lanzaboote,
+    sops-nix,
   } @ inputs: let
     inherit (self) outputs;
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
@@ -108,6 +114,7 @@
           [
             {nixpkgs.pkgs = pkgsFor "x86_64-linux" [];}
             lanzaboote.nixosModules.lanzaboote
+            sops-nix.nixosModules.sops
             vpn-confinement.nixosModules.default
             ./hosts/sparkle
             ./users/lapine
