@@ -7,6 +7,9 @@
       "network/sfp0-mac" = {};
       "network/sfp1-mac" = {};
       "network/ipmi0-mac" = {};
+      "cloudflare-dns-api-token" = {owner = "acme";};
+      "pgadmin-password" = {};
+      "protonvpn-qbittorrent-conf" = {};
     };
 
     templates."10-sfp0.link".content = ''

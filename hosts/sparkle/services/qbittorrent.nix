@@ -1,7 +1,7 @@
 {config, ...}: {
   vpnNamespaces.qbtvpn = {
     enable = true;
-    wireguardConfigFile = "/persist/secrets/protonvpn-qbittorrent.conf";
+    wireguardConfigFile = config.sops.secrets."protonvpn-qbittorrent-conf".path;
     accessibleFrom = ["127.0.0.1/32"];
     portMappings = [
       {

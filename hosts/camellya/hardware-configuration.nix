@@ -43,7 +43,7 @@
     device = "//10.28.32.25/lapine";
     fsType = "cifs";
     options = [
-      "credentials=/etc/samba-credentials"
+      "credentials=${config.sops.templates."samba-credentials".path}"
       "uid=1000"
       "gid=100"
       "x-systemd.automount"
@@ -58,7 +58,7 @@
     device = "//10.28.32.25/torrents";
     fsType = "cifs";
     options = [
-      "credentials=/etc/samba-credentials"
+      "credentials=${config.sops.templates."samba-credentials".path}"
       "uid=1000"
       "gid=100"
       "x-systemd.automount"

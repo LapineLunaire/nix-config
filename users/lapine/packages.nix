@@ -18,6 +18,8 @@
       ripgrep
       rsync
       socat
+      sops
+      ssh-to-age
       traceroute
       tree
       whois

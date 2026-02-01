@@ -1,8 +1,13 @@
 keys:
   - &sparkle_host age1sjl9kkr6ad558leph7l4cvgaphz6gsl8jwrkye3sf5qe6r2sh4qqynz6uk
+  - &camellya_host age13e5xfv7uqryrkyamxrmjykdu0tlj49wg9pkneqxhpehlrfx4l3gsztallq
 
 creation_rules:
   - path_regex: hosts/sparkle/secrets\.yaml$
     key_groups:
       - age:
           - *sparkle_host
+  - path_regex: hosts/camellya/secrets\.yaml$
+    key_groups:
+      - age:
+          - *camellya_host

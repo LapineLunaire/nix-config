@@ -9,6 +9,7 @@
     ./hardware-configuration.nix
     ./persistence.nix
     ./tmpfiles.nix
+    ./sops.nix
     ./audio.nix
     ./display.nix
   ];

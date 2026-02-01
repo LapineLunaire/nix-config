@@ -76,6 +76,7 @@
         egrep = "egrep --color=auto";
         fgrep = "fgrep --color=auto";
         cp = "cp --reflink=auto --sparse=always";
+        sops = "SOPS_AGE_KEY_FILE=<(sudo cat /etc/ssh/ssh_host_ed25519_key | ssh-to-age -private-key) sops";
       }
       // lib.optionalAttrs config.userConfig.desktop.enable {
         cat = "bat";

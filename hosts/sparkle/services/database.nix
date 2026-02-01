@@ -1,4 +1,8 @@
-{lib, ...}: {
+{
+  lib,
+  config,
+  ...
+}: {
   services.postgresql = {
     enable = true;
     ensureDatabases = ["forgejo"];
@@ -24,7 +28,7 @@
   services.pgadmin = {
     enable = true;
     initialEmail = "lapine@lunaire.eu";
-    initialPasswordFile = "/persist/secrets/pgadmin-password";
+    initialPasswordFile = config.sops.secrets."pgadmin-password".path;
     settings = {
       # Listen only on localhost since Caddy will reverse proxy
       DEFAULT_SERVER = "127.0.0.1";

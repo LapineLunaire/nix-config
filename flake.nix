@@ -100,6 +100,7 @@
           [
             {nixpkgs.pkgs = pkgsFor "x86_64-linux" [nixpkgs-wayland.overlays.default];}
             lanzaboote.nixosModules.lanzaboote
+            sops-nix.nixosModules.sops
             ./hosts/camellya
             ./users/lapine
           ]
