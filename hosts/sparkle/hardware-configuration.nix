@@ -54,7 +54,7 @@
   fileSystems."/boot" = {
     device = "/dev/disk/by-uuid/B8BB-F5FD";
     fsType = "vfat";
-    options = ["fmask=0022" "dmask=0022"];
+    options = ["umask=0077"];
   };
 
   swapDevices = [];
