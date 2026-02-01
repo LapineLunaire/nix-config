@@ -31,12 +31,14 @@
       duf
       elysia
       eza
+      ffmpeg-full
       firefox
       gping
       grim
       heroic
       imv
       minisign
+      mpv
       nmap
       playerctl
       protonmail-desktop

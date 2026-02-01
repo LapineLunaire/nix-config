@@ -258,17 +258,4 @@
       ];
     };
   };
-
-  programs.mpv = lib.mkIf config.userConfig.desktop.enable {
-    enable = true;
-    package = pkgs.mpv.override {
-      mpv-unwrapped = pkgs.mpv-unwrapped.override {
-        ffmpeg = pkgs.ffmpeg-full.override {withUnfree = true;};
-      };
-    };
-  };
-
-  home.packages = lib.mkIf config.userConfig.desktop.enable [
-    (pkgs.ffmpeg-full.override {withUnfree = true;})
-  ];
 }
