@@ -8,16 +8,14 @@
   ffmpeg_8,
   clang,
   llvmPackages,
-  libadwaita,
-  gst_all_1,
-  wrapGAppsHook4,
-  glib-networking,
   python3,
   alsa-lib,
   libGL,
   libglvnd,
   wayland,
   libxkbcommon,
+  freetype,
+  fontconfig,
 }:
 rustPlatform.buildRustPackage rec {
   pname = "elysia";
@@ -42,7 +40,6 @@ rustPlatform.buildRustPackage rec {
   nativeBuildInputs = [
     pkg-config
     clang
-    wrapGAppsHook4
     rustPlatform.bindgenHook
     python3
   ];
@@ -50,17 +47,13 @@ rustPlatform.buildRustPackage rec {
   buildInputs = [
     openssl
     ffmpeg_8
-    libadwaita
-    glib-networking
     alsa-lib
     libGL
     libglvnd
     wayland
     libxkbcommon
-    gst_all_1.gstreamer
-    gst_all_1.gst-plugins-base
-    gst_all_1.gst-plugins-good
-    gst_all_1.gst-plugins-bad
+    freetype
+    fontconfig
   ];
 
   # Provide pre-built Skia binaries to the build
