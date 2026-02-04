@@ -10,7 +10,7 @@
     ./persistence.nix
     ./tmpfiles.nix
     ./sops.nix
-    ./audio.nix
+    ./services
     ./display.nix
   ];
 
