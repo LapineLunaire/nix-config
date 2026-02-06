@@ -6,5 +6,6 @@
     ./proxy.nix
     ./qbittorrent.nix
     ./smb.nix
+    ./vaultwarden.nix
   ];
 }

@@ -11,6 +11,7 @@
       "/var/lib/samba"
       "/var/lib/sbctl"
       "/var/lib/systemd"
+      "/var/lib/vaultwarden"
       "/var/log"
       "/etc/NetworkManager/system-connections"
     ];

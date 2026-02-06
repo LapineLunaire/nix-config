@@ -34,6 +34,15 @@
         "1.1.1.1:53"
       ];
     };
+    certs."vw.lunaire.moe" = {
+      dnsProvider = "cloudflare";
+      credentialsFile = config.sops.secrets."cloudflare-dns-api-token".path;
+      group = "caddy";
+      extraLegoFlags = [
+        "--dns.resolvers"
+        "1.1.1.1:53"
+      ];
+    };
   };
 
   services.caddy = {
@@ -49,6 +58,10 @@
     virtualHosts."pga.lunaire.moe".extraConfig = ''
       tls /var/lib/acme/pga.lunaire.moe/cert.pem /var/lib/acme/pga.lunaire.moe/key.pem
       reverse_proxy localhost:5000
+    '';
+    virtualHosts."vw.lunaire.moe".extraConfig = ''
+      tls /var/lib/acme/vw.lunaire.moe/cert.pem /var/lib/acme/vw.lunaire.moe/key.pem
+      reverse_proxy localhost:6000
     '';
   };
 }
