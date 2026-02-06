@@ -61,7 +61,9 @@
     '';
     virtualHosts."vw.lunaire.moe".extraConfig = ''
       tls /var/lib/acme/vw.lunaire.moe/cert.pem /var/lib/acme/vw.lunaire.moe/key.pem
-      reverse_proxy localhost:6000
+      reverse_proxy localhost:6000 {
+        header_up X-Real-IP {remote_host}
+      }
     '';
   };
 }
