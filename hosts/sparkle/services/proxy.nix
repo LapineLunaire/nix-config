@@ -9,7 +9,7 @@
     };
     certs."git.lunaire.moe" = {
       dnsProvider = "cloudflare";
-      credentialsFile = config.sops.secrets."cloudflare-dns-api-token".path;
+      environmentFile = config.sops.templates."cloudflare-dns-api-token.env".path;
       group = "caddy";
       extraLegoFlags = [
         "--dns.resolvers"
@@ -18,7 +18,7 @@
     };
     certs."qbt.lunaire.moe" = {
       dnsProvider = "cloudflare";
-      credentialsFile = config.sops.secrets."cloudflare-dns-api-token".path;
+      environmentFile = config.sops.templates."cloudflare-dns-api-token.env".path;
       group = "caddy";
       extraLegoFlags = [
         "--dns.resolvers"
@@ -27,7 +27,7 @@
     };
     certs."pga.lunaire.moe" = {
       dnsProvider = "cloudflare";
-      credentialsFile = config.sops.secrets."cloudflare-dns-api-token".path;
+      environmentFile = config.sops.templates."cloudflare-dns-api-token.env".path;
       group = "caddy";
       extraLegoFlags = [
         "--dns.resolvers"
@@ -36,7 +36,7 @@
     };
     certs."vw.lunaire.moe" = {
       dnsProvider = "cloudflare";
-      credentialsFile = config.sops.secrets."cloudflare-dns-api-token".path;
+      environmentFile = config.sops.templates."cloudflare-dns-api-token.env".path;
       group = "caddy";
       extraLegoFlags = [
         "--dns.resolvers"

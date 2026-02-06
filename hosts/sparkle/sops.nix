@@ -7,7 +7,7 @@
       "network/sfp0-mac" = {};
       "network/sfp1-mac" = {};
       "network/ipmi0-mac" = {};
-      "cloudflare-dns-api-token" = {owner = "acme";};
+      "cloudflare-dns-api-token" = {};
       "pgadmin-password" = {};
       "protonvpn-qbittorrent-conf" = {};
     };
@@ -33,6 +33,12 @@
       [Link]
       Name=ipmi0
     '';
+    templates."cloudflare-dns-api-token.env" = {
+      content = ''
+        CF_DNS_API_TOKEN=${config.sops.placeholder."cloudflare-dns-api-token"}
+      '';
+      owner = "acme";
+    };
   };
 
   environment.etc = {
