@@ -45,6 +45,7 @@
       protonvpn-gui
       rclone
       slurp
+      tidal-hifi
       winbox4
       wl-clipboard
       yt-dlp
