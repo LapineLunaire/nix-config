@@ -5,10 +5,14 @@
 }: {
   services.postgresql = {
     enable = true;
-    ensureDatabases = ["forgejo"];
+    ensureDatabases = ["forgejo" "vaultwarden"];
     ensureUsers = [
       {
         name = "forgejo";
+        ensureDBOwnership = true;
+      }
+      {
+        name = "vaultwarden";
         ensureDBOwnership = true;
       }
       {
