@@ -10,8 +10,12 @@
       "cloudflare-dns-api-token" = {};
       "pgadmin-password" = {};
       "protonvpn-qbittorrent-conf" = {};
-      "vaultwarden-env" = {};
+      "vaultwarden-admin-token" = {};
     };
+
+    templates."vaultwarden.env".content = ''
+      ADMIN_TOKEN=${config.sops.placeholder."vaultwarden-admin-token"}
+    '';
 
     templates."10-sfp0.link".content = ''
       [Match]
