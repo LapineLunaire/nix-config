@@ -17,7 +17,7 @@
         (oldAttrs.postFixup or "")
         + ''
           wrapProgram $out/bin/proton-mail \
-            --add-flags "--enable-features=UseOzonePlatform --ozone-platform=x11"
+            --add-flags "--ozone-platform=x11"
         '';
     });
   };

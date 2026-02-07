@@ -26,7 +26,7 @@
     serverConfig = {
       Core.AutoDeleteAddedTorrentFile = "Never";
       Preferences.WebUI = {
-        LocalHostAuth = false;
+        LocalHostAuth = true;
         # generate with the following command (make sure to prefix with a space to avoid going into shell history!)
         # nix run git+https://codeberg.org/feathecutie/qbittorrent_password -- -p [password here]
         Password_PBKDF2 = "@ByteArray(+WZc5S80KMQiHJ/0L/Ogsg==:4ohJt9PRpMsRMSbLwoNnGz8lUQM0zjyVnHOFFjZH3JxpEKnh274Cq2xT32ATsIFh2QJJEmm8ZMqp4P7HnHt90w==)";

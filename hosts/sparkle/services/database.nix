@@ -39,7 +39,7 @@
       DEFAULT_SERVER_PORT = lib.mkForce 5000;
 
       # Pre-configure the local PostgreSQL server
-      MASTER_PASSWORD_REQUIRED = false;
+      MASTER_PASSWORD_REQUIRED = true;
     };
   };
 }

@@ -10,6 +10,7 @@
       "cloudflare-dns-api-token" = {};
       "pgadmin-password" = {};
       "protonvpn-qbittorrent-conf" = {};
+      "vaultwarden-env" = {};
     };
 
     templates."10-sfp0.link".content = ''

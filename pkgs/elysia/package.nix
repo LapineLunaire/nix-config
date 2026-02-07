@@ -25,7 +25,7 @@ rustPlatform.buildRustPackage rec {
     domain = "dawn.wine";
     owner = "elysia";
     repo = "elysia";
-    rev = "dev";
+    rev = "16bc8e9b2daeeaa3922b54aa117372af9242df3b";
     hash = "sha256-b5A7MdPBjm2UTHN2ci/OD8y9WkYe8j+4KZ4CIeealrw=";
   };
 
