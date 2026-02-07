@@ -117,10 +117,13 @@
       vim_mode = true;
       hour_format = "hour24";
       languages.Nix.language_servers = ["nixd" "!nil"];
-      lsp.nixd.settings.nixpkgs.expr = "import <nixpkgs> {}";
+      lsp.nixd.settings = {
+        nixpkgs.expr = "import <nixpkgs> {}";
+        formatting.command = ["alejandra"];
+      };
     };
     extensions = ["nix"];
-    extraPackages = [inputs.nixd.packages.${pkgs.stdenv.hostPlatform.system}.nixd];
+    extraPackages = [inputs.nixd.packages.${pkgs.stdenv.hostPlatform.system}.nixd pkgs.alejandra];
   };
 
   programs.rofi = lib.mkIf config.userConfig.desktop.enable {
