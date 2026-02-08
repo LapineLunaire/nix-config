@@ -18,11 +18,12 @@
 
     @       IN NS   sparkle.lunaire.moe.
 
-    sparkle IN A    10.28.32.25
-    git     IN CNAME sparkle.lunaire.moe.
-    qbt     IN CNAME sparkle.lunaire.moe.
-    pga     IN CNAME sparkle.lunaire.moe.
-    vw      IN CNAME sparkle.lunaire.moe.
+    sparkle  IN A    10.28.32.25
+    camellya IN A    10.28.64.96
+    git      IN CNAME sparkle.lunaire.moe.
+    qbt      IN CNAME sparkle.lunaire.moe.
+    pga      IN CNAME sparkle.lunaire.moe.
+    vw       IN CNAME sparkle.lunaire.moe.
   '';
 
   environment.etc."coredns/zones/db.28.10".text = ''
@@ -40,6 +41,7 @@
     @       IN NS   sparkle.lunaire.moe.
 
     25.32   IN PTR  sparkle.lunaire.moe.
+    96.64   IN PTR  camellya.lunaire.moe.
   '';
 
   services.coredns = {
