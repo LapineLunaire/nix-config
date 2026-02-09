@@ -29,10 +29,10 @@ in
         # Display
         wayland
         libxkbcommon
-        xorg.libX11
-        xorg.libXcursor
-        xorg.libXrandr
-        xorg.libXi
+        libx11
+        libxcursor
+        libxrandr
+        libxi
 
         # Required by Rust/Skia binaries
         glibc
