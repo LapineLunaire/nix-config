@@ -24,6 +24,8 @@
     enableVirtualCamera = true;
   };
 
+  programs.nix-ld.enable = true;
+
   programs.gamemode.enable = true;
   programs.honkers-railway-launcher.enable = true;
 
