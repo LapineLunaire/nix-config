@@ -1,6 +1,4 @@
 {pkgs, ...}: {
-  security.rtkit.enable = true;
-
   services.speechd.enable = false;
 
   services.earlyoom = {

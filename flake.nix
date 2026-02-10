@@ -15,8 +15,13 @@
       inputs.home-manager.follows = "home-manager";
     };
 
-    nixd = {
-      url = "github:nix-community/nixd";
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -37,13 +42,8 @@
 
     vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
 
-    lanzaboote = {
-      url = "github:nix-community/lanzaboote";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    sops-nix = {
-      url = "github:Mic92/sops-nix";
+    nixd = {
+      url = "github:nix-community/nixd";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -53,13 +53,13 @@
     nixpkgs,
     home-manager,
     impermanence,
-    nixd,
+    lanzaboote,
+    sops-nix,
     aagl,
     stylix,
     nixpkgs-wayland,
     vpn-confinement,
-    lanzaboote,
-    sops-nix,
+    nixd,
   } @ inputs: let
     inherit (self) outputs;
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
