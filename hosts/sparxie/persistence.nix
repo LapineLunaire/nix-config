@@ -3,7 +3,7 @@
     hideMounts = true;
     directories = [
       "/var/lib/acme"
-      "/var/lib/private/matrix-conduit"
+      "/var/lib/private/tuwunel"
       "/var/lib/nixos"
       "/var/lib/systemd"
       "/var/log"

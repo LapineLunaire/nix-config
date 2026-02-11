@@ -1,6 +1,6 @@
 {lib, ...}: {
   imports = [
-    ./conduit.nix
+    ./tuwunel.nix
     ./proxy.nix
   ];
 
