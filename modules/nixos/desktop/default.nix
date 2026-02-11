@@ -57,6 +57,39 @@
           serif = ["Noto Serif" "Noto Serif CJK JP"];
           emoji = ["Noto Color Emoji"];
         };
+        localConf = ''
+          <?xml version="1.0"?>
+          <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+          <fontconfig>
+            <!-- Reject monochrome Noto Emoji so color variant is always used -->
+            <selectfont>
+              <rejectfont>
+                <pattern>
+                  <patelt name="family"><string>Noto Emoji</string></patelt>
+                </pattern>
+              </rejectfont>
+            </selectfont>
+            <!-- Append Noto Color Emoji as fallback for all common families -->
+            <match target="pattern">
+              <test name="family" qual="any"><string>sans-serif</string></test>
+              <edit name="family" mode="append" binding="weak">
+                <string>Noto Color Emoji</string>
+              </edit>
+            </match>
+            <match target="pattern">
+              <test name="family" qual="any"><string>serif</string></test>
+              <edit name="family" mode="append" binding="weak">
+                <string>Noto Color Emoji</string>
+              </edit>
+            </match>
+            <match target="pattern">
+              <test name="family" qual="any"><string>monospace</string></test>
+              <edit name="family" mode="append" binding="weak">
+                <string>Noto Color Emoji</string>
+              </edit>
+            </match>
+          </fontconfig>
+        '';
       };
     };
   };
