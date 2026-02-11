@@ -32,6 +32,7 @@
       elysia
       eza
       ffmpeg-full
+      fluffychat
       firefox
       gping
       grim
