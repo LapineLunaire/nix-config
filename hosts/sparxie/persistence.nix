@@ -2,10 +2,11 @@
   environment.persistence."/persist" = {
     hideMounts = true;
     directories = [
+      "/var/lib/acme"
+      "/var/lib/private/matrix-conduit"
       "/var/lib/nixos"
       "/var/lib/systemd"
       "/var/log"
-      "/etc/NetworkManager/system-connections"
     ];
     files = [
       "/etc/machine-id"
