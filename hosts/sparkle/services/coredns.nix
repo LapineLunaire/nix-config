@@ -23,6 +23,7 @@
     git      IN CNAME sparkle.lunaire.moe.
     qbt      IN CNAME sparkle.lunaire.moe.
     pga      IN CNAME sparkle.lunaire.moe.
+    ha       IN CNAME sparkle.lunaire.moe.
     vw       IN CNAME sparkle.lunaire.moe.
   '';
 

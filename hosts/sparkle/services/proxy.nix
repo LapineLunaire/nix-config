@@ -34,6 +34,15 @@
         "1.1.1.1:53"
       ];
     };
+    certs."ha.lunaire.moe" = {
+      dnsProvider = "cloudflare";
+      environmentFile = config.sops.templates."cloudflare-dns-api-token.env".path;
+      group = "caddy";
+      extraLegoFlags = [
+        "--dns.resolvers"
+        "1.1.1.1:53"
+      ];
+    };
     certs."vw.lunaire.moe" = {
       dnsProvider = "cloudflare";
       environmentFile = config.sops.templates."cloudflare-dns-api-token.env".path;
@@ -54,6 +63,10 @@
     virtualHosts."qbt.lunaire.moe".extraConfig = ''
       tls /var/lib/acme/qbt.lunaire.moe/cert.pem /var/lib/acme/qbt.lunaire.moe/key.pem
       reverse_proxy ${config.vpnNamespaces.qbtvpn.namespaceAddress}:4000
+    '';
+    virtualHosts."ha.lunaire.moe".extraConfig = ''
+      tls /var/lib/acme/ha.lunaire.moe/cert.pem /var/lib/acme/ha.lunaire.moe/key.pem
+      reverse_proxy localhost:7000
     '';
     virtualHosts."pga.lunaire.moe".extraConfig = ''
       tls /var/lib/acme/pga.lunaire.moe/cert.pem /var/lib/acme/pga.lunaire.moe/key.pem
