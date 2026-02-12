@@ -41,12 +41,14 @@
       minisign
       mpv
       nmap
+      pciutils
       playerctl
       protonmail-desktop
       protonvpn-gui
       rclone
       slurp
       tidal-hifi
+      usbutils
       winbox4
       wl-clipboard
       yt-dlp
