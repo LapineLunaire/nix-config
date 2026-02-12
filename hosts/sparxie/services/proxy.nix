@@ -29,6 +29,22 @@ in {
         "1.1.1.1:53"
       ];
     };
+    certs."bunny.enterprises" = {
+      dnsProvider = "cloudflare";
+      environmentFile = config.sops.templates."cloudflare-dns-api-token.env".path;
+      group = "ejabberd";
+      extraDomainNames = [
+        "xmpp.bunny.enterprises"
+        "conference.bunny.enterprises"
+        "proxy.bunny.enterprises"
+        "pubsub.bunny.enterprises"
+        "upload.bunny.enterprises"
+      ];
+      extraLegoFlags = [
+        "--dns.resolvers"
+        "1.1.1.1:53"
+      ];
+    };
     certs."chat.bunny.enterprises" = {
       dnsProvider = "cloudflare";
       environmentFile = config.sops.templates."cloudflare-dns-api-token.env".path;

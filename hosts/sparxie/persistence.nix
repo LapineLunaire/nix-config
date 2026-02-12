@@ -3,8 +3,11 @@
     hideMounts = true;
     directories = [
       "/var/lib/acme"
-      "/var/lib/private/tuwunel"
+      "/var/lib/ejabberd"
       "/var/lib/nixos"
+      "/var/lib/postgresql"
+      "/var/lib/private/tuwunel"
+      "/var/lib/redis"
       "/var/lib/systemd"
       "/var/log"
     ];

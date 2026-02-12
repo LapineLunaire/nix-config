@@ -6,6 +6,7 @@
     secrets = {
       "cloudflare-dns-api-token" = {};
       "tuwunel-registration-token" = {};
+      "ejabberd-sql-password" = {};
     };
 
     templates."cloudflare-dns-api-token.env" = {
