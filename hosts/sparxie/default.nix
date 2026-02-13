@@ -36,7 +36,8 @@
   };
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_latest;
+    # TODO: switch back to linuxPackages_latest when ZFS supports 6.19
+    kernelPackages = pkgs.linuxPackages_6_18;
     zfs.package = pkgs.zfs_unstable;
   };
 

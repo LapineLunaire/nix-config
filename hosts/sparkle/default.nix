@@ -24,7 +24,8 @@
   };
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_latest.extend (self: super: {
+    # TODO: switch back to linuxPackages_latest when ZFS supports 6.19
+    kernelPackages = pkgs.linuxPackages_6_18.extend (self: super: {
       kernel = super.kernel.override {
         structuredExtraConfig = with lib.kernel; {
           X86_NATIVE_CPU = yes;
