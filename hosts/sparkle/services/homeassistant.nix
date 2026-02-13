@@ -18,6 +18,7 @@
           "::1"
         ];
       };
+      zha.zigpy_config.ota.z2m_remote_index = "https://raw.githubusercontent.com/Koenkk/zigbee-OTA/master/index.json";
       default_config = {};
     };
   };
