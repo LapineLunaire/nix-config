@@ -14,6 +14,9 @@
     "z '/mnt/samba/torrents' 0755 qbittorrent qbittorrent - -"
     "z '/mnt/samba/torrents/incomplete' 0755 qbittorrent qbittorrent - -"
 
+    # Home Assistant config
+    "z '/persist/var/lib/hass' 0700 root root - -"
+
     # Secure Boot keys directory
     "z '/var/lib/sbctl' 0700 root root - -"
   ];

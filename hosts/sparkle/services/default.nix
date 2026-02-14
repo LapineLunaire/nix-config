@@ -10,4 +10,10 @@
     ./smb.nix
     ./vaultwarden.nix
   ];
+
+  virtualisation.podman = {
+    enable = true;
+    dockerCompat = false;
+  };
+  virtualisation.oci-containers.backend = "podman";
 }

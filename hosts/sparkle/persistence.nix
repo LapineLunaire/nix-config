@@ -5,6 +5,7 @@
       "/var/lib/acme"
       "/var/lib/forgejo"
       "/var/lib/hass"
+      "/var/lib/containers"
       "/var/lib/nixos"
       "/var/lib/postgresql"
       "/var/lib/qBittorrent"

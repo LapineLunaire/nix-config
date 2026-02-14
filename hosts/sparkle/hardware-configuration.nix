@@ -20,6 +20,12 @@
     options = ["defaults" "size=4G" "mode=1777"];
   };
 
+  fileSystems."/var/tmp" = {
+    device = "none";
+    fsType = "tmpfs";
+    options = ["defaults" "size=4G" "mode=1777"];
+  };
+
   fileSystems."/nix" = {
     device = "sparkle/nix";
     fsType = "zfs";
