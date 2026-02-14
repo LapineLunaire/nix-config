@@ -17,6 +17,12 @@
     # Home Assistant config
     "z '/persist/var/lib/hass' 0700 root root - -"
 
+    # Vaultwarden data
+    "z '/persist/var/lib/vaultwarden' 0700 root root - -"
+
+    # pgAdmin data (container runs as UID 5050)
+    "d '/persist/var/lib/pgadmin' 0700 5050 5050 - -"
+
     # Secure Boot keys directory
     "z '/var/lib/sbctl' 0700 root root - -"
   ];

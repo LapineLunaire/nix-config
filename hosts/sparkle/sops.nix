@@ -8,8 +8,15 @@
       "network/sfp1-mac" = {};
       "network/ipmi0-mac" = {};
       "cloudflare-dns-api-token" = {};
+      "pgadmin-password" = {};
       "protonvpn-qbittorrent-conf" = {};
+      "vaultwarden-admin-token" = {};
+      "vaultwarden-db-password" = {};
     };
+
+    templates."vaultwarden.env".content = "ADMIN_TOKEN=${config.sops.placeholder."vaultwarden-admin-token"}\nDATABASE_URL=postgresql://vaultwarden:${config.sops.placeholder."vaultwarden-db-password"}@127.0.0.1/vaultwarden\n";
+
+    templates."pgadmin.env".content = "PGADMIN_DEFAULT_PASSWORD=${config.sops.placeholder."pgadmin-password"}\n";
 
     templates."10-sfp0.link".content = ''
       [Match]
