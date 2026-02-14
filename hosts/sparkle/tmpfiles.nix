@@ -6,6 +6,7 @@
 
     # pgAdmin DynamicUser directories
     "d '/var/lib/private' 0700 root root - -"
+    "z '/var/lib/private' 0700 root root - -"
     "d '/var/lib/private/pgadmin' 0750 pgadmin pgadmin - -"
 
     # qBittorrent download directories
