@@ -8,14 +8,8 @@
       "network/sfp1-mac" = {};
       "network/ipmi0-mac" = {};
       "cloudflare-dns-api-token" = {};
-      "pgadmin-password" = {};
       "protonvpn-qbittorrent-conf" = {};
-      "vaultwarden-admin-token" = {};
     };
-
-    templates."vaultwarden.env".content = ''
-      ADMIN_TOKEN=${config.sops.placeholder."vaultwarden-admin-token"}
-    '';
 
     templates."10-sfp0.link".content = ''
       [Match]

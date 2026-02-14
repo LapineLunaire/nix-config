@@ -1,19 +1,20 @@
 {...}: {
   systemd.tmpfiles.rules = [
-    # Forgejo state directories
-    "d '/var/lib/forgejo' 0750 forgejo forgejo - -"
-    "d '/var/lib/forgejo/custom' 0750 forgejo forgejo - -"
+    # ACME certificates
+    "z '/var/lib/acme' 0750 acme acme - -"
 
-    # pgAdmin DynamicUser directories
-    "d '/var/lib/private' 0700 root root - -"
-    "z '/var/lib/private' 0700 root root - -"
-    "d '/var/lib/private/pgadmin' 0750 pgadmin pgadmin - -"
+    # Forgejo state directories
+    "z '/var/lib/forgejo' 0750 forgejo forgejo - -"
+    "z '/var/lib/forgejo/custom' 0750 forgejo forgejo - -"
+
+    # PostgreSQL data directory
+    "z '/var/lib/postgresql' 0750 postgres postgres - -"
 
     # qBittorrent download directories
-    "d '/mnt/samba/torrents' 0755 qbittorrent qbittorrent - -"
-    "d '/mnt/samba/torrents/incomplete' 0755 qbittorrent qbittorrent - -"
+    "z '/mnt/samba/torrents' 0755 qbittorrent qbittorrent - -"
+    "z '/mnt/samba/torrents/incomplete' 0755 qbittorrent qbittorrent - -"
 
     # Secure Boot keys directory
-    "d '/var/lib/sbctl' 0700 root root - -"
+    "z '/var/lib/sbctl' 0700 root root - -"
   ];
 }

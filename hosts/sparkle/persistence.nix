@@ -6,7 +6,6 @@
       "/var/lib/forgejo"
       "/var/lib/hass"
       "/var/lib/nixos"
-      "/var/lib/private/pgadmin"
       "/var/lib/postgresql"
       "/var/lib/qBittorrent"
       "/var/lib/samba"
