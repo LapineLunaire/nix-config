@@ -35,7 +35,7 @@
     zfs.package = pkgs.zfs_unstable;
   };
 
-  powerManagement.cpuFreqGovernor = "performance";
+  powerManagement.cpuFreqGovernor = "powersave";
 
   services.udev.packages = with pkgs; [
     wooting-udev-rules
