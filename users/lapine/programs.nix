@@ -85,7 +85,10 @@ lib.mkMerge [
       enable = true;
       enableDefaultConfig = false;
       matchBlocks."*" = {
-        identityFile = "~/.ssh/id_ed25519_sk_rk_lapine";
+        identityFile = [
+          "~/.ssh/id_ed25519_sk_rk_lapine"
+          "~/.ssh/id_ed25519_sk_rk_lapine2"
+        ];
         extraOptions.IdentityAgent = "none";
       };
     };

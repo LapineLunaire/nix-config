@@ -20,6 +20,7 @@
       socat
       sops
       ssh-to-age
+      yubikey-manager
       traceroute
       tree
       whois
