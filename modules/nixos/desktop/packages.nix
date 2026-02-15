@@ -27,7 +27,12 @@
   programs.nix-ld.enable = true;
 
   programs.gamemode.enable = true;
-  programs.honkers-railway-launcher.enable = true;
+  programs.honkers-railway-launcher = {
+    enable = true;
+    package = pkgs.honkers-railway-launcher.override {
+      extraPkgs = _: [pkgs.winetricks];
+    };
+  };
 
   programs.steam = {
     enable = true;
