@@ -6,7 +6,7 @@
   home = {
     username = "lapine";
     homeDirectory = "/Users/lapine";
-    stateVersion = "25.11";
+    stateVersion = "26.05";
 
     packages = [
       inputs.nixd.packages.${pkgs.stdenv.hostPlatform.system}.nixd

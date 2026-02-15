@@ -36,7 +36,7 @@
       home = {
         username = "lapine";
         homeDirectory = "/home/lapine";
-        stateVersion = "25.11";
+        stateVersion = "26.05";
 
         sessionVariables = {
           PAGER = "nvimpager";
