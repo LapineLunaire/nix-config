@@ -55,10 +55,6 @@ in {
           ];
         };
 
-        misc = {
-          disable_splash_rendering = true;
-        };
-
         dwindle = {
           pseudotile = true;
           preserve_split = true;
@@ -282,6 +278,10 @@ in {
         extraPortals = [pkgs.xdg-desktop-portal-hyprland pkgs.xdg-desktop-portal-gtk];
         config.common.default = ["hyprland" "gtk"];
       };
+
+      configFile."hypr/hyprpaper.conf".text = ''
+        splash = false
+      '';
 
       userDirs = {
         enable = true;
