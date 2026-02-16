@@ -1,6 +1,5 @@
 {
   config,
-  inputs,
   lib,
   pkgs,
   ...
@@ -130,7 +129,7 @@ lib.mkMerge [
         };
       };
       extensions = ["nix"];
-      extraPackages = [inputs.nixd.packages.${pkgs.stdenv.hostPlatform.system}.nixd pkgs.alejandra];
+      extraPackages = [pkgs.nixd pkgs.alejandra];
     };
 
     programs.obs-studio = {
@@ -138,7 +137,6 @@ lib.mkMerge [
       plugins = with pkgs.obs-studio-plugins; [
         obs-pipewire-audio-capture
         obs-vaapi
-        wlrobs
       ];
     };
 

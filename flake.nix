@@ -35,17 +35,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nixpkgs-wayland = {
-      url = "github:nix-community/nixpkgs-wayland";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
-
-    nixd = {
-      url = "github:nix-community/nixd";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs = {
@@ -57,9 +47,7 @@
     sops-nix,
     aagl,
     stylix,
-    nixpkgs-wayland,
     vpn-confinement,
-    nixd,
   } @ inputs: let
     inherit (self) outputs;
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
@@ -99,7 +87,7 @@
         specialArgs = {inherit inputs outputs;};
         modules =
           [
-            {nixpkgs.pkgs = pkgsFor "x86_64-linux" [nixpkgs-wayland.overlays.default];}
+            {nixpkgs.pkgs = pkgsFor "x86_64-linux" [];}
             sops-nix.nixosModules.sops
             ./hosts/camellya
             ./users/lapine

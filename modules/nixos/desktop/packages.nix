@@ -4,19 +4,9 @@
     nix-direnv.enable = true;
   };
 
-  programs.sway = {
+  programs.hyprland = {
     enable = true;
-    extraPackages = [];
-  };
-
-  xdg.portal.wlr = {
-    enable = true;
-    settings = {
-      screencast = {
-        chooser_type = "dmenu";
-        chooser_cmd = "${pkgs.rofi}/bin/rofi -dmenu -p 'Select screen to share'";
-      };
-    };
+    xwayland.enable = true;
   };
 
   programs.obs-studio = {

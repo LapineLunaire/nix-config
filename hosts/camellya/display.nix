@@ -1,8 +1,9 @@
 {...}: {
   home-manager.users.lapine = {
-    wayland.windowManager.sway.config.output."DP-2" = {
-      mode = "2560x1440@165.080Hz";
-      allow_tearing = "yes";
+    wayland.windowManager.hyprland.settings = {
+      monitor = ["DP-2, 2560x1440@165.08, 0x0, 1"];
+      general.allow_tearing = true;
+      windowrule = ["immediate on, match:class .*"];
     };
   };
 }
