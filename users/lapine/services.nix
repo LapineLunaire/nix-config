@@ -64,7 +64,7 @@
         width = 400;
         margin = "8";
         layer = "overlay";
-        icon-size = 64;
+        max-icon-size = 64;
         default-timeout = 5000;
         anchor = "top-right";
       };

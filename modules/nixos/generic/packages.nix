@@ -15,7 +15,7 @@
       extraArgs = "--keep 3";
       dates = "daily";
     };
-    flake = "/etc/nixos";
+    flake = "/persist/nix-config";
   };
 
   environment.systemPackages = with pkgs; [
