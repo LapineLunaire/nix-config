@@ -4,7 +4,6 @@
     directories = [
       "/var/lib/acme"
       "/var/lib/forgejo"
-      "/var/lib/hass"
       "/var/lib/containers"
       "/var/lib/nixos"
       "/var/lib/postgresql"
@@ -12,7 +11,6 @@
       "/var/lib/samba"
       "/var/lib/sbctl"
       "/var/lib/systemd"
-      "/var/lib/vaultwarden"
       "/var/log"
       "/etc/NetworkManager/system-connections"
     ];
