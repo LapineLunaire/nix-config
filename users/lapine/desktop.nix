@@ -216,7 +216,7 @@ in {
 
           modules-left = ["hyprland/workspaces"];
           modules-center = ["clock"];
-          modules-right = ["tray" "network" "cpu" "memory" "temperature"];
+          modules-right = ["tray" "network" "cpu" "memory"];
 
           tray = {
             spacing = 8;
@@ -253,11 +253,6 @@ in {
           memory = {
             format = "RAM {percentage}%";
             interval = 2;
-          };
-
-          temperature = {
-            format = "{temperatureC}°C";
-            critical-threshold = 80;
           };
 
           network = {
