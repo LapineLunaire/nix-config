@@ -12,7 +12,10 @@
       "protonvpn-qbittorrent-conf" = {};
       "vaultwarden-admin-token" = {};
       "vaultwarden-db-password" = {};
+      "forgejo-runner-token" = {};
     };
+
+    templates."forgejo-runner-token.env".content = "TOKEN=${config.sops.placeholder."forgejo-runner-token"}\n";
 
     templates."vaultwarden.env".content = "ADMIN_TOKEN=${config.sops.placeholder."vaultwarden-admin-token"}\nDATABASE_URL=postgresql://vaultwarden:${config.sops.placeholder."vaultwarden-db-password"}@127.0.0.1/vaultwarden\n";
 
