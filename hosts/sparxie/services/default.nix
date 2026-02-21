@@ -6,5 +6,6 @@
     ./tuwunel.nix
   ];
 
+  services.fwupd.enable = lib.mkForce false;
   services.smartd.enable = lib.mkForce false;
 }
