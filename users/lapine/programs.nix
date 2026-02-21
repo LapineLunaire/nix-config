@@ -88,7 +88,7 @@ lib.mkMerge [
           "~/.ssh/id_ed25519_sk_rk_lapine"
           "~/.ssh/id_ed25519_sk_rk_lapine2"
         ];
-        extraOptions.IdentityAgent = "none";
+        identitiesOnly = true;
       };
     };
 
