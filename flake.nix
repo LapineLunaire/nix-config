@@ -48,20 +48,23 @@
     aagl,
     stylix,
     vpn-confinement,
+    ...
   } @ inputs: let
     inherit (self) outputs;
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
     overlays = import ./overlays {inherit inputs;};
-    pkgsFor = system: extraOverlays:
+    pkgsFor = system:
       import nixpkgs {
         inherit system;
-        overlays = [overlays.additions overlays.modifications] ++ extraOverlays;
+        overlays = [overlays.additions overlays.modifications];
         config.allowUnfree = true;
       };
   in {
+    inherit overlays;
+
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
 
-    packages = forAllSystems (system: import ./pkgs (pkgsFor system []));
+    packages = forAllSystems (system: import ./pkgs (pkgsFor system));
 
     nixosConfigurations = let
       baseModules = [
@@ -88,7 +91,7 @@
         specialArgs = {inherit inputs outputs;};
         modules =
           [
-            {nixpkgs.pkgs = pkgsFor "x86_64-linux" [];}
+            {nixpkgs.pkgs = pkgsFor "x86_64-linux";}
             ./hosts/camellya
             ./users/lapine
           ]
@@ -101,7 +104,7 @@
         specialArgs = {inherit inputs outputs;};
         modules =
           [
-            {nixpkgs.pkgs = pkgsFor "x86_64-linux" [];}
+            {nixpkgs.pkgs = pkgsFor "x86_64-linux";}
             vpn-confinement.nixosModules.default
             ./hosts/sparkle
             ./users/lapine
@@ -114,7 +117,7 @@
         specialArgs = {inherit inputs outputs;};
         modules =
           [
-            {nixpkgs.pkgs = pkgsFor "aarch64-linux" [];}
+            {nixpkgs.pkgs = pkgsFor "aarch64-linux";}
             ./hosts/sparxie
             ./users/lapine
           ]
@@ -124,7 +127,7 @@
 
     homeConfigurations = {
       "lapine@aquafang" = home-manager.lib.homeManagerConfiguration {
-        pkgs = pkgsFor "aarch64-darwin" [];
+        pkgs = pkgsFor "aarch64-darwin";
         extraSpecialArgs = {inherit inputs outputs;};
         modules = [./home-manager/aquafang];
       };

@@ -1,8 +1,11 @@
 {
   config,
+  inputs,
   lib,
   ...
-}: {
+}: let
+  flakeInputs = lib.filterAttrs (_: lib.isType "flake") inputs;
+in {
   imports = [
     ./packages.nix
     ./security.nix
@@ -20,9 +23,15 @@
     };
   };
 
-  nix.settings = {
-    experimental-features = ["nix-command" "flakes"];
-    auto-optimise-store = true;
+  nix = {
+    settings = {
+      experimental-features = ["nix-command" "flakes"];
+      flake-registry = "";
+      auto-optimise-store = true;
+    };
+    channel.enable = false;
+    registry = lib.mapAttrs (_: flake: {inherit flake;}) flakeInputs;
+    nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
   };
 
   zramSwap = {
