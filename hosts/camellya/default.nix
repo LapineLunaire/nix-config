@@ -31,7 +31,7 @@
         };
       };
     });
-    kernelParams = ["amd_pstate=active"];
+    kernelParams = ["amd_pstate=active" "usbcore.autosuspend=-1"];
     zfs.package = pkgs.zfs_unstable;
   };
 

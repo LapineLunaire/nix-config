@@ -34,6 +34,8 @@ in {
     nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
   };
 
+  boot.kernel.sysctl."vm.swappiness" = 100;
+
   zramSwap = {
     enable = true;
     algorithm = "zstd";
