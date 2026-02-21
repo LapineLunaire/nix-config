@@ -4,8 +4,8 @@
     homeDirectory = "/Users/lapine";
     stateVersion = "26.05";
 
-    packages = [
-      pkgs.nixd
+    packages = with pkgs; [
+      nixd
     ];
   };
 

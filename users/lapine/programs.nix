@@ -129,7 +129,7 @@ lib.mkMerge [
         };
       };
       extensions = ["nix"];
-      extraPackages = [pkgs.nixd pkgs.alejandra];
+      extraPackages = with pkgs; [nixd alejandra];
     };
 
     programs.obs-studio = {
