@@ -158,7 +158,7 @@ in {
         ];
 
         exec-once = [
-          "${pkgs.kdePackages.polkit-kde-agent-1}/libexec/polkit-kde-authentication-agent-1"
+          "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
           (toString (pkgs.writeShellScript "random-wallpaper" ''
             wallpaper="$(${pkgs.findutils}/bin/find ~/pictures/wallpapers -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) 2>/dev/null | ${pkgs.coreutils}/bin/shuf -n 1)"
             if [ -n "$wallpaper" ]; then

@@ -67,6 +67,7 @@
       baseModules = [
         impermanence.nixosModules.impermanence
         lanzaboote.nixosModules.lanzaboote
+        sops-nix.nixosModules.sops
         home-manager.nixosModules.home-manager
         {
           home-manager = {
@@ -88,7 +89,6 @@
         modules =
           [
             {nixpkgs.pkgs = pkgsFor "x86_64-linux" [];}
-            sops-nix.nixosModules.sops
             ./hosts/camellya
             ./users/lapine
           ]
@@ -102,7 +102,6 @@
         modules =
           [
             {nixpkgs.pkgs = pkgsFor "x86_64-linux" [];}
-            sops-nix.nixosModules.sops
             vpn-confinement.nixosModules.default
             ./hosts/sparkle
             ./users/lapine
@@ -116,7 +115,6 @@
         modules =
           [
             {nixpkgs.pkgs = pkgsFor "aarch64-linux" [];}
-            sops-nix.nixosModules.sops
             ./hosts/sparxie
             ./users/lapine
           ]
