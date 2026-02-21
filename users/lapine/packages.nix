@@ -36,8 +36,10 @@
       fluffychat
       firefox
       gping
+      gcr
       grim
       heroic
+      libsecret
       imv
       minisign
       mpv
@@ -52,6 +54,7 @@
       usbutils
       winbox4
       wl-clipboard
+      xivlauncher
       yt-dlp
     ])
     ++ lib.optionals (osConfig.networking.hostName == "camellya") (with pkgs; [

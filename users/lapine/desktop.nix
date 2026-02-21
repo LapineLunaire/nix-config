@@ -174,6 +174,7 @@ in {
           "float on, match:class ^(elysia)$"
           "float on, match:class ^(moe\\.launcher\\.the-honkers-railway-launcher)$"
           "float on, match:class ^(endfield\\.exe)$"
+          "float on, match:class ^(XIVLauncher\\.Core)$"
         ];
       };
     };

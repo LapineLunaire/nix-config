@@ -6,6 +6,11 @@
   config = lib.mkIf config.userConfig.desktop.enable {
     services.ssh-agent.enable = true;
 
+    services.gnome-keyring = {
+      enable = true;
+      components = ["secrets"];
+    };
+
     services.easyeffects.enable = true;
 
     services.hypridle = {
