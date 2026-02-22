@@ -13,6 +13,10 @@
 
     services.easyeffects.enable = true;
 
+    systemd.user.services.easyeffects = {
+      Unit.After = ["pipewire.service" "wireplumber.service"];
+    };
+
     services.hypridle = {
       enable = true;
       settings = {
