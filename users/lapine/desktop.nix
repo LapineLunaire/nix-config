@@ -77,18 +77,17 @@ in {
 
         "$mod" = mod;
 
-        # Hyprland defaults translated to Colemak
-        # QWERTY → Colemak: e→f r→p p→; j→n s→r m→m (q,c,v unchanged)
+        # Window management
         bind = [
-          "$mod, q, exec, ghostty"
-          "$mod, c, killactive"
-          "$mod, m, exit"
-          "$mod, f, exec, ghostty -e yazi" # QWERTY E
-          "$mod, v, togglefloating"
-          "$mod, p, exec, rofi -show drun" # QWERTY R
-          "$mod, semicolon, pseudo" # QWERTY P
-          "$mod, n, togglesplit" # QWERTY J
-          "$mod, Escape, exec, hyprlock"
+          "$mod, Return, exec, ghostty"
+          "$mod, q, killactive"
+          "$mod SHIFT, m, exit"
+          "$mod SHIFT, f, exec, ghostty -e yazi"
+          "$mod SHIFT, Space, togglefloating"
+          "$mod, semicolon, pseudo"
+          "$mod SHIFT, n, togglesplit"
+          "CTRL $mod, q, exec, hyprlock"
+          "CTRL $mod, f, fullscreen,"
           "$mod, k, exec, makoctl dismiss"
 
           # Focus (arrow keys, same as Hyprland default)
@@ -121,8 +120,8 @@ in {
           "$mod SHIFT, 0, movetoworkspace, 10"
 
           # Scratchpad
-          "$mod, r, togglespecialworkspace, magic" # QWERTY S
-          "$mod SHIFT, r, movetoworkspace, special:magic"
+          "$mod, grave, togglespecialworkspace, magic"
+          "$mod SHIFT, grave, movetoworkspace, special:magic"
 
           # Mouse scroll workspaces
           "$mod, mouse_down, workspace, e+1"
@@ -131,6 +130,32 @@ in {
           # Screenshots
           ", Print, exec, grim - | wl-copy"
           "SHIFT, Print, exec, grim -g \"$(slurp)\" - | wl-copy"
+        ];
+
+        # App launcher (release-trigger so pressing again closes rofi)
+        bindr = [
+          "$mod, Space, exec, pkill rofi || rofi -show drun"
+        ];
+
+        # macOS-like app shortcuts (ALT → CTRL via sendshortcut)
+        binde = [
+          "$mod, a, sendshortcut, CTRL, a,"
+          "$mod, c, sendshortcut, CTRL, Insert,"
+          "$mod, v, sendshortcut, SHIFT, Insert,"
+          "$mod, x, sendshortcut, CTRL, x,"
+          "$mod, z, sendshortcut, CTRL, z,"
+          "$mod SHIFT, z, sendshortcut, CTRL SHIFT, z,"
+          "$mod, s, sendshortcut, CTRL, s,"
+          "$mod, f, sendshortcut, CTRL, f,"
+          "$mod, t, sendshortcut, CTRL, t,"
+          "$mod, n, sendshortcut, CTRL, n,"
+          "$mod, l, sendshortcut, CTRL, l,"
+          "$mod, w, sendshortcut, CTRL, w,"
+          "$mod, r, sendshortcut, CTRL, r,"
+          "$mod SHIFT, t, sendshortcut, CTRL SHIFT, t,"
+          "$mod SHIFT, s, sendshortcut, CTRL SHIFT, s,"
+          "$mod, o, sendshortcut, CTRL, o,"
+          "$mod, y, sendshortcut, CTRL, y,"
         ];
 
         # Volume/brightness (repeat-enabled + locked)
