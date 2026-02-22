@@ -19,7 +19,7 @@ in {
 
     wayland.windowManager.hyprland = {
       enable = true;
-      systemd.enable = true;
+      systemd.enable = false;
 
       settings = {
         general = {
@@ -217,7 +217,7 @@ in {
       enable = true;
       systemd = {
         enable = true;
-        target = "hyprland-session.target";
+        target = "graphical-session.target";
       };
       style = ''
         #workspaces button {
