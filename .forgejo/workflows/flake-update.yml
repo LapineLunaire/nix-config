@@ -10,26 +10,21 @@ jobs:
     runs-on: docker
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        run: |
+          git clone https://x-access-token:${{ secrets.PUSH_TOKEN }}@git.lunaire.moe/${{ github.repository }}.git .
+          git checkout ${{ github.ref_name }}
 
       - name: Update flake inputs
         run: nix --extra-experimental-features "nix-command flakes" flake update
 
-      - name: Check for changes
-        id: check
+      - name: Commit and push
         run: |
           if git diff --quiet flake.lock; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "No changes, skipping."
+            exit 0
           fi
-
-      - name: Commit and push
-        if: steps.check.outputs.changed == 'true'
-        run: |
           git config user.name "Lapine"
           git config user.email "lapine@lunaire.eu"
-          git remote set-url origin https://x-access-token:${{ secrets.PUSH_TOKEN }}@git.lunaire.moe/${{ github.repository }}.git
-          git add -u
+          git add flake.lock
           git commit -m "flake: update inputs $(date +%Y-%m-%d)"
           git push
