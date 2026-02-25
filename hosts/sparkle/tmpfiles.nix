@@ -23,6 +23,10 @@
     # pgAdmin data (container runs as UID 5050)
     "d '/persist/var/lib/pgadmin' 0700 5050 5050 - -"
 
+    # Forgejo runner data directory (container runs as UID 1000)
+    "d '/persist/var/lib/forgejo-runner' 0750 1000 1000 - -"
+    "z '/persist/var/lib/forgejo-runner' 0750 1000 1000 - -"
+
     # Secure Boot keys directory
     "z '/var/lib/sbctl' 0700 root root - -"
   ];

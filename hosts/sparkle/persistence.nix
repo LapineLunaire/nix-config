@@ -8,7 +8,6 @@
       "/var/lib/nixos"
       "/var/lib/postgresql"
       "/var/lib/qBittorrent"
-      "/var/lib/gitea-actions-runner"
       "/var/lib/samba"
       "/var/lib/sbctl"
       "/var/lib/systemd"

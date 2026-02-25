@@ -14,6 +14,7 @@
   virtualisation.podman = {
     enable = true;
     dockerCompat = false;
+    dockerSocket.enable = true;
   };
   virtualisation.oci-containers.backend = "podman";
 }

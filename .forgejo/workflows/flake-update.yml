@@ -7,13 +7,13 @@ on:
 
 jobs:
   update:
-    runs-on: native
+    runs-on: docker
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Update flake inputs
-        run: nix flake update
+        run: nix --extra-experimental-features "nix-command flakes" flake update
 
       - name: Check for changes
         id: check
@@ -29,6 +29,7 @@ jobs:
         run: |
           git config user.name "Lapine"
           git config user.email "lapine@lunaire.eu"
-          git add flake.lock
+          git remote set-url origin https://x-access-token:${{ secrets.PUSH_TOKEN }}@git.lunaire.moe/${{ github.repository }}.git
+          git add -u
           git commit -m "flake: update inputs $(date +%Y-%m-%d)"
           git push
