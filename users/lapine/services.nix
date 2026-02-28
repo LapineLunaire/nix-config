@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   ...
 }: {
   config = lib.mkIf config.userConfig.desktop.enable {
@@ -16,7 +15,8 @@
 
     systemd.user.services.easyeffects = {
       Unit.Requires = ["pipewire.socket"];
-      Service.ExecStartPre = "${pkgs.coreutils}/bin/sleep 2";
+      Unit.After = ["waybar.service"];
+      Service.Restart = lib.mkForce "always";
     };
 
     services.hypridle = {
