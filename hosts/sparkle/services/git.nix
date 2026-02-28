@@ -60,18 +60,17 @@ in {
     ];
     volumes = [
       "/persist/var/lib/forgejo-runner:/data"
-      "/run/podman/podman.sock:/var/run/docker.sock"
+      "/var/run/docker.sock:/var/run/docker.sock"
       "${runnerConfig}:/etc/forgejo-runner/config.yml:ro"
     ];
     extraOptions = [
       "--network=host"
-      "--group-add=keep-groups"
     ];
   };
 
-  systemd.services."podman-forgejo-runner" = {
+  systemd.services."docker-forgejo-runner" = {
     after = ["forgejo.service"];
     requires = ["forgejo.service"];
-    serviceConfig.SupplementaryGroups = ["podman"];
+    serviceConfig.SupplementaryGroups = ["docker"];
   };
 }

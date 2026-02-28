@@ -11,10 +11,6 @@
     ./vaultwarden.nix
   ];
 
-  virtualisation.podman = {
-    enable = true;
-    dockerCompat = false;
-    dockerSocket.enable = true;
-  };
-  virtualisation.oci-containers.backend = "podman";
+  virtualisation.docker.enable = true;
+  virtualisation.oci-containers.backend = "docker";
 }
