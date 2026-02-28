@@ -65,6 +65,7 @@ in {
     ];
     extraOptions = [
       "--network=host"
+      "--group-add=${toString config.users.groups.docker.gid}"
     ];
   };
 

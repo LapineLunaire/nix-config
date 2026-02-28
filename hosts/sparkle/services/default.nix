@@ -13,4 +13,6 @@
 
   virtualisation.docker.enable = true;
   virtualisation.oci-containers.backend = "docker";
+
+  users.groups.docker.gid = 131;
 }
