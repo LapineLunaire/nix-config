@@ -5,7 +5,6 @@
       "/var/lib/nixos"
       "/var/lib/systemd"
       "/var/log"
-      "/etc/NetworkManager/system-connections"
       "/var/lib/sbctl"
     ];
     files = [
