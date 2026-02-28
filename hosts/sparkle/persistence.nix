@@ -12,7 +12,6 @@
       "/var/lib/sbctl"
       "/var/lib/systemd"
       "/var/log"
-      "/etc/NetworkManager/system-connections"
     ];
     files = [
       "/etc/machine-id"
