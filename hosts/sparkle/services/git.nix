@@ -72,6 +72,5 @@ in {
   systemd.services."docker-forgejo-runner" = {
     after = ["forgejo.service"];
     requires = ["forgejo.service"];
-    serviceConfig.SupplementaryGroups = ["docker"];
   };
 }
