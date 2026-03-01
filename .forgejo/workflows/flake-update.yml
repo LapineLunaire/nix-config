@@ -7,22 +7,32 @@ on:
 
 jobs:
   update:
-    runs-on: docker
+    runs-on: debian
     steps:
       - name: Checkout
-        run: |
-          git clone https://x-access-token:${{ secrets.PUSH_TOKEN }}@git.lunaire.moe/${{ github.repository }}.git .
-          git checkout ${{ github.ref_name }}
+        uses: actions/checkout@v5
+
+      - name: Install sudo
+        run: apt update && apt install -y sudo
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
 
       - name: Update flake inputs
-        run: nix --extra-experimental-features "nix-command flakes" flake update
+        run: nix flake update
 
-      - name: Commit and push
+      - name: Check for changes
+        id: check
         run: |
           if git diff --quiet flake.lock; then
-            echo "No changes, skipping."
-            exit 0
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Commit and push
+        if: steps.check.outputs.changed == 'true'
+        run: |
           git config user.name "Lapine"
           git config user.email "lapine@lunaire.eu"
           git add flake.lock
