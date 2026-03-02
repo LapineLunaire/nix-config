@@ -24,15 +24,14 @@
   };
 
   boot = {
-    # TODO: switch back to linuxPackages_latest when ZFS supports 6.19
-    kernelPackages = pkgs.linuxPackages_6_18.extend (self: super: {
+    kernelPackages = pkgs.linuxPackages_6_19.extend (self: super: {
       kernel = super.kernel.override {
         structuredExtraConfig = with lib.kernel; {
           X86_NATIVE_CPU = yes;
         };
       };
     });
-    zfs.package = pkgs.zfs_unstable;
+    zfs.package = pkgs.zfs_2_4;
   };
 
   system.stateVersion = "26.05";

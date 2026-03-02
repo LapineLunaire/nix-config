@@ -36,9 +36,8 @@
   };
 
   boot = {
-    # TODO: switch back to linuxPackages_latest when ZFS supports 6.19
-    kernelPackages = pkgs.linuxPackages_6_18;
-    zfs.package = pkgs.zfs_unstable;
+    kernelPackages = pkgs.linuxPackages_6_19;
+    zfs.package = pkgs.zfs_2_4;
   };
 
   system.stateVersion = "26.05";

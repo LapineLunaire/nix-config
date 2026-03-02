@@ -23,16 +23,15 @@
   };
 
   boot = {
-    # TODO: switch back to linuxPackages_latest when ZFS supports 6.19
-    kernelPackages = pkgs.linuxPackages_6_18.extend (self: super: {
+    kernelPackages = pkgs.linuxPackages_6_19.extend (self: super: {
       kernel = super.kernel.override {
         structuredExtraConfig = with lib.kernel; {
           X86_NATIVE_CPU = yes;
         };
       };
     });
-    kernelParams = ["amd_pstate=active" "usbcore.autosuspend=-1"];
-    zfs.package = pkgs.zfs_unstable;
+    kernelParams = ["amd_pstate=active"];
+    zfs.package = pkgs.zfs_2_4;
   };
 
   powerManagement.cpuFreqGovernor = "powersave";
