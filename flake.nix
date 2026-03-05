@@ -126,10 +126,10 @@
     };
 
     homeConfigurations = {
-      "lapine@aquafang" = home-manager.lib.homeManagerConfiguration {
+      "carmilla@silverwolf" = home-manager.lib.homeManagerConfiguration {
         pkgs = pkgsFor "aarch64-darwin";
         extraSpecialArgs = {inherit inputs outputs;};
-        modules = [./home-manager/aquafang];
+        modules = [./home-manager/silverwolf];
       };
     };
   };
