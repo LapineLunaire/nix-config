@@ -36,6 +36,21 @@
 
   programs.home-manager.enable = true;
 
+  programs.ssh = {
+    enable = true;
+    enableDefaultConfig = false;
+    package = pkgs.openssh.override {withFIDO = true;};
+    matchBlocks."*" = {
+      identityFile = ["~/.ssh/id_ed25519_sk_rk_lapine"];
+      identitiesOnly = true;
+    };
+  };
+
+  programs.nh = {
+    enable = true;
+    flake = "/users/carmilla/projects/nix-config";
+  };
+
   nix = {
     package = pkgs.nix;
     settings.experimental-features = ["nix-command" "flakes"];
