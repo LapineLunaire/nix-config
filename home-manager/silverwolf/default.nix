@@ -18,12 +18,12 @@
       duf
       eza
       fd
-      fzf
       gping
       jq
       ldns
       mtr
       neovim
+      nvimpager
       nmap
       ripgrep
       rclone
@@ -54,6 +54,22 @@
   nix = {
     package = pkgs.nix;
     settings.experimental-features = ["nix-command" "flakes"];
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 30d";
+    };
+  };
+
+  programs.direnv = {
+    enable = true;
+    enableZshIntegration = true;
+    nix-direnv.enable = true;
+  };
+
+  programs.fzf = {
+    enable = true;
+    enableZshIntegration = true;
   };
 
   programs.tealdeer = {
@@ -79,7 +95,10 @@
         name = "Lapine";
         email = "lapine@lunaire.eu";
       };
-      core.editor = "nvim";
+      core = {
+        editor = "nvim";
+        pager = "nvimpager";
+      };
       pull.rebase = true;
       init.defaultBranch = "main";
       color.ui = "auto";
