@@ -23,7 +23,6 @@ in {
     certs."matrix.bunny.enterprises" = {
       dnsProvider = "cloudflare";
       environmentFile = config.sops.templates."cloudflare-dns-api-token.env".path;
-      group = "caddy";
       extraLegoFlags = [
         "--dns.resolvers"
         "1.1.1.1:53"
@@ -32,7 +31,6 @@ in {
     certs."bunny.enterprises" = {
       dnsProvider = "cloudflare";
       environmentFile = config.sops.templates."cloudflare-dns-api-token.env".path;
-      group = "ejabberd";
       extraDomainNames = [
         "xmpp.bunny.enterprises"
         "conference.bunny.enterprises"
@@ -48,13 +46,15 @@ in {
     certs."chat.bunny.enterprises" = {
       dnsProvider = "cloudflare";
       environmentFile = config.sops.templates."cloudflare-dns-api-token.env".path;
-      group = "caddy";
       extraLegoFlags = [
         "--dns.resolvers"
         "1.1.1.1:53"
       ];
     };
   };
+
+  users.users.caddy.extraGroups = ["acme"];
+  users.users.ejabberd.extraGroups = ["acme"];
 
   services.caddy = {
     enable = true;
