@@ -1,6 +1,11 @@
-{config, ...}: {
+{
+  config,
+  lib,
+  ...
+}: {
   services.postgresql = {
     enable = true;
+    settings.listen_addresses = lib.mkForce "localhost,10.28.32.25";
     ensureDatabases = ["forgejo" "vaultwarden"];
     ensureUsers = [
       {
@@ -22,8 +27,11 @@
       # Allow containerized services and pgAdmin to connect locally
       host all all 127.0.0.1/32 scram-sha-256
       host all all ::1/128 scram-sha-256
+      host all all 172.17.0.0/16 scram-sha-256
     '';
   };
+
+  networking.firewall.interfaces."docker0".allowedTCPPorts = [5432];
 
   virtualisation.oci-containers.containers.pgadmin = {
     image = "dpage/pgadmin4:latest";
@@ -38,8 +46,6 @@
     volumes = [
       "/persist/var/lib/pgadmin:/var/lib/pgadmin"
     ];
-    extraOptions = [
-      "--network=host"
-    ];
+    ports = ["127.0.0.1:5000:5000"];
   };
 }

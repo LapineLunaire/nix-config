@@ -4,7 +4,7 @@
     autoStart = true;
     environment = {
       DOMAIN = "https://vw.lunaire.moe";
-      ROCKET_ADDRESS = "127.0.0.1";
+      ROCKET_ADDRESS = "0.0.0.0";
       ROCKET_PORT = "6000";
       SIGNUPS_ALLOWED = "false";
     };
@@ -14,8 +14,6 @@
     volumes = [
       "/persist/var/lib/vaultwarden:/data"
     ];
-    extraOptions = [
-      "--network=host"
-    ];
+    ports = ["127.0.0.1:6000:6000"];
   };
 }

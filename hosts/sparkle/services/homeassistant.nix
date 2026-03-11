@@ -8,8 +8,8 @@
     environment = {
       TZ = "Etc/UTC";
     };
+    ports = ["127.0.0.1:7000:7000"];
     extraOptions = [
-      "--network=host"
       "--device=/dev/ttyUSB0:/dev/ttyUSB0"
     ];
   };

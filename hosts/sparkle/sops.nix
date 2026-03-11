@@ -17,7 +17,7 @@
 
     templates."forgejo-runner-token.env".content = "TOKEN=${config.sops.placeholder."forgejo-runner-token"}\n";
 
-    templates."vaultwarden.env".content = "ADMIN_TOKEN=${config.sops.placeholder."vaultwarden-admin-token"}\nDATABASE_URL=postgresql://vaultwarden:${config.sops.placeholder."vaultwarden-db-password"}@127.0.0.1/vaultwarden\n";
+    templates."vaultwarden.env".content = "ADMIN_TOKEN=${config.sops.placeholder."vaultwarden-admin-token"}\nDATABASE_URL=postgresql://vaultwarden:${config.sops.placeholder."vaultwarden-db-password"}@10.28.32.25/vaultwarden\n";
 
     templates."pgadmin.env".content = "PGADMIN_DEFAULT_PASSWORD=${config.sops.placeholder."pgadmin-password"}\n";
 
