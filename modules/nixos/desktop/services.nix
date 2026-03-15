@@ -1,4 +1,13 @@
 {pkgs, ...}: {
+  services.kmscon = {
+    enable = true;
+    hwRender = true;
+    fonts = [{
+      name = "JetBrainsMono Nerd Font";
+      package = pkgs.nerd-fonts.jetbrains-mono;
+    }];
+  };
+
   services.speechd.enable = false;
 
   services.earlyoom = {
