@@ -26,6 +26,13 @@ lib.mkMerge [
       };
     };
 
+    programs.tmux = {
+      enable = true;
+      mouse = true;
+      keyMode = "vi";
+      baseIndex = 1;
+    };
+
     programs.git = {
       enable = true;
       settings = {
