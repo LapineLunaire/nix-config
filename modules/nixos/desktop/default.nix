@@ -16,6 +16,8 @@
 
     nix.settings = inputs.aagl.nixConfig;
 
+    time.timeZone = "Europe/Amsterdam";
+
     console.keyMap = "colemak";
 
     security.rtkit.enable = true;
