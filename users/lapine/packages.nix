@@ -16,6 +16,7 @@
       mtr
       nvimpager
       ripgrep
+      rclone
       rsync
       socat
       sops
@@ -48,7 +49,6 @@
       playerctl
       protonmail-desktop
       protonvpn-gui
-      rclone
       slurp
       tidal-hifi
       usbutils
