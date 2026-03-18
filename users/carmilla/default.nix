@@ -4,23 +4,23 @@
   pkgs,
   ...
 }: {
-  users.users.lapine = {
+  users.users.carmilla = {
     isNormalUser = true;
-    description = "Lapine";
+    description = "Carmilla";
     uid = 1000;
     shell = pkgs.zsh;
-    hashedPassword = "$6$h.m1Ftri0Zjsinfs$jKmYsiTrcWzTOCVGSeKA53p/1twd0buX/qxzS08aB6Dgm7PVl9jQTeiZEmb4MIBWrZHEsyLt/ejQsko4b.abf/";
+    hashedPasswordFile = config.sops.secrets."carmilla-password-hash".path;
     extraGroups =
       ["wheel"]
       ++ lib.optionals config.networking.networkmanager.enable ["networkmanager"]
-      ++ lib.optionals config.home-manager.users.lapine.userConfig.desktop.enable ["video" "audio" "input"];
+      ++ lib.optionals config.home-manager.users.carmilla.userConfig.desktop.enable ["video" "audio" "input"];
     openssh.authorizedKeys.keys = [
       "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIEes6fnuE4zIKuneekCyPzMYItOOgfnDo0Eiakvwf62mAAAACnNzaDpsYXBpbmU="
       "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIMqXDPM9z04YBOp2fVDox7sgPFNpad+9p8UA+od8V8nxAAAACnNzaDpsYXBpbmU="
     ];
   };
 
-  home-manager.users.lapine = {lib, ...}: {
+  home-manager.users.carmilla = {lib, ...}: {
     imports = [
       ./desktop.nix
       ./packages.nix
@@ -34,8 +34,8 @@
 
     config = {
       home = {
-        username = "lapine";
-        homeDirectory = "/home/lapine";
+        username = "carmilla";
+        homeDirectory = "/home/carmilla";
         stateVersion = "26.05";
 
         sessionVariables = {

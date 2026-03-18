@@ -4,6 +4,9 @@
     age.sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
 
     secrets = {
+      "carmilla-password-hash" = {
+        neededForUsers = true;
+      };
       "network/sfp0-mac" = {};
       "network/sfp1-mac" = {};
       "network/ipmi0-mac" = {};

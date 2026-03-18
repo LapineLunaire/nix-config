@@ -93,7 +93,7 @@
           [
             {nixpkgs.pkgs = pkgsFor "x86_64-linux";}
             ./hosts/camellya
-            ./users/lapine
+            ./users/carmilla
           ]
           ++ baseModules
           ++ desktopModules;
@@ -107,7 +107,7 @@
             {nixpkgs.pkgs = pkgsFor "x86_64-linux";}
             vpn-confinement.nixosModules.default
             ./hosts/sparkle
-            ./users/lapine
+            ./users/carmilla
           ]
           ++ baseModules;
       };
@@ -119,7 +119,7 @@
           [
             {nixpkgs.pkgs = pkgsFor "aarch64-linux";}
             ./hosts/sparxie
-            ./users/lapine
+            ./users/carmilla
           ]
           ++ baseModules;
       };

@@ -8,7 +8,7 @@
         ensureDBOwnership = true;
       }
       {
-        name = "lapine";
+        name = "carmilla";
         ensureClauses.superuser = true;
       }
     ];

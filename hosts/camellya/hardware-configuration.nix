@@ -39,7 +39,7 @@
     options = ["zfsutil"];
   };
 
-  fileSystems."/home/lapine/vault" = {
+  fileSystems."/home/carmilla/vault" = {
     device = "//10.28.32.25/lapine";
     fsType = "cifs";
     options = [
@@ -54,7 +54,7 @@
     ];
   };
 
-  fileSystems."/home/lapine/torrents" = {
+  fileSystems."/home/carmilla/torrents" = {
     device = "//10.28.32.25/torrents";
     fsType = "cifs";
     options = [

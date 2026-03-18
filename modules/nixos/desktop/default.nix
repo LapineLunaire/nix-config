@@ -10,7 +10,7 @@
   ];
 
   config = {
-    home-manager.users.lapine.userConfig.desktop.enable = true;
+    home-manager.users.carmilla.userConfig.desktop.enable = true;
 
     boot.kernelModules = ["ntsync"];
 

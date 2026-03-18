@@ -28,9 +28,9 @@
       };
       lapine = {
         "path" = "/mnt/samba/lapine";
-        "valid users" = "lapine";
+        "valid users" = "carmilla";
         "writeable" = "yes";
-        "force user" = "lapine";
+        "force user" = "carmilla";
         "force group" = "users";
         "create mask" = "0644";
         "directory mask" = "0755";
@@ -39,16 +39,16 @@
       };
       misc = {
         "path" = "/mnt/samba/misc";
-        "valid users" = "lapine";
+        "valid users" = "carmilla";
         "writeable" = "no";
-        "force user" = "lapine";
+        "force user" = "carmilla";
         "force group" = "users";
         "fruit:aapl" = "yes";
         "vfs objects" = "catia fruit streams_xattr";
       };
       torrents = {
         "path" = "/mnt/samba/torrents";
-        "valid users" = "lapine";
+        "valid users" = "carmilla";
         "writeable" = "no";
         "fruit:aapl" = "yes";
         "vfs objects" = "catia fruit streams_xattr";

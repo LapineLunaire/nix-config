@@ -11,7 +11,7 @@
     "z '/var/lib/postgresql' 0750 postgres postgres - -"
 
     # Misc samba share
-    "d '/mnt/samba/misc' 0755 lapine users - -"
+    "d '/mnt/samba/misc' 0755 carmilla users - -"
 
     # qBittorrent download directories
     "z '/mnt/samba/torrents' 0755 qbittorrent qbittorrent - -"
