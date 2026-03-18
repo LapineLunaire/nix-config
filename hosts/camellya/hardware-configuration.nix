@@ -17,7 +17,7 @@
   fileSystems."/tmp" = {
     device = "none";
     fsType = "tmpfs";
-    options = ["defaults" "size=16G" "mode=1777"];
+    options = ["defaults" "size=16G" "mode=1777" "nosuid" "nodev" "noexec"];
   };
 
   fileSystems."/nix" = {

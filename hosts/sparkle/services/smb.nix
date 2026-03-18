@@ -24,7 +24,7 @@
         "hosts allow" = "10.0.0.0/8 127.0.0.0/8 ::1";
         "hosts deny" = "0.0.0.0/0";
         "guest account" = "nobody";
-        "map to guest" = "bad user";
+        "map to guest" = "never";
       };
       lapine = {
         "path" = "/mnt/samba/lapine";
