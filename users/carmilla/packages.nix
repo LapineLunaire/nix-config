@@ -48,7 +48,7 @@
       pciutils
       playerctl
       protonmail-desktop
-      protonvpn-gui
+      proton-vpn
       slurp
       tidal-hifi
       usbutils
