@@ -40,7 +40,7 @@
   };
 
   fileSystems."/home/carmilla/vault" = {
-    device = "//10.28.32.25/lapine";
+    device = "//10.28.32.25/carmilla";
     fsType = "cifs";
     options = [
       "credentials=${config.sops.templates."samba-credentials".path}"
