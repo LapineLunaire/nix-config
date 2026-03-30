@@ -26,8 +26,8 @@
         "guest account" = "nobody";
         "map to guest" = "never";
       };
-      lapine = {
-        "path" = "/mnt/samba/lapine";
+      carmilla = {
+        "path" = "/mnt/samba/carmilla";
         "valid users" = "carmilla";
         "writeable" = "yes";
         "force user" = "carmilla";

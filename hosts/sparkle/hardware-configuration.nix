@@ -45,8 +45,8 @@
     options = ["zfsutil"];
   };
 
-  fileSystems."/mnt/samba/lapine" = {
-    device = "vault/lapine";
+  fileSystems."/mnt/samba/carmilla" = {
+    device = "vault/carmilla";
     fsType = "zfs";
     options = ["zfsutil"];
   };
