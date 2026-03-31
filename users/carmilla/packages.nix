@@ -9,7 +9,6 @@
     (with pkgs; [
       curl
       fd
-      fzf
       iperf3
       jq
       ldns
@@ -22,21 +21,37 @@
       sops
       ssh-to-age
       yubikey-manager
-      traceroute
       tree
       whois
     ])
-    ++ lib.optionals config.userConfig.desktop.enable (with pkgs; [
+    ++ lib.optionals (config.userConfig.desktop.enable || config.userConfig.darwin.enable) (with pkgs; [
       bat
-      brightnessctl
       discord
       duf
-      elysia
       eza
-      ffmpeg-full
-      fluffychat
       firefox
       gping
+      nmap
+      protonmail-desktop
+      proton-vpn
+      winbox4
+      yt-dlp
+    ])
+    ++ lib.optionals config.userConfig.darwin.enable (with pkgs; [
+      iina
+      utm
+    ])
+    ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin (with pkgs; [
+      neovim
+    ])
+    ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux (with pkgs; [
+      traceroute
+    ])
+    ++ lib.optionals config.userConfig.desktop.enable (with pkgs; [
+      brightnessctl
+      elysia
+      ffmpeg-full
+      fluffychat
       gcr
       grim
       heroic
@@ -44,18 +59,13 @@
       imv
       minisign
       mpv
-      nmap
       pciutils
       playerctl
-      protonmail-desktop
-      proton-vpn
       slurp
       tidal-hifi
       usbutils
-      winbox4
       wl-clipboard
       xivlauncher
-      yt-dlp
     ])
     ++ lib.optionals (osConfig.networking.hostName == "camellya") (with pkgs; [
       wootility

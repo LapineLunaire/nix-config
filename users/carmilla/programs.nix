@@ -73,22 +73,36 @@ lib.mkMerge [
           grep = "grep --color=auto";
           egrep = "egrep --color=auto";
           fgrep = "fgrep --color=auto";
+        }
+        // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
           cp = "cp --reflink=auto --sparse=always";
           sops = "SOPS_AGE_KEY_FILE=<(sudo cat /etc/ssh/ssh_host_ed25519_key | ssh-to-age -private-key) sops";
         }
-        // lib.optionalAttrs config.userConfig.desktop.enable {
+        // lib.optionalAttrs (config.userConfig.desktop.enable || config.userConfig.darwin.enable) {
           cat = "bat";
           ls = "eza";
           ll = "eza -l";
           la = "eza -la";
         };
     };
+
+    programs.direnv = {
+      enable = true;
+      enableZshIntegration = true;
+      nix-direnv.enable = true;
+    };
+
+    programs.fzf = {
+      enable = true;
+      enableZshIntegration = true;
+    };
   }
 
-  (lib.mkIf config.userConfig.desktop.enable {
+  (lib.mkIf (config.userConfig.desktop.enable || config.userConfig.darwin.enable) {
     programs.ssh = {
       enable = true;
       enableDefaultConfig = false;
+      package = pkgs.openssh.override {withFIDO = true;};
       matchBlocks."*" = {
         identityFile = [
           "~/.ssh/id_ed25519_sk_rk_lapine"
@@ -110,17 +124,6 @@ lib.mkMerge [
       };
     };
 
-    programs.ghostty = {
-      enable = true;
-      settings = {
-        window-decoration = false;
-        gtk-titlebar = false;
-        window-padding-x = 8;
-        window-padding-y = 8;
-        background-opacity = 0.95;
-      };
-    };
-
     programs.zed-editor = {
       enable = true;
       userSettings = {
@@ -136,14 +139,6 @@ lib.mkMerge [
       };
       extensions = ["nix"];
       extraPackages = with pkgs; [nixd alejandra];
-    };
-
-    programs.obs-studio = {
-      enable = true;
-      plugins = with pkgs.obs-studio-plugins; [
-        obs-pipewire-audio-capture
-        obs-vaapi
-      ];
     };
 
     programs.fastfetch = {
@@ -184,6 +179,35 @@ lib.mkMerge [
           "colors"
         ];
       };
+    };
+
+    programs.nh = {
+      enable = true;
+      flake =
+        if config.userConfig.darwin.enable
+        then "/Users/carmilla/projects/nix-config"
+        else "/home/carmilla/projects/nix-config";
+    };
+  })
+
+  (lib.mkIf config.userConfig.desktop.enable {
+    programs.ghostty = {
+      enable = true;
+      settings = {
+        window-decoration = false;
+        gtk-titlebar = false;
+        window-padding-x = 8;
+        window-padding-y = 8;
+        background-opacity = 0.95;
+      };
+    };
+
+    programs.obs-studio = {
+      enable = true;
+      plugins = with pkgs.obs-studio-plugins; [
+        obs-pipewire-audio-capture
+        obs-vaapi
+      ];
     };
   })
 ]

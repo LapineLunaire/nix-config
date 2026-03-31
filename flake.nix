@@ -1,5 +1,5 @@
 {
-  description = "Lapine's NixOS config";
+  description = "Carmilla's nix config";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -36,6 +36,11 @@
     };
 
     vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
+
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -48,6 +53,7 @@
     aagl,
     stylix,
     vpn-confinement,
+    nix-darwin,
     ...
   } @ inputs: let
     inherit (self) outputs;
@@ -125,11 +131,22 @@
       };
     };
 
-    homeConfigurations = {
-      "carmilla@silverwolf" = home-manager.lib.homeManagerConfiguration {
-        pkgs = pkgsFor "aarch64-darwin";
-        extraSpecialArgs = {inherit inputs outputs;};
-        modules = [./home-manager/silverwolf];
+    darwinConfigurations = {
+      silverwolf = nix-darwin.lib.darwinSystem {
+        specialArgs = {inherit inputs outputs;};
+        modules = [
+          {nixpkgs.pkgs = pkgsFor "aarch64-darwin";}
+          home-manager.darwinModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              extraSpecialArgs = {inherit inputs outputs;};
+            };
+          }
+          ./hosts/silverwolf
+          ./users/carmilla
+        ];
       };
     };
   };

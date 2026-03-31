@@ -12,13 +12,17 @@
       };
     };
 
-    protonmail-desktop = prev.protonmail-desktop.overrideAttrs (oldAttrs: {
-      postFixup =
-        (oldAttrs.postFixup or "")
-        + ''
-          wrapProgram $out/bin/proton-mail \
-            --add-flags "--ozone-platform=x11"
-        '';
-    });
+    protonmail-desktop =
+      if prev.stdenv.hostPlatform.isLinux
+      then
+        prev.protonmail-desktop.overrideAttrs (oldAttrs: {
+          postFixup =
+            (oldAttrs.postFixup or "")
+            + ''
+              wrapProgram $out/bin/proton-mail \
+                --add-flags "--ozone-platform=x11"
+            '';
+        })
+      else prev.protonmail-desktop;
   };
 }

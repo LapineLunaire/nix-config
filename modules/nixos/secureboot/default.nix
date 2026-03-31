@@ -5,7 +5,7 @@
   ...
 }: {
   options.secureboot = {
-    enable = lib.mkEnableOption "Enable Secure Boot with Lanzaboote";
+    enable = lib.mkEnableOption "Secure Boot with Lanzaboote";
   };
 
   config = lib.mkIf config.secureboot.enable {
