@@ -15,7 +15,7 @@
   sops.templates."ejabberd.yml" = {
     owner = "ejabberd";
     content = ''
-      new_sql_schema: true
+      sql_schema_multihost: true
       default_db: sql
       default_ram_db: redis
 
@@ -110,7 +110,7 @@
       acl:
         admin:
           user:
-            - "lapine@bunny.enterprises"
+            - "carmilla@bunny.enterprises"
         local:
           user_regexp: ""
         loopback:
@@ -265,6 +265,7 @@
         mod_stun_disco: {}
         mod_vcard: {}
         mod_vcard_xupdate: {}
+        mod_pubsub_serverinfo: {}
         mod_version:
           show_os: false
     '';
