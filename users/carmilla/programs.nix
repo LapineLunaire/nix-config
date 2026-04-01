@@ -227,6 +227,17 @@ lib.mkMerge [
       enable = true;
       flake = "/users/carmilla/projects/nix-config";
     };
+
+    programs.ghostty = {
+      enable = true;
+      package = null;
+      settings = {
+        theme = "Gruvbox Dark Hard";
+        background-opacity = 0.95;
+        window-padding-x = 8;
+        window-padding-y = 8;
+      };
+    };
   })
 
   (lib.mkIf config.userConfig.desktop.enable {
