@@ -5,6 +5,7 @@
   system.stateVersion = 6;
 
   networking.hostName = "silverwolf";
+  networking.computerName = "Silver Wolf";
   system.primaryUser = "carmilla";
 
   homebrew = {
