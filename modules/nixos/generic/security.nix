@@ -2,6 +2,18 @@
   users.users.root.hashedPassword = "!";
   users.mutableUsers = false;
 
+  security.protectKernelImage = true;
+
+  boot.kernel.sysctl = {
+    "kernel.kptr_restrict" = 2;
+    "kernel.dmesg_restrict" = 1;
+    "net.ipv4.tcp_syncookies" = 1;
+    "net.ipv4.conf.all.rp_filter" = 1;
+    "net.ipv4.conf.default.rp_filter" = 1;
+    "net.ipv6.conf.all.rp_filter" = 1;
+    "net.ipv6.conf.default.rp_filter" = 1;
+  };
+
   security.polkit.enable = true;
 
   environment.etc."polkit-1/rules.d/50-wheel-power.rules".text = ''
