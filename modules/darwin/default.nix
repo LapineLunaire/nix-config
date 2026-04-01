@@ -48,6 +48,9 @@ in {
 
     CustomUserPreferences = {
       NSGlobalDomain.AppleActionOnDoubleClick = "Minimize";
+      "com.apple.AdLib".allowApplePersonalizedAdvertising = false;
+      "com.apple.assistant.support"."Assistant Enabled" = false;
+      "com.apple.SubmitDiagInfo".AutoSubmit = false;
     };
 
     dock = {
@@ -73,6 +76,12 @@ in {
     };
 
     trackpad.Clicking = true;
+  };
+
+  networking.applicationFirewall = {
+    enable = true;
+    allowSigned = true;
+    allowSignedApp = true;
   };
 
   system.keyboard = {
