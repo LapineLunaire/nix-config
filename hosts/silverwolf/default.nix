@@ -30,6 +30,7 @@
       "soundsource"
       "steam"
       "tidal"
+      "wootility"
     ];
     masApps = {
       "AdGuard Mini" = 1440147259;
