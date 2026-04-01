@@ -33,6 +33,8 @@ in {
     NSGlobalDomain = {
       AppleInterfaceStyle = "Dark";
       ApplePressAndHoldEnabled = false;
+      KeyRepeat = 2;
+      InitialKeyRepeat = 15;
       AppleShowAllExtensions = true;
       NSAutomaticCapitalizationEnabled = false;
       NSAutomaticPeriodSubstitutionEnabled = false;
