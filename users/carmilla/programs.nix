@@ -48,9 +48,9 @@ lib.mkMerge [
         init.defaultBranch = "main";
         color.ui = "auto";
         push.autoSetupRemote = true;
-        rerere.enabled = true;
-        diff.algorithm = "histogram";
-        merge.conflictstyle = "zdiff3";
+        rerere.enabled = true; # remember conflict resolutions
+        diff.algorithm = "histogram"; # better diff output than default myers
+        merge.conflictstyle = "zdiff3"; # shows base version in conflict markers
         branch.sort = "-committerdate";
       };
     };
@@ -141,7 +141,7 @@ lib.mkMerge [
 
     programs.ssh = {
       enable = true;
-      enableDefaultConfig = false;
+      enableDefaultConfig = false; # deprecated by home-manager
       package = pkgs.openssh.override {withFIDO = true;};
       matchBlocks."*" = {
         identityFile = [

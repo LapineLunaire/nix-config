@@ -5,10 +5,10 @@
   security.protectKernelImage = true;
 
   boot.kernel.sysctl = {
-    "kernel.kptr_restrict" = 2;
-    "kernel.dmesg_restrict" = 1;
-    "net.ipv4.tcp_syncookies" = 1;
-    "net.ipv4.conf.all.rp_filter" = 1;
+    "kernel.kptr_restrict" = 2; # hide kernel pointers from all users
+    "kernel.dmesg_restrict" = 1; # restrict dmesg to root
+    "net.ipv4.tcp_syncookies" = 1; # SYN flood mitigation
+    "net.ipv4.conf.all.rp_filter" = 1; # strict reverse path filtering (anti-spoofing)
     "net.ipv4.conf.default.rp_filter" = 1;
     "net.ipv6.conf.all.rp_filter" = 1;
     "net.ipv6.conf.default.rp_filter" = 1;

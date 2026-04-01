@@ -12,6 +12,7 @@
       };
     };
 
+    # protonmail-desktop crashes under native Wayland, force X11 via XWayland
     protonmail-desktop =
       if prev.stdenv.hostPlatform.isLinux
       then

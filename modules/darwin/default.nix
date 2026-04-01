@@ -67,9 +67,9 @@ in {
 
     finder = {
       _FXSortFoldersFirst = true;
-      FXDefaultSearchScope = "SCcf";
+      FXDefaultSearchScope = "SCcf"; # search current folder by default
       FXEnableExtensionChangeWarning = false;
-      FXPreferredViewStyle = "Nlsv";
+      FXPreferredViewStyle = "Nlsv"; # list view
       ShowPathbar = true;
       ShowStatusBar = true;
     };

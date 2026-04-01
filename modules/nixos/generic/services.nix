@@ -9,6 +9,7 @@
     trim.enable = true;
   };
 
+  # NTS = authenticated NTP, prevents time spoofing
   services.chrony = {
     enable = true;
     enableNTS = true;
@@ -21,6 +22,7 @@
       PermitRootLogin = "no";
       PasswordAuthentication = false;
     };
+    # ed25519 only — sops-nix derives age keys from this host key
     hostKeys = [
       {
         path = "/etc/ssh/ssh_host_ed25519_key";
