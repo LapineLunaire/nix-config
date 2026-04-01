@@ -25,12 +25,14 @@
       whois
     ])
     ++ lib.optionals (config.userConfig.desktop.enable || pkgs.stdenv.hostPlatform.isDarwin) (with pkgs; [
+      alejandra
       bat
       discord
       duf
       eza
       firefox
       gping
+      nixd
       nmap
       protonmail-desktop
       proton-vpn
@@ -39,7 +41,6 @@
     ])
     ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin (with pkgs; [
       iina
-      neovim
       utm
     ])
     ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux (with pkgs; [

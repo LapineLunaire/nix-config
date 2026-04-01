@@ -104,9 +104,41 @@ lib.mkMerge [
       enable = true;
       enableZshIntegration = true;
     };
+
+    programs.neovim = {
+      enable = true;
+      defaultEditor = true;
+      viAlias = true;
+      vimAlias = true;
+    };
   }
 
   (lib.mkIf (config.userConfig.desktop.enable || pkgs.stdenv.hostPlatform.isDarwin) {
+    programs.neovim.initLua = ''
+      vim.lsp.config('nixd', {
+        cmd = { 'nixd' },
+        filetypes = { 'nix' },
+        root_markers = { 'flake.nix', '.git' },
+        settings = {
+          nixd = {
+            formatting = { command = { 'alejandra' } },
+          },
+        },
+      })
+      vim.lsp.enable('nixd')
+
+      vim.api.nvim_create_autocmd('LspAttach', {
+        callback = function(args)
+          vim.api.nvim_create_autocmd('BufWritePre', {
+            buffer = args.buf,
+            callback = function()
+              vim.lsp.buf.format({ bufnr = args.buf })
+            end,
+          })
+        end,
+      })
+    '';
+
     programs.ssh = {
       enable = true;
       enableDefaultConfig = false;
