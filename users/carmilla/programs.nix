@@ -49,6 +49,9 @@ lib.mkMerge [
         color.ui = "auto";
         push.autoSetupRemote = true;
         rerere.enabled = true;
+        diff.algorithm = "histogram";
+        merge.conflictstyle = "zdiff3";
+        branch.sort = "-committerdate";
       };
     };
 
