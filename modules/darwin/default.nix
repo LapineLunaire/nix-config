@@ -37,7 +37,9 @@ in {
       InitialKeyRepeat = 15;
       AppleShowAllExtensions = true;
       NSAutomaticCapitalizationEnabled = false;
+      NSAutomaticDashSubstitutionEnabled = false;
       NSAutomaticPeriodSubstitutionEnabled = false;
+      NSAutomaticQuoteSubstitutionEnabled = false;
       NSDocumentSaveNewDocumentsToCloud = false;
       NSNavPanelExpandedStateForSaveMode = true;
     };
@@ -52,11 +54,17 @@ in {
 
     finder = {
       _FXSortFoldersFirst = true;
+      FXDefaultSearchScope = "SCcf";
+      FXEnableExtensionChangeWarning = false;
       FXPreferredViewStyle = "Nlsv";
       ShowPathbar = true;
+      ShowStatusBar = true;
     };
 
-    screencapture.location = "~/Pictures/Screenshots";
+    screencapture = {
+      location = "~/Pictures/Screenshots";
+      disable-shadow = true;
+    };
 
     trackpad.Clicking = true;
   };
