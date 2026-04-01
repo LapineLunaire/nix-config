@@ -96,6 +96,11 @@ lib.mkMerge [
       enable = true;
       enableZshIntegration = true;
     };
+
+    programs.zoxide = {
+      enable = true;
+      enableZshIntegration = true;
+    };
   }
 
   (lib.mkIf (config.userConfig.desktop.enable || pkgs.stdenv.hostPlatform.isDarwin) {

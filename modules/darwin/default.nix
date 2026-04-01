@@ -58,4 +58,9 @@ in {
 
     trackpad.Clicking = true;
   };
+
+  system.keyboard = {
+    enableKeyMapping = true;
+    remapCapsLockToEscape = true;
+  };
 }
