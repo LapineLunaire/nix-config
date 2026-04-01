@@ -20,6 +20,7 @@
     taps = [];
     brews = [];
     casks = [
+      "altserver"
       "appcleaner"
       "ghostty"
       "obs"

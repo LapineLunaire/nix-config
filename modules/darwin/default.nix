@@ -42,6 +42,12 @@ in {
       NSAutomaticQuoteSubstitutionEnabled = false;
       NSDocumentSaveNewDocumentsToCloud = false;
       NSNavPanelExpandedStateForSaveMode = true;
+      "com.apple.trackpad.forceClick" = true;
+      "com.apple.springing.enabled" = true;
+    };
+
+    CustomUserPreferences = {
+      NSGlobalDomain.AppleActionOnDoubleClick = "Minimize";
     };
 
     dock = {
