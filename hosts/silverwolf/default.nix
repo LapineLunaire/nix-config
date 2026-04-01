@@ -21,6 +21,7 @@
     casks = [
       "appcleaner"
       "ghostty"
+      "obs"
       "playcover-community"
       "prismlauncher"
       "proton-drive"

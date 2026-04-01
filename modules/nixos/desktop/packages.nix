@@ -1,9 +1,4 @@
 {pkgs, ...}: {
-  programs.direnv = {
-    enable = true;
-    nix-direnv.enable = true;
-  };
-
   programs.hyprland = {
     enable = true;
     withUWSM = true;
@@ -13,6 +8,10 @@
   programs.obs-studio = {
     enable = true;
     enableVirtualCamera = true;
+    plugins = with pkgs.obs-studio-plugins; [
+      obs-pipewire-audio-capture
+      obs-vaapi
+    ];
   };
 
   programs.nix-ld.enable = true;
