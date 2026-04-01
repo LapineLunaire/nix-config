@@ -45,7 +45,10 @@ in {
       "com.apple.trackpad.forceClick" = true;
       "com.apple.springing.enabled" = true;
       AppleICUForce24HourTime = true;
+      NSWindowShouldDragOnGesture = true;
     };
+
+    loginwindow.GuestEnabled = false;
 
     CustomUserPreferences = {
       NSGlobalDomain.AppleActionOnDoubleClick = "Minimize";
