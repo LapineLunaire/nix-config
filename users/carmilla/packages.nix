@@ -24,7 +24,7 @@
       tree
       whois
     ])
-    ++ lib.optionals (config.userConfig.desktop.enable || config.userConfig.darwin.enable) (with pkgs; [
+    ++ lib.optionals (config.userConfig.desktop.enable || pkgs.stdenv.hostPlatform.isDarwin) (with pkgs; [
       bat
       discord
       duf
@@ -37,12 +37,10 @@
       winbox4
       yt-dlp
     ])
-    ++ lib.optionals config.userConfig.darwin.enable (with pkgs; [
-      iina
-      utm
-    ])
     ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin (with pkgs; [
+      iina
       neovim
+      utm
     ])
     ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux (with pkgs; [
       traceroute

@@ -78,7 +78,7 @@ lib.mkMerge [
           cp = "cp --reflink=auto --sparse=always";
           sops = "SOPS_AGE_KEY_FILE=<(sudo cat /etc/ssh/ssh_host_ed25519_key | ssh-to-age -private-key) sops";
         }
-        // lib.optionalAttrs (config.userConfig.desktop.enable || config.userConfig.darwin.enable) {
+        // lib.optionalAttrs (config.userConfig.desktop.enable || pkgs.stdenv.hostPlatform.isDarwin) {
           cat = "bat";
           ls = "eza";
           ll = "eza -l";
@@ -98,7 +98,7 @@ lib.mkMerge [
     };
   }
 
-  (lib.mkIf (config.userConfig.desktop.enable || config.userConfig.darwin.enable) {
+  (lib.mkIf (config.userConfig.desktop.enable || pkgs.stdenv.hostPlatform.isDarwin) {
     programs.ssh = {
       enable = true;
       enableDefaultConfig = false;
@@ -180,13 +180,12 @@ lib.mkMerge [
         ];
       };
     };
+  })
 
+  (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
     programs.nh = {
       enable = true;
-      flake =
-        if config.userConfig.darwin.enable
-        then "/Users/carmilla/projects/nix-config"
-        else "/home/carmilla/projects/nix-config";
+      flake = "/users/carmilla/projects/nix-config";
     };
   })
 

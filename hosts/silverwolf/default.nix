@@ -1,23 +1,11 @@
-{pkgs, ...}: {
+{...}: {
+  imports = [../../modules/darwin];
+
   nixpkgs.hostPlatform = "aarch64-darwin";
   system.stateVersion = 6;
 
   networking.hostName = "silverwolf";
   system.primaryUser = "carmilla";
-
-  programs.zsh.enable = true;
-
-  security.pam.services.sudo_local.touchIdAuth = true;
-
-  nix = {
-    package = pkgs.nix;
-    settings.experimental-features = ["nix-command" "flakes"];
-    gc = {
-      automatic = true;
-      interval.Weekday = 0;
-      options = "--delete-older-than 30d";
-    };
-  };
 
   homebrew = {
     enable = true;
@@ -49,36 +37,4 @@
       "Xcode" = 497799835;
     };
   };
-
-  system.defaults = {
-    NSGlobalDomain = {
-      AppleInterfaceStyle = "Dark";
-      ApplePressAndHoldEnabled = false;
-      AppleShowAllExtensions = true;
-      NSAutomaticCapitalizationEnabled = false;
-      NSAutomaticPeriodSubstitutionEnabled = false;
-      NSDocumentSaveNewDocumentsToCloud = false;
-      NSNavPanelExpandedStateForSaveMode = true;
-    };
-
-    dock = {
-      autohide = true;
-      mru-spaces = false;
-      tilesize = 64;
-      minimize-to-application = true;
-      show-recents = false;
-    };
-
-    finder = {
-      _FXSortFoldersFirst = true;
-      FXPreferredViewStyle = "Nlsv";
-      ShowPathbar = true;
-    };
-
-    screencapture.location = "~/Pictures/Screenshots";
-
-    trackpad.Clicking = true;
-  };
-
-  home-manager.users.carmilla.userConfig.darwin.enable = true;
 }

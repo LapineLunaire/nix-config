@@ -30,6 +30,7 @@
 
   home-manager.users.carmilla = {
     lib,
+    osConfig,
     pkgs,
     ...
   }: {
@@ -42,29 +43,25 @@
 
     options.userConfig = {
       desktop.enable = lib.mkEnableOption "desktop environment configuration";
-      darwin.enable = lib.mkEnableOption "darwin machine configuration";
     };
 
     config = lib.mkMerge [
       {
         home = {
           username = "carmilla";
-          homeDirectory =
-            if pkgs.stdenv.hostPlatform.isDarwin
-            then "/Users/carmilla"
-            else "/home/carmilla";
+          homeDirectory = osConfig.users.users.carmilla.home;
           stateVersion = "26.05";
         };
 
         programs.home-manager.enable = true;
-      }
 
-      (lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         home.sessionVariables = {
           PAGER = "nvimpager";
           MANPAGER = "nvimpager";
         };
+      }
 
+      (lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         systemd.user.startServices = "sd-switch";
       })
     ];
