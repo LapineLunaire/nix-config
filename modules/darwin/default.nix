@@ -44,6 +44,7 @@ in {
       NSNavPanelExpandedStateForSaveMode = true;
       "com.apple.trackpad.forceClick" = true;
       "com.apple.springing.enabled" = true;
+      AppleICUForce24HourTime = true;
     };
 
     CustomUserPreferences = {
@@ -76,6 +77,21 @@ in {
     };
 
     trackpad.Clicking = true;
+
+    menuExtraClock = {
+      Show24Hour = true;
+      ShowDayOfWeek = true;
+    };
+
+    WindowManager = {
+      HideDesktop = true;
+      EnableTiledWindowMargins = false;
+    };
+  };
+
+  system.defaults.CustomUserPreferences."com.apple.finder" = {
+    FXICloudDriveDesktop = false;
+    FXICloudDriveDocuments = false;
   };
 
   networking.applicationFirewall = {
