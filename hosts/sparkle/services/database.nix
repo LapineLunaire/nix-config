@@ -18,9 +18,7 @@
       }
       {
         name = "carmilla";
-        ensureClauses = {
-          superuser = true;
-        };
+        ensureClauses.superuser = true;
       }
     ];
     authentication = ''

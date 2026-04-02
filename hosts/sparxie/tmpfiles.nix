@@ -7,5 +7,6 @@
 
     # ejabberd upload directory
     "d '/var/lib/ejabberd/upload' 0750 ejabberd ejabberd - -"
+    "z '/var/lib/ejabberd/upload' 0750 ejabberd ejabberd - -"
   ];
 }

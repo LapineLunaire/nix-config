@@ -59,11 +59,7 @@ lib.mkMerge [
 
     programs.tealdeer = {
       enable = true;
-      settings = {
-        updates = {
-          auto_update = true;
-        };
-      };
+      settings.updates.auto_update = true;
     };
 
     programs.tmux = {
@@ -198,12 +194,10 @@ lib.mkMerge [
     programs.yazi = {
       enable = true;
       enableZshIntegration = true;
-      settings = {
-        manager = {
-          show_hidden = true;
-          sort_by = "natural";
-          sort_dir_first = true;
-        };
+      settings.manager = {
+        show_hidden = true;
+        sort_by = "natural";
+        sort_dir_first = true;
       };
     };
 

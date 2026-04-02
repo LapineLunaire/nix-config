@@ -26,11 +26,9 @@
   # UWSM manages the Hyprland session as a set of systemd user units, enabling proper session lifecycle, cgroup tracking, and clean shutdown.
   services.greetd = {
     enable = true;
-    settings = {
-      default_session = {
-        command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd 'uwsm start hyprland-uwsm.desktop'";
-        user = "greeter";
-      };
+    settings.default_session = {
+      command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd 'uwsm start hyprland-uwsm.desktop'";
+      user = "greeter";
     };
   };
 
@@ -47,11 +45,7 @@
             {"node.name" = "~alsa_input.*";}
             {"node.name" = "~alsa_output.*";}
           ];
-          actions = {
-            update-props = {
-              "session.suspend-timeout-seconds" = 0;
-            };
-          };
+          actions.update-props."session.suspend-timeout-seconds" = 0;
         }
       ];
     };

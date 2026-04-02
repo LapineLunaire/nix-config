@@ -4,9 +4,7 @@
   pkgs,
   ...
 }: {
-  options.secureboot = {
-    enable = lib.mkEnableOption "Secure Boot with Lanzaboote";
-  };
+  options.secureboot.enable = lib.mkEnableOption "Secure Boot with Lanzaboote";
 
   config = lib.mkIf config.secureboot.enable {
     # pkiBundle stores the Secure Boot signing keys.

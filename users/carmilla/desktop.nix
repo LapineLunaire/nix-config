@@ -234,60 +234,56 @@ in {
           background: @base01;
         }
       '';
-      settings = {
-        mainBar = {
-          layer = "top";
-          position = "top";
-          height = 30;
-          spacing = 8;
+      settings.mainBar = {
+        layer = "top";
+        position = "top";
+        height = 30;
+        spacing = 8;
 
-          modules-left = ["hyprland/workspaces"];
-          modules-center = ["clock"];
-          modules-right = ["tray" "network" "cpu" "memory"];
+        modules-left = ["hyprland/workspaces"];
+        modules-center = ["clock"];
+        modules-right = ["tray" "network" "cpu" "memory"];
 
-          tray = {
-            spacing = 8;
+        tray.spacing = 8;
+
+        "hyprland/workspaces" = {
+          format = "{icon}";
+          format-icons = {
+            "1" = "一";
+            "2" = "二";
+            "3" = "三";
+            "4" = "四";
+            "5" = "五";
+            "6" = "六";
+            "7" = "七";
+            "8" = "八";
+            "9" = "九";
+            "10" = "十";
           };
+          disable-scroll = true;
+        };
 
-          "hyprland/workspaces" = {
-            format = "{icon}";
-            format-icons = {
-              "1" = "一";
-              "2" = "二";
-              "3" = "三";
-              "4" = "四";
-              "5" = "五";
-              "6" = "六";
-              "7" = "七";
-              "8" = "八";
-              "9" = "九";
-              "10" = "十";
-            };
-            disable-scroll = true;
-          };
+        clock = {
+          format = "{:%Y-%m-%d %H:%M:%S}";
+          interval = 1;
+          tooltip-format = "<tt>{calendar}</tt>";
+        };
 
-          clock = {
-            format = "{:%Y-%m-%d %H:%M:%S}";
-            interval = 1;
-            tooltip-format = "<tt>{calendar}</tt>";
-          };
+        cpu = {
+          format = "CPU {usage}%";
+          interval = 2;
+        };
 
-          cpu = {
-            format = "CPU {usage}%";
-            interval = 2;
-          };
+        memory = {
+          format = "RAM {percentage}%";
+          interval = 2;
+        };
 
-          memory = {
-            format = "RAM {percentage}%";
-            interval = 2;
-          };
-
-          network = {
-            format-wifi = "{ipaddr}";
-            format-ethernet = "{ipaddr}";
-            format-disconnected = "Offline";
-            tooltip-format = "{ifname}: {essid}";
-          };
+        network = {
+          format-wifi = "{ipaddr}";
+          format-ethernet = "{ipaddr}";
+          format-disconnected = "Offline";
+          tooltip-format = "{ifname}: {essid}";
         };
       };
     };

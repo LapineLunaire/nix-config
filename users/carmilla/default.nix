@@ -42,9 +42,7 @@
       ./services.nix
     ];
 
-    options.userConfig = {
-      desktop.enable = lib.mkEnableOption "desktop environment configuration";
-    };
+    options.userConfig.desktop.enable = lib.mkEnableOption "desktop environment configuration";
 
     config = lib.mkMerge [
       {

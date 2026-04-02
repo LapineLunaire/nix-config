@@ -54,6 +54,10 @@ in {
       NSGlobalDomain.AppleActionOnDoubleClick = "Minimize";
       "com.apple.AdLib".allowApplePersonalizedAdvertising = false;
       "com.apple.assistant.support"."Assistant Enabled" = false;
+      "com.apple.finder" = {
+        FXICloudDriveDesktop = false;
+        FXICloudDriveDocuments = false;
+      };
       "com.apple.SubmitDiagInfo".AutoSubmit = false;
     };
 
@@ -90,11 +94,6 @@ in {
       HideDesktop = true;
       EnableTiledWindowMargins = false;
     };
-  };
-
-  system.defaults.CustomUserPreferences."com.apple.finder" = {
-    FXICloudDriveDesktop = false;
-    FXICloudDriveDocuments = false;
   };
 
   networking.applicationFirewall = {

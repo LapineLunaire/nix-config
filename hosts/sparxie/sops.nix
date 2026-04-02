@@ -4,9 +4,7 @@
     age.sshKeyPaths = ["/persist/etc/ssh/ssh_host_ed25519_key"];
 
     secrets = {
-      "carmilla-password-hash" = {
-        neededForUsers = true;
-      };
+      "carmilla-password-hash".neededForUsers = true;
       "cloudflare-dns-api-token" = {};
       "ejabberd-sql-password" = {};
       "tuwunel-registration-token" = {};
@@ -277,5 +275,10 @@
             show_os: false
       '';
     };
+
+    # Registration is open but token-gated. The token is injected via an env var so it doesn't appear in the world-readable tuwunel config file.
+    templates."tuwunel.env".content = ''
+      TUWUNEL_REGISTRATION_TOKEN=${config.sops.placeholder."tuwunel-registration-token"}
+    '';
   };
 }

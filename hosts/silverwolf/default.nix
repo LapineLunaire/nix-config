@@ -19,8 +19,6 @@
       cleanup = "uninstall";
     };
     global.autoUpdate = false;
-    taps = [];
-    brews = [];
     casks = [
       "altserver"
       "appcleaner"

@@ -1,11 +1,4 @@
 {config, ...}: {
-  # Registration is open but token-gated. The token is injected via an env var so it doesn't appear in the world-readable tuwunel config file.
-  sops.templates."tuwunel.env" = {
-    content = ''
-      TUWUNEL_REGISTRATION_TOKEN=${config.sops.placeholder."tuwunel-registration-token"}
-    '';
-  };
-
   systemd.services.tuwunel.serviceConfig.EnvironmentFile = config.sops.templates."tuwunel.env".path;
 
   services.matrix-tuwunel = {
