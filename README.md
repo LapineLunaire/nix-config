@@ -34,10 +34,126 @@ overlays/       ffmpeg unfree codecs, protonmail-desktop X11 ozone workaround
 - protonmail-desktop overlay forces X11 ozone platform on Linux to avoid Wayland crashes
 - Console keymap is Colemak on all Linux hosts
 
-## First deployment
+## Bootstrapping a new host
 
-- **NixOS:** clone this repo to `/persist/nix-config` — `nh` expects the flake at this path on all NixOS hosts
-- **macOS:** clone this repo to `/Users/carmilla/projects/nix-config`
+### NixOS
+
+Boot from a NixOS installer ISO, then:
+
+**1. Partition**
+
+```sh
+parted /dev/nvme0n1 -- mklabel gpt
+parted /dev/nvme0n1 -- mkpart ESP fat32 1MiB 1GiB
+parted /dev/nvme0n1 -- set 1 esp on
+parted /dev/nvme0n1 -- mkpart primary 1GiB 100%
+
+mkfs.vfat -F32 /dev/nvme0n1p1
+```
+
+**2. Create ZFS pool and datasets**
+
+```sh
+zpool create -o ashift=12 -o autotrim=on \
+  -O atime=off -O acltype=posixacl -O xattr=sa -O dnodesize=auto \
+  -O normalization=formD -O compression=zstd \
+  -O encryption=on -O keylocation=prompt -O keyformat=passphrase \
+  -O mountpoint=none \
+  <hostname> /dev/disk/by-id/<disk>-part2
+
+zfs create <hostname>/nix
+zfs create <hostname>/persist
+zfs create <hostname>/home
+```
+
+Without encryption: omit `-O encryption=on -O keylocation=prompt -O keyformat=passphrase`
+
+With mirror: replace the vdev with `mirror /dev/disk/by-id/<disk1>-part2 /dev/disk/by-id/<disk2>-part2`
+
+**3. Mount**
+
+```sh
+mount -t tmpfs -o size=2G,mode=755 none /mnt
+mkdir -p /mnt/{boot,nix,persist,home}
+mount /dev/nvme0n1p1 /mnt/boot
+mount -t zfs -o zfsutil <hostname>/nix /mnt/nix
+mount -t zfs -o zfsutil <hostname>/persist /mnt/persist
+mount -t zfs -o zfsutil <hostname>/home /mnt/home
+```
+
+**4. Generate the SSH host key (required for sops)**
+
+```sh
+mkdir -p /mnt/persist/etc/ssh
+ssh-keygen -t ed25519 -N "" -f /mnt/persist/etc/ssh/ssh_host_ed25519_key
+```
+
+**5. Register the host with sops**
+
+Get the age public key derived from the SSH host key:
+
+```sh
+nix-shell -p ssh-to-age --run "ssh-to-age < /mnt/persist/etc/ssh/ssh_host_ed25519_key.pub"
+```
+
+Add the output to `.sops.yaml` under a new `<hostname>_host` key, include it in the creation rules for `hosts/<hostname>/secrets.yaml`, then re-encrypt:
+
+```sh
+sops updatekeys hosts/<hostname>/secrets.yaml
+```
+
+**6. Clone the repo and install**
+
+```sh
+mkdir -p /mnt/persist/nix-config
+git clone <repo> /mnt/persist/nix-config
+nixos-install --flake /mnt/persist/nix-config#<hostname>
+```
+
+**7. First boot — Secure Boot hosts only** (camellya, sparkle)
+
+After rebooting into the installed system:
+
+```sh
+sbctl create-keys
+sbctl enroll-keys --microsoft
+```
+
+---
+
+### macOS (silverwolf)
+
+nix-darwin manages Homebrew declaratively but cannot install it — Homebrew must be installed before Nix.
+
+**1. Install Homebrew**
+
+```sh
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+**2. Install Nix**
+
+```sh
+sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install)
+```
+
+**3. Clone the repo**
+
+```sh
+git clone <repo> ~/projects/nix-config
+```
+
+**4. Bootstrap nix-darwin** (first run only — `nh` is not yet available)
+
+```sh
+sudo nix --extra-experimental-features "nix-command flakes" run nix-darwin -- switch --flake ~/projects/nix-config#silverwolf
+```
+
+**5. Subsequent rebuilds**
+
+```sh
+nh darwin switch ~/projects/nix-config
+```
 
 ## Manual post-install steps
 
