@@ -34,8 +34,14 @@ overlays/       ffmpeg unfree codecs, protonmail-desktop X11 ozone workaround
 - protonmail-desktop overlay forces X11 ozone platform on Linux to avoid Wayland crashes
 - Console keymap is Colemak on all Linux hosts
 
+## First deployment
+
+- **NixOS:** clone this repo to `/persist/nix-config` — `nh` expects the flake at this path on all NixOS hosts
+- **macOS:** clone this repo to `/Users/carmilla/projects/nix-config`
+
 ## Manual post-install steps
 
+- Place wallpapers in `~/pictures/wallpapers/` for the random wallpaper script to pick them up
 - Export FIDO2 resident SSH keys from YubiKey: `ssh-keygen -K` in `~/.ssh/`
 - Create `~/Pictures/Screenshots` on macOS
 - Grant App Management permission to the terminal emulator (System Settings → Privacy & Security → App Management)

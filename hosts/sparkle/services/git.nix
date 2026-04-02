@@ -46,6 +46,8 @@
   systemd.services.gitea-runner-sparkle = {
     after = ["forgejo.service"];
     requires = ["forgejo.service"];
+    # Prevent restarting mid-run CI jobs on nixos-rebuild switch.
+    # Config changes require a manual: systemctl restart gitea-runner-sparkle
     restartIfChanged = false;
     serviceConfig.SupplementaryGroups = ["docker"];
   };

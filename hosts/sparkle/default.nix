@@ -31,7 +31,9 @@
     kernelPackages = pkgs.linuxPackages_6_19.extend (self: super: {
       kernel = super.kernel.override {
         structuredExtraConfig = with lib.kernel; {
-          # Compile the kernel with optimizations for this machine's specific CPU microarchitecture.
+          # WARNING: X86_NATIVE_CPU detects the build machine's CPU at compile time.
+          # This host must be built on sparkle itself (or a machine with an identical CPU).
+          # Building on a different microarchitecture will produce a mismatched kernel.
           X86_NATIVE_CPU = yes;
         };
       };
