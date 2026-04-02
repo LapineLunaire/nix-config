@@ -4,19 +4,17 @@
   ...
 }: {
   config = lib.mkIf config.userConfig.desktop.enable {
-    services.ssh-agent.enable = true;
-
-    services.gnome-keyring = {
-      enable = true;
-      components = ["secrets"];
-    };
-
     services.easyeffects.enable = true;
 
     systemd.user.services.easyeffects = {
       Unit.Requires = ["pipewire.socket"];
       Unit.After = ["waybar.service"];
       Service.Restart = lib.mkForce "always";
+    };
+
+    services.gnome-keyring = {
+      enable = true;
+      components = ["secrets"];
     };
 
     services.hypridle = {
@@ -80,5 +78,7 @@
         anchor = "top-right";
       };
     };
+
+    services.ssh-agent.enable = true;
   };
 }

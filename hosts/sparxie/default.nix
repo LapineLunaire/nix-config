@@ -4,11 +4,9 @@
     ./hardware-configuration.nix
     ./persistence.nix
     ./tmpfiles.nix
-    ./services
     ./sops.nix
+    ./services
   ];
-
-  secureboot.enable = false;
 
   networking = {
     hostName = "sparxie";

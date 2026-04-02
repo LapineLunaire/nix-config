@@ -12,6 +12,7 @@
     };
   };
 in {
+  # 8448: Matrix federation port for server-to-server traffic.
   networking.firewall.allowedTCPPorts = [80 443 8448];
 
   security.acme = {
@@ -28,6 +29,8 @@ in {
         "1.1.1.1:53"
       ];
     };
+    # Single SAN cert covering all ejabberd component subdomains:
+    # conference (MUC), proxy (SOCKS5 file transfer), pubsub, upload (HTTP upload).
     certs."bunny.enterprises" = {
       dnsProvider = "cloudflare";
       environmentFile = config.sops.templates."cloudflare-dns-api-token.env".path;
@@ -62,6 +65,7 @@ in {
       tls /var/lib/acme/matrix.bunny.enterprises/cert.pem /var/lib/acme/matrix.bunny.enterprises/key.pem
       reverse_proxy [::1]:6167
     '';
+    # Federation listener on the default Matrix port.
     virtualHosts."matrix.bunny.enterprises:8448".extraConfig = ''
       tls /var/lib/acme/matrix.bunny.enterprises/cert.pem /var/lib/acme/matrix.bunny.enterprises/key.pem
       reverse_proxy [::1]:6167

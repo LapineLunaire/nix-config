@@ -137,7 +137,7 @@ in {
           "$mod, Space, exec, pkill rofi || rofi -show drun"
         ];
 
-        # macOS-like app shortcuts (ALT → CTRL via sendshortcut)
+        # ALT is $mod, so these bindings intercept ALT+<key> and forward CTRL+<key> to the focused window, mimicking macOS-style shortcuts.
         binde = [
           "$mod, a, sendshortcut, CTRL, a,"
           "$mod, c, sendshortcut, CTRL, Insert,"

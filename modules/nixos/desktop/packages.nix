@@ -5,6 +5,8 @@
     xwayland.enable = true;
   };
 
+  programs.nix-ld.enable = true;
+
   programs.obs-studio = {
     enable = true;
     enableVirtualCamera = true;
@@ -13,8 +15,6 @@
       obs-vaapi
     ];
   };
-
-  programs.nix-ld.enable = true;
 
   programs.gamemode.enable = true;
   programs.honkers-railway-launcher.enable = true;

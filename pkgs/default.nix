@@ -1,5 +1,5 @@
-# Custom packages, that can be defined similarly to ones from nixpkgs
-# You can build them using 'nix build .#example'
+# Custom packages, defined similarly to ones from nixpkgs.
+# Build them with 'nix build .#example'.
 pkgs: {
   elysia = pkgs.callPackage ./elysia {};
 }

@@ -24,7 +24,8 @@
       }
     ];
     authentication = ''
-      # Allow containerized services and pgAdmin to connect locally
+      # Allow localhost and the Docker bridge subnet (172.17.0.0/16) to connect.
+      # The Docker subnet is needed for containerized services (pgAdmin, Vaultwarden).
       host all all 127.0.0.1/32 scram-sha-256
       host all all ::1/128 scram-sha-256
       host all all 172.17.0.0/16 scram-sha-256

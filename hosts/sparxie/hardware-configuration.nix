@@ -24,6 +24,12 @@
     options = ["defaults" "size=4G" "mode=1777" "nosuid" "nodev" "noexec"];
   };
 
+  fileSystems."/var/tmp" = {
+    device = "none";
+    fsType = "tmpfs";
+    options = ["defaults" "size=4G" "mode=1777" "nosuid" "nodev" "noexec"];
+  };
+
   fileSystems."/nix" = {
     device = "sparxie/nix";
     fsType = "zfs";

@@ -3,9 +3,9 @@
     hideMounts = true;
     directories = [
       "/var/lib/nixos"
+      "/var/lib/sbctl"
       "/var/lib/systemd"
       "/var/log"
-      "/var/lib/sbctl"
     ];
     files = [
       "/etc/machine-id"

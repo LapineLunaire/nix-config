@@ -30,12 +30,14 @@ in {
       auto-optimise-store = true;
     };
     channel.enable = false;
-    # pin registry and nixPath to flake inputs so `nix run nixpkgs#...` and `<nixpkgs>` resolve to the locked version
+    # Pin nix.registry and nixPath to flake inputs
+    # so `nix run nixpkgs#foo` and `<nixpkgs>` always resolve to the locked revision rather than fetching from the upstream registry.
     registry = lib.mapAttrs (_: flake: {inherit flake;}) flakeInputs;
     nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
   };
 
-  # high swappiness is correct with zram — tells the kernel to prefer compressing into zram over evicting file cache
+  # vm.swappiness=100 is correct with zram: since zram compresses pages in RAM, swapping is cheap.
+  # High swappiness lets the kernel aggressively move anonymous pages into zram rather than holding them uncompressed in RAM.
   boot.kernel.sysctl."vm.swappiness" = 100;
 
   zramSwap = {

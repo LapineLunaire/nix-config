@@ -1,8 +1,8 @@
 {...}: {
-  # This overlay adds our custom packages from the 'pkgs' directory
+  # This overlay adds our custom packages from the 'pkgs' directory.
   additions = final: _prev: import ../pkgs final.pkgs;
 
-  # This overlay can be used to modify or add custom versions of packages
+  # This overlay can be used to modify or add custom versions of packages.
   modifications = final: prev: {
     ffmpeg-full = prev.ffmpeg-full.override {withUnfree = true;};
 
@@ -12,7 +12,7 @@
       };
     };
 
-    # protonmail-desktop crashes under native Wayland, force X11 via XWayland
+    # protonmail-desktop crashes under native Wayland, so it is forced to use X11 via XWayland.
     protonmail-desktop =
       if prev.stdenv.hostPlatform.isLinux
       then

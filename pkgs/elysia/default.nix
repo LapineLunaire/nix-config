@@ -11,7 +11,7 @@ in
       with pkgs; [
         elysia-unwrapped
 
-        # Required by UMU launcher and Wine/Proton scripts
+        # Required by UMU launcher and Wine/Proton scripts.
         bash
         coreutils
         which
@@ -39,13 +39,13 @@ in
         gcc-unwrapped
         zlib
 
-        # Prevents dlopen errors when games request it
+        # Games may call into libgamemode.so via dlopen at runtime. Including it here ensures the library is present in the FHS environment.
         gamemode
       ];
 
     runScript = "elysia";
 
-    # Copy desktop file and icon from the wrapped package
+    # Copy desktop file and icon from the wrapped package.
     extraInstallCommands = ''
       mkdir -p $out/share/applications
       mkdir -p $out/share/pixmaps

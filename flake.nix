@@ -4,6 +4,11 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
+    aagl = {
+      url = "github:ezKEa/aagl-gtk-on-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -20,13 +25,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    sops-nix = {
-      url = "github:Mic92/sops-nix";
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    aagl = {
-      url = "github:ezKEa/aagl-gtk-on-nix";
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -36,27 +41,23 @@
     };
 
     vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
-
-    nix-darwin = {
-      url = "github:nix-darwin/nix-darwin/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs = {
     self,
     nixpkgs,
+    aagl,
     home-manager,
     impermanence,
     lanzaboote,
+    nix-darwin,
     sops-nix,
-    aagl,
     stylix,
     vpn-confinement,
-    nix-darwin,
     ...
   } @ inputs: let
     inherit (self) outputs;
+    commonArgs = {inherit inputs outputs;};
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
     overlays = import ./overlays {inherit inputs;};
     pkgsFor = system:
@@ -65,6 +66,36 @@
         overlays = [overlays.additions overlays.modifications];
         config.allowUnfree = true;
       };
+
+    nixosBaseModules = [
+      impermanence.nixosModules.impermanence
+      lanzaboote.nixosModules.lanzaboote
+      sops-nix.nixosModules.sops
+      home-manager.nixosModules.home-manager
+      {
+        home-manager = {
+          useGlobalPkgs = true;
+          useUserPackages = true;
+          extraSpecialArgs = commonArgs;
+        };
+      }
+    ];
+
+    nixosDesktopModules = [
+      aagl.nixosModules.default
+      stylix.nixosModules.stylix
+    ];
+
+    darwinBaseModules = [
+      home-manager.darwinModules.home-manager
+      {
+        home-manager = {
+          useGlobalPkgs = true;
+          useUserPackages = true;
+          extraSpecialArgs = commonArgs;
+        };
+      }
+    ];
   in {
     inherit overlays;
 
@@ -72,42 +103,23 @@
 
     packages = forAllSystems (system: import ./pkgs (pkgsFor system));
 
-    nixosConfigurations = let
-      baseModules = [
-        impermanence.nixosModules.impermanence
-        lanzaboote.nixosModules.lanzaboote
-        sops-nix.nixosModules.sops
-        home-manager.nixosModules.home-manager
-        {
-          home-manager = {
-            useGlobalPkgs = true;
-            useUserPackages = true;
-            extraSpecialArgs = {inherit inputs outputs;};
-          };
-        }
-      ];
-
-      desktopModules = [
-        aagl.nixosModules.default
-        stylix.nixosModules.stylix
-      ];
-    in {
+    nixosConfigurations = {
       camellya = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = {inherit inputs outputs;};
+        specialArgs = commonArgs;
         modules =
           [
             {nixpkgs.pkgs = pkgsFor "x86_64-linux";}
             ./hosts/camellya
             ./users/carmilla
           ]
-          ++ baseModules
-          ++ desktopModules;
+          ++ nixosBaseModules
+          ++ nixosDesktopModules;
       };
 
       sparkle = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = {inherit inputs outputs;};
+        specialArgs = commonArgs;
         modules =
           [
             {nixpkgs.pkgs = pkgsFor "x86_64-linux";}
@@ -115,38 +127,32 @@
             ./hosts/sparkle
             ./users/carmilla
           ]
-          ++ baseModules;
+          ++ nixosBaseModules;
       };
 
       sparxie = nixpkgs.lib.nixosSystem {
         system = "aarch64-linux";
-        specialArgs = {inherit inputs outputs;};
+        specialArgs = commonArgs;
         modules =
           [
             {nixpkgs.pkgs = pkgsFor "aarch64-linux";}
             ./hosts/sparxie
             ./users/carmilla
           ]
-          ++ baseModules;
+          ++ nixosBaseModules;
       };
     };
 
     darwinConfigurations = {
       silverwolf = nix-darwin.lib.darwinSystem {
-        specialArgs = {inherit inputs outputs;};
-        modules = [
-          {nixpkgs.pkgs = pkgsFor "aarch64-darwin";}
-          home-manager.darwinModules.home-manager
-          {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              extraSpecialArgs = {inherit inputs outputs;};
-            };
-          }
-          ./hosts/silverwolf
-          ./users/carmilla
-        ];
+        specialArgs = commonArgs;
+        modules =
+          [
+            {nixpkgs.pkgs = pkgsFor "aarch64-darwin";}
+            ./hosts/silverwolf
+            ./users/carmilla
+          ]
+          ++ darwinBaseModules;
       };
     };
   };

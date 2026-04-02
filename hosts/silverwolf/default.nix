@@ -4,8 +4,10 @@
   nixpkgs.hostPlatform = "aarch64-darwin";
   system.stateVersion = 6;
 
-  networking.hostName = "silverwolf";
-  networking.computerName = "Silver Wolf";
+  networking = {
+    hostName = "silverwolf";
+    computerName = "Silver Wolf";
+  };
   system.primaryUser = "carmilla";
 
   homebrew = {

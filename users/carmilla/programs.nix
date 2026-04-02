@@ -6,31 +6,15 @@
 }:
 lib.mkMerge [
   {
-    programs.tealdeer = {
+    programs.direnv = {
       enable = true;
-      settings = {
-        updates = {
-          auto_update = true;
-        };
-      };
+      enableZshIntegration = true;
+      nix-direnv.enable = true;
     };
 
-    programs.htop = {
+    programs.fzf = {
       enable = true;
-      settings = {
-        show_program_path = 0;
-        show_merged_command = 1;
-        highlight_base_name = 1;
-        tree_view = 1;
-        hide_userland_threads = 1;
-      };
-    };
-
-    programs.tmux = {
-      enable = true;
-      mouse = true;
-      keyMode = "vi";
-      baseIndex = 1;
+      enableZshIntegration = true;
     };
 
     programs.git = {
@@ -53,6 +37,45 @@ lib.mkMerge [
         merge.conflictstyle = "zdiff3"; # shows base version in conflict markers
         branch.sort = "-committerdate";
       };
+    };
+
+    programs.htop = {
+      enable = true;
+      settings = {
+        show_program_path = 0;
+        show_merged_command = 1;
+        highlight_base_name = 1;
+        tree_view = 1;
+        hide_userland_threads = 1;
+      };
+    };
+
+    programs.neovim = {
+      enable = true;
+      defaultEditor = true;
+      viAlias = true;
+      vimAlias = true;
+    };
+
+    programs.tealdeer = {
+      enable = true;
+      settings = {
+        updates = {
+          auto_update = true;
+        };
+      };
+    };
+
+    programs.tmux = {
+      enable = true;
+      mouse = true;
+      keyMode = "vi";
+      baseIndex = 1;
+    };
+
+    programs.zoxide = {
+      enable = true;
+      enableZshIntegration = true;
     };
 
     programs.zsh = {
@@ -78,7 +101,9 @@ lib.mkMerge [
           fgrep = "fgrep --color=auto";
         }
         // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+          # Use CoW reflinks on supported filesystems (ZFS, btrfs), falling back to a regular copy. --sparse=always avoids writing zero blocks explicitly.
           cp = "cp --reflink=auto --sparse=always";
+          # Derive the sops age key on the fly from the SSH host key. Requires sudo to read /etc/ssh/ssh_host_ed25519_key.
           sops = "SOPS_AGE_KEY_FILE=<(sudo cat /etc/ssh/ssh_host_ed25519_key | ssh-to-age -private-key) sops";
         }
         // lib.optionalAttrs (config.userConfig.desktop.enable || pkgs.stdenv.hostPlatform.isDarwin) {
@@ -88,99 +113,9 @@ lib.mkMerge [
           la = "eza -la";
         };
     };
-
-    programs.direnv = {
-      enable = true;
-      enableZshIntegration = true;
-      nix-direnv.enable = true;
-    };
-
-    programs.fzf = {
-      enable = true;
-      enableZshIntegration = true;
-    };
-
-    programs.zoxide = {
-      enable = true;
-      enableZshIntegration = true;
-    };
-
-    programs.neovim = {
-      enable = true;
-      defaultEditor = true;
-      viAlias = true;
-      vimAlias = true;
-    };
   }
 
   (lib.mkIf (config.userConfig.desktop.enable || pkgs.stdenv.hostPlatform.isDarwin) {
-    programs.neovim.initLua = ''
-      vim.lsp.config('nixd', {
-        cmd = { 'nixd' },
-        filetypes = { 'nix' },
-        root_markers = { 'flake.nix', '.git' },
-        settings = {
-          nixd = {
-            formatting = { command = { 'alejandra' } },
-          },
-        },
-      })
-      vim.lsp.enable('nixd')
-
-      vim.api.nvim_create_autocmd('LspAttach', {
-        callback = function(args)
-          vim.api.nvim_create_autocmd('BufWritePre', {
-            buffer = args.buf,
-            callback = function()
-              vim.lsp.buf.format({ bufnr = args.buf })
-            end,
-          })
-        end,
-      })
-    '';
-
-    programs.ssh = {
-      enable = true;
-      enableDefaultConfig = false; # deprecated by home-manager
-      package = pkgs.openssh.override {withFIDO = true;};
-      matchBlocks."*" = {
-        identityFile = [
-          "~/.ssh/id_ed25519_sk_rk_lapine"
-          "~/.ssh/id_ed25519_sk_rk_lapine2"
-        ];
-        identitiesOnly = true;
-      };
-    };
-
-    programs.yazi = {
-      enable = true;
-      enableZshIntegration = true;
-      settings = {
-        manager = {
-          show_hidden = true;
-          sort_by = "natural";
-          sort_dir_first = true;
-        };
-      };
-    };
-
-    programs.zed-editor = {
-      enable = true;
-      userSettings = {
-        telemetry.metrics = false;
-        load_direnv = "shell_hook";
-        vim_mode = true;
-        hour_format = "hour24";
-        languages.Nix.language_servers = ["nixd" "!nil"];
-        lsp.nixd.settings = {
-          nixpkgs.expr = "import <nixpkgs> {}";
-          formatting.command = ["alejandra"];
-        };
-      };
-      extensions = ["nix"];
-      extraPackages = with pkgs; [nixd alejandra];
-    };
-
     programs.fastfetch = {
       enable = true;
       settings = {
@@ -220,16 +155,80 @@ lib.mkMerge [
         ];
       };
     };
+
+    programs.neovim.initLua = ''
+      vim.lsp.config('nixd', {
+        cmd = { 'nixd' },
+        filetypes = { 'nix' },
+        root_markers = { 'flake.nix', '.git' },
+        settings = {
+          nixd = {
+            formatting = { command = { 'alejandra' } },
+          },
+        },
+      })
+      vim.lsp.enable('nixd')
+
+      vim.api.nvim_create_autocmd('LspAttach', {
+        callback = function(args)
+          vim.api.nvim_create_autocmd('BufWritePre', {
+            buffer = args.buf,
+            callback = function()
+              vim.lsp.buf.format({ bufnr = args.buf })
+            end,
+          })
+        end,
+      })
+    '';
+
+    programs.ssh = {
+      enable = true;
+      enableDefaultConfig = false; # deprecated by home-manager
+      # Rebuild OpenSSH with FIDO2 support for sk-ssh-ed25519 resident keys stored on the YubiKey.
+      package = pkgs.openssh.override {withFIDO = true;};
+      matchBlocks."*" = {
+        identityFile = [
+          "~/.ssh/id_ed25519_sk_rk_lapine"
+          "~/.ssh/id_ed25519_sk_rk_lapine2"
+        ];
+        identitiesOnly = true;
+      };
+    };
+
+    programs.yazi = {
+      enable = true;
+      enableZshIntegration = true;
+      settings = {
+        manager = {
+          show_hidden = true;
+          sort_by = "natural";
+          sort_dir_first = true;
+        };
+      };
+    };
+
+    programs.zed-editor = {
+      enable = true;
+      userSettings = {
+        telemetry.metrics = false;
+        load_direnv = "shell_hook";
+        vim_mode = true;
+        hour_format = "hour24";
+        languages.Nix.language_servers = ["nixd" "!nil"];
+        lsp.nixd.settings = {
+          nixpkgs.expr = "import <nixpkgs> {}";
+          formatting.command = ["alejandra"];
+        };
+      };
+      extensions = ["nix"];
+      extraPackages = with pkgs; [nixd alejandra];
+    };
   })
 
   (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
-    programs.nh = {
-      enable = true;
-      flake = "/users/carmilla/projects/nix-config";
-    };
-
     programs.ghostty = {
       enable = true;
+      # Ghostty is not available on nixpkgs for macOS. Use the Homebrew package instead. home-manager manages the config only.
       package = null;
       settings = {
         theme = "Gruvbox Dark Hard";
@@ -237,6 +236,11 @@ lib.mkMerge [
         window-padding-x = 8;
         window-padding-y = 8;
       };
+    };
+
+    programs.nh = {
+      enable = true;
+      flake = "/users/carmilla/projects/nix-config";
     };
   })
 

@@ -27,6 +27,7 @@
     vw       IN CNAME sparkle.lunaire.moe.
   '';
 
+  # Reverse DNS zone for 10.28.0.0/16.
   environment.etc."coredns/zones/db.28.10".text = ''
     $ORIGIN 28.10.in-addr.arpa.
     $TTL 3600
@@ -60,6 +61,8 @@
         errors
       }
 
+      # Forward all other queries to Cloudflare over DNS-over-TLS (DoT).
+      # tls_servername is required to verify the server certificate.
       . {
         forward . tls://1.1.1.1 tls://1.0.0.1 {
           tls_servername cloudflare-dns.com

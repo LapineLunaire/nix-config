@@ -10,7 +10,4 @@
     ./smb.nix
     ./vaultwarden.nix
   ];
-
-  virtualisation.docker.enable = true;
-  virtualisation.oci-containers.backend = "docker";
 }

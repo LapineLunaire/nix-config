@@ -19,7 +19,7 @@
 
   environment.systemPackages = with pkgs; [
     cifs-utils
-    smartmontools
     ghostty.terminfo
+    smartmontools
   ];
 }

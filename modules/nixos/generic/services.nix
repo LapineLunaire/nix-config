@@ -9,7 +9,7 @@
     trim.enable = true;
   };
 
-  # NTS = authenticated NTP, prevents time spoofing
+  # NTS (RFC 8915): TLS-authenticated NTP, prevents on-path attackers from spoofing time responses.
   services.chrony = {
     enable = true;
     enableNTS = true;
@@ -22,7 +22,7 @@
       PermitRootLogin = "no";
       PasswordAuthentication = false;
     };
-    # ed25519 only — sops-nix derives age keys from this host key
+    # Only ed25519 host keys are enabled. sops-nix derives its age decryption key from this host key.
     hostKeys = [
       {
         path = "/etc/ssh/ssh_host_ed25519_key";

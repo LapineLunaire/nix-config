@@ -27,8 +27,9 @@
       Core.AutoDeleteAddedTorrentFile = "Never";
       Preferences.WebUI = {
         LocalHostAuth = true;
-        # generate with the following command (make sure to prefix with a space to avoid going into shell history!)
-        # nix run git+https://codeberg.org/feathecutie/qbittorrent_password -- -p [password here]
+        # Generate the password hash with (prefix with a space to keep it out of shell history):
+        #   nix run git+https://codeberg.org/feathecutie/qbittorrent_password -- -p <password>
+        # This produces a PBKDF2 hash in the format qBittorrent expects for its config file.
         Password_PBKDF2 = "@ByteArray(+WZc5S80KMQiHJ/0L/Ogsg==:4ohJt9PRpMsRMSbLwoNnGz8lUQM0zjyVnHOFFjZH3JxpEKnh274Cq2xT32ATsIFh2QJJEmm8ZMqp4P7HnHt90w==)";
       };
       BitTorrent.Session = {
@@ -46,8 +47,8 @@
 
   assertions = [
     {
-      # do not let qbittorrent run if we aren't sure we've quarantined it to the network namespace
-      # that is running behind the VPN
+      # Verify the qbittorrent systemd service exists before binding it to the VPN namespace.
+      # If the service name ever changes upstream, this fails at eval time rather than silently running qbittorrent outside the VPN.
       assertion = config.systemd.services ? qbittorrent;
       message = "systemd service 'qbittorrent' not found - the qbittorrent service name may have changed";
     }

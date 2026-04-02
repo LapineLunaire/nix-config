@@ -12,8 +12,10 @@
   config = {
     home-manager.users.carmilla.userConfig.desktop.enable = true;
 
+    # ntsync: kernel-side NT synchronization primitives used by Wine/Proton to reduce syscall overhead for games that rely heavily on Win32 sync objects.
     boot.kernelModules = ["ntsync"];
 
+    # Pull in the aagl binary cache so anime game launchers don't build from source.
     nix.settings = inputs.aagl.nixConfig;
 
     time.timeZone = "Europe/Amsterdam";
@@ -25,6 +27,7 @@
     environment.sessionVariables = {
       PROTON_ENABLE_WAYLAND = "1";
       PROTON_ENABLE_HDR = "1";
+      # Enable stem darkening in FreeType's CFF and autofitter engines. This adds slight weight to thin strokes at small sizes, improving readability.
       FREETYPE_PROPERTIES = "cff:no-stem-darkening=0 autofitter:no-stem-darkening=0";
     };
 

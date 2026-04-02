@@ -8,17 +8,21 @@
     ./hardware-configuration.nix
     ./persistence.nix
     ./tmpfiles.nix
-    ./services
     ./sops.nix
+    ./services
   ];
 
   secureboot.enable = true;
+
+  virtualisation.docker.enable = true;
+  virtualisation.oci-containers.backend = "docker";
 
   networking = {
     hostName = "sparkle";
     hostId = "d38a0d1c";
     networkmanager = {
       enable = true;
+      # Keep the IPMI interface unmanaged so NetworkManager doesn't touch its static config.
       unmanaged = ["ipmi0"];
     };
   };
@@ -27,6 +31,7 @@
     kernelPackages = pkgs.linuxPackages_6_19.extend (self: super: {
       kernel = super.kernel.override {
         structuredExtraConfig = with lib.kernel; {
+          # Compile the kernel with optimizations for this machine's specific CPU microarchitecture.
           X86_NATIVE_CPU = yes;
         };
       };

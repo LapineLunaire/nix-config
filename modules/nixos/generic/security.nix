@@ -1,4 +1,5 @@
 {...}: {
+  # "!" locks the root account — no password login is possible.
   users.users.root.hashedPassword = "!";
   users.mutableUsers = false;
 
@@ -16,6 +17,7 @@
 
   security.polkit.enable = true;
 
+  # Allow wheel group members to reboot and power off without a password prompt.
   environment.etc."polkit-1/rules.d/50-wheel-power.rules".text = ''
     polkit.addRule(function (action, subject) {
       if (

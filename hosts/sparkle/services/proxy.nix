@@ -1,6 +1,8 @@
 {config, ...}: {
   networking.firewall.allowedTCPPorts = [80 443];
 
+  # All certs use DNS-01 challenge via Cloudflare.
+  # The --dns.resolvers flag points lego at Cloudflare's resolver (1.1.1.1) so it verifies DNS propagation against the same nameserver it just updated, avoiding stale cache issues.
   security.acme = {
     acceptTerms = true;
     defaults = {
@@ -57,6 +59,7 @@
       tls /var/lib/acme/git.lunaire.moe/cert.pem /var/lib/acme/git.lunaire.moe/key.pem
       reverse_proxy localhost:3000
     '';
+    # qBittorrent runs in the qbtvpn network namespace, so it is unreachable on localhost. Proxy to the namespace's veth address instead.
     virtualHosts."qbt.lunaire.moe".extraConfig = ''
       tls /var/lib/acme/qbt.lunaire.moe/cert.pem /var/lib/acme/qbt.lunaire.moe/key.pem
       reverse_proxy ${config.vpnNamespaces.qbtvpn.namespaceAddress}:4000

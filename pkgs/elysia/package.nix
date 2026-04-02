@@ -1,23 +1,23 @@
 {
-  lib,
-  runCommand,
-  fetchgit,
-  fetchFromGitHub,
-  fetchFromGitea,
-  rustPlatform,
-  pkg-config,
-  openssl,
-  ffmpeg_8,
-  clang,
-  python3,
   alsa-lib,
-  libGL,
-  libglvnd,
-  wayland,
-  libxkbcommon,
+  clang,
+  fetchFromGitea,
+  fetchFromGitHub,
+  fetchgit,
+  ffmpeg_8,
   fontconfig,
   gn,
+  lib,
+  libGL,
+  libglvnd,
+  libxkbcommon,
   ninja,
+  openssl,
+  pkg-config,
+  python3,
+  runCommand,
+  rustPlatform,
+  wayland,
 }: let
   skia-src = fetchFromGitHub {
     owner = "rust-skia";
@@ -160,8 +160,7 @@ in
     ];
 
     # rust-skia builds Skia from source using GN + Ninja.
-    # gn/ninja are passed via env vars rather than nativeBuildInputs to avoid
-    # their setup hooks interfering with the cargo build phase.
+    # gn/ninja are passed via env vars rather than nativeBuildInputs to avoid their setup hooks interfering with the cargo build phase.
     SKIA_SOURCE_DIR = skia-src-with-deps;
     SKIA_NINJA_COMMAND = "${ninja}/bin/ninja";
     SKIA_GN_COMMAND = "${gn}/bin/gn";
@@ -170,11 +169,9 @@ in
     CLANGCC = "${clang}/bin/clang";
     CLANGCXX = "${clang}/bin/clang++";
 
-    # skia-bindings 0.87.0 blocklists "std::_Rb_tree.*" for GCC/LLVM9 C++17,
-    # but GCC 15 renamed those internals to __rb_tree_node_base. The missing
-    # pattern causes std__Rb_tree_color to be referenced but never defined in
-    # the generated bindings. Patch the vendored crate to add the new names;
-    # this was fixed upstream in a later skia-bindings release.
+    # skia-bindings 0.87.0 blocklists "std::_Rb_tree.*" for GCC/LLVM9 C++17, but GCC 15 renamed those internals to __rb_tree_node_base.
+    # The missing pattern causes std__Rb_tree_color to be referenced but never defined in the generated bindings.
+    # Patch the vendored crate to add the new names. This was fixed upstream in a later skia-bindings release.
     preBuild = ''
       skia_bindgen=$(find /build -name "skia_bindgen.rs" -path "*/skia-bindings*" | head -1)
       substituteInPlace "$skia_bindgen" \

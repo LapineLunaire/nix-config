@@ -14,15 +14,15 @@
       ldns
       mtr
       nvimpager
-      ripgrep
       rclone
+      ripgrep
       rsync
       socat
       sops
       ssh-to-age
-      yubikey-manager
       tree
       whois
+      yubikey-manager
     ])
     ++ lib.optionals (config.userConfig.desktop.enable || pkgs.stdenv.hostPlatform.isDarwin) (with pkgs; [
       alejandra
@@ -34,8 +34,8 @@
       gping
       nixd
       nmap
-      protonmail-desktop
       proton-vpn
+      protonmail-desktop
       winbox4
       yt-dlp
     ])
@@ -54,8 +54,8 @@
       gcr
       grim
       heroic
-      libsecret
       imv
+      libsecret
       minisign
       mpv
       pciutils

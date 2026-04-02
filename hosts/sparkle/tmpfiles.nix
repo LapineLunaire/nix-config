@@ -26,7 +26,8 @@
     # pgAdmin data (container runs as UID 5050)
     "d '/persist/var/lib/pgadmin' 0700 5050 5050 - -"
 
-    # DynamicUser private directory (persisted as a whole to avoid bind mount conflicts)
+    # DynamicUser services get a private /var/lib/private/<name> bind-mounted into the unit's namespace.
+    # Impermanence can't bind-mount individual subdirs of this, so the entire /var/lib/private directory is persisted instead.
     "d '/persist/var/lib/private' 0700 root root - -"
     "z '/var/lib/private' 0700 root root - -"
 
