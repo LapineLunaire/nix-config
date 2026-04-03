@@ -38,8 +38,12 @@
         };
       };
     });
+    kernelParams = ["intel_pstate=active"];
     zfs.package = pkgs.zfs_2_4;
   };
+
+  # With intel_pstate active, powersave lets HWP firmware handle frequency scaling.
+  powerManagement.cpuFreqGovernor = "powersave";
 
   system.stateVersion = "26.05";
 }
