@@ -7,6 +7,7 @@
 }: {
   home.packages =
     (with pkgs; [
+      btop
       curl
       fd
       iperf3
@@ -20,8 +21,8 @@
       socat
       sops
       ssh-to-age
-      tree
       whois
+      xh
       yubikey-manager
     ])
     ++ lib.optionals (config.userConfig.desktop.enable || pkgs.stdenv.hostPlatform.isDarwin) (with pkgs; [
