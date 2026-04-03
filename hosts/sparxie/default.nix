@@ -14,6 +14,9 @@
     useDHCP = false;
   };
 
+  # Static network config per Hetzner VPS requirements (https://docs.hetzner.com/cloud/servers/static-configuration/).
+  # The IPv4 gateway (172.31.1.1) is off-subnet relative to the /32 address, so GatewayOnLink is required.
+  # The IPv6 default gateway is the router's link-local address.
   systemd.network = {
     enable = true;
     networks."30-wan" = {

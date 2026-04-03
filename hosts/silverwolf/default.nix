@@ -16,8 +16,10 @@
     onActivation = {
       autoUpdate = true;
       upgrade = true;
+      # Remove casks not listed here on activation, keeping the install declarative.
       cleanup = "uninstall";
     };
+    # Prevent Homebrew from auto-updating during regular brew commands; updates happen only on nix-darwin activation.
     global.autoUpdate = false;
     casks = [
       "altserver"

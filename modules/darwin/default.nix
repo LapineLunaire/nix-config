@@ -8,6 +8,7 @@
 in {
   programs.zsh.enable = true;
 
+  # Allow Touch ID to authenticate sudo prompts in terminal.
   security.pam.services.sudo_local.touchIdAuth = true;
 
   time.timeZone = lib.mkDefault "Europe/Amsterdam";
@@ -24,7 +25,7 @@ in {
     nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
     gc = {
       automatic = true;
-      interval.Weekday = 0;
+      interval.Weekday = 7; # Sunday
       options = "--delete-older-than 30d";
     };
   };
@@ -32,6 +33,7 @@ in {
   system.defaults = {
     NSGlobalDomain = {
       AppleInterfaceStyle = "Dark";
+      # Disable press-and-hold accent menu so key repeat works in all apps.
       ApplePressAndHoldEnabled = false;
       KeyRepeat = 2;
       InitialKeyRepeat = 15;
@@ -45,6 +47,7 @@ in {
       "com.apple.trackpad.forceClick" = true;
       "com.apple.springing.enabled" = true;
       AppleICUForce24HourTime = true;
+      # Allow dragging windows by clicking anywhere on them (not just the title bar).
       NSWindowShouldDragOnGesture = true;
     };
 
@@ -91,6 +94,7 @@ in {
     };
 
     WindowManager = {
+      # Hide desktop icons so files on ~/Desktop don't clutter the wallpaper.
       HideDesktop = true;
       EnableTiledWindowMargins = false;
     };

@@ -27,11 +27,13 @@
         };
         listener = [
           {
+            # 5 min inactivity: turn off displays.
             timeout = 300;
             on-timeout = "hyprctl dispatch dpms off";
             on-resume = "hyprctl dispatch dpms on";
           }
           {
+            # 10 min inactivity: lock session.
             timeout = 600;
             on-timeout = "loginctl lock-session";
           }

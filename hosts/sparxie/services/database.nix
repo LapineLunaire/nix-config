@@ -18,6 +18,7 @@
     '';
   };
 
+  # ejabberd uses Redis for session and cache storage (db 1, configured in ejabberd.yml).
   services.redis.servers."" = {
     enable = true;
     bind = "127.0.0.1";
