@@ -32,6 +32,8 @@
     };
   };
 
+  virtualisation.waydroid.enable = true;
+
   services.pipewire = {
     enable = true;
     alsa.enable = true;

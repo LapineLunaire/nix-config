@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  osConfig,
   pkgs,
   ...
 }: {
@@ -64,9 +63,7 @@
       tidal-hifi
       usbutils
       wl-clipboard
-      xivlauncher
-    ])
-    ++ lib.optionals (osConfig.networking.hostName == "camellya") (with pkgs; [
       wootility
+      xivlauncher
     ]);
 }
