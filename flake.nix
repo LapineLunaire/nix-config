@@ -7,7 +7,11 @@
     aagl = {
       url = "github:ezKEa/aagl-gtk-on-nix";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.rust-overlay.follows = "rust-overlay";
+      inputs.flake-compat.follows = "flake-compat";
     };
+
+    flake-compat.url = "github:NixOS/flake-compat";
 
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -22,6 +26,13 @@
 
     lanzaboote = {
       url = "github:nix-community/lanzaboote";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.rust-overlay.follows = "rust-overlay";
+      inputs.pre-commit.inputs.flake-compat.follows = "flake-compat";
+    };
+
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
