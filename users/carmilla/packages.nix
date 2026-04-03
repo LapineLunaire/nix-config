@@ -7,7 +7,6 @@
 }: {
   home.packages =
     (with pkgs; [
-      btop
       curl
       fd
       iperf3

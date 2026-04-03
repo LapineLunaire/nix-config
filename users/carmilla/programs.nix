@@ -39,6 +39,16 @@ lib.mkMerge [
       };
     };
 
+    programs.btop = {
+      enable = true;
+      settings = {
+        color_theme = "TTY";
+        theme_background = false;
+        truecolor = true;
+        vim_keys = true;
+        update_ms = 1000;
+      };
+    };
 
     programs.neovim = {
       enable = true;
@@ -181,7 +191,7 @@ lib.mkMerge [
       vim.cmd('colorscheme gruvbox')
     '';
 
-    programs.neovim.plugins = with pkgs.vimPlugins; [ gruvbox-nvim ];
+    programs.neovim.plugins = with pkgs.vimPlugins; [gruvbox-nvim];
 
     programs.ssh = {
       enable = true;
