@@ -42,7 +42,7 @@ lib.mkMerge [
     programs.btop = {
       enable = true;
       settings = {
-        color_theme = "TTY";
+        color_theme = lib.mkDefault "TTY";
         theme_background = false;
         truecolor = true;
         vim_keys = true;
