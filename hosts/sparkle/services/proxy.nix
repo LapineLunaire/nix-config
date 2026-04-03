@@ -19,6 +19,7 @@
     certs."ha.lunaire.moe" = {};
     certs."pga.lunaire.moe" = {};
     certs."qbt.lunaire.moe" = {};
+    certs."up.lunaire.moe" = {};
     certs."vw.lunaire.moe" = {};
   };
 
@@ -42,6 +43,10 @@
     virtualHosts."qbt.lunaire.moe".extraConfig = ''
       tls /var/lib/acme/qbt.lunaire.moe/cert.pem /var/lib/acme/qbt.lunaire.moe/key.pem
       reverse_proxy ${config.vpnNamespaces.qbtvpn.namespaceAddress}:4000
+    '';
+    virtualHosts."up.lunaire.moe".extraConfig = ''
+      tls /var/lib/acme/up.lunaire.moe/cert.pem /var/lib/acme/up.lunaire.moe/key.pem
+      reverse_proxy localhost:8000
     '';
     virtualHosts."vw.lunaire.moe".extraConfig = ''
       tls /var/lib/acme/vw.lunaire.moe/cert.pem /var/lib/acme/vw.lunaire.moe/key.pem

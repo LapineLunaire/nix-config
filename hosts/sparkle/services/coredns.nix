@@ -9,7 +9,7 @@
     $TTL 3600
 
     @       IN SOA  sparkle.lunaire.moe. hostmaster.lunaire.moe. (
-                    2025010101 ; serial
+                    2026040301 ; serial
                     3600       ; refresh
                     900        ; retry
                     604800     ; expire
@@ -24,6 +24,7 @@
     ha       IN CNAME sparkle.lunaire.moe.
     pga      IN CNAME sparkle.lunaire.moe.
     qbt      IN CNAME sparkle.lunaire.moe.
+    up       IN CNAME sparkle.lunaire.moe.
     vw       IN CNAME sparkle.lunaire.moe.
   '';
 
@@ -33,7 +34,7 @@
     $TTL 3600
 
     @       IN SOA  sparkle.lunaire.moe. hostmaster.lunaire.moe. (
-                    2025010101 ; serial
+                    2026040301 ; serial
                     3600       ; refresh
                     900        ; retry
                     604800     ; expire

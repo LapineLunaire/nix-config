@@ -8,6 +8,7 @@
     ./proxy.nix
     ./qbittorrent.nix
     ./smb.nix
+    ./uptime-kuma.nix
     ./vaultwarden.nix
   ];
 }
