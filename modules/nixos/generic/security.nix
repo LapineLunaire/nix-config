@@ -15,6 +15,10 @@
     "net.ipv6.conf.default.rp_filter" = 1;
   };
 
+  security.apparmor.enable = true;
+  security.apparmor.enableCache = true;
+  security.apparmor.killUnconfinedConfinables = true;
+
   security.polkit.enable = true;
 
   # Allow wheel group members to reboot and power off without a password prompt.
