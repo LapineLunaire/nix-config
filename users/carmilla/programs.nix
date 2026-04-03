@@ -55,6 +55,14 @@ lib.mkMerge [
       defaultEditor = true;
       viAlias = true;
       vimAlias = true;
+      initLua = ''
+        vim.opt.number = true
+        vim.opt.relativenumber = true
+        vim.opt.signcolumn = 'yes'
+        vim.opt.termguicolors = true
+        vim.opt.undofile = true
+        vim.opt.clipboard = 'unnamedplus'
+      '';
     };
 
     programs.tealdeer = {
@@ -167,7 +175,9 @@ lib.mkMerge [
 
       vim.api.nvim_create_autocmd('LspAttach', {
         callback = function(args)
+          local group = vim.api.nvim_create_augroup('lsp_format_' .. args.buf, { clear = true })
           vim.api.nvim_create_autocmd('BufWritePre', {
+            group = group,
             buffer = args.buf,
             callback = function()
               vim.lsp.buf.format({ bufnr = args.buf })
@@ -175,7 +185,12 @@ lib.mkMerge [
           })
         end,
       })
+
+      require('gruvbox').setup({ contrast = 'hard' })
+      vim.cmd('colorscheme gruvbox')
     '';
+
+    programs.neovim.plugins = with pkgs.vimPlugins; [ gruvbox-nvim ];
 
     programs.ssh = {
       enable = true;
