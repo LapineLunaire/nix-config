@@ -54,7 +54,7 @@
 
     templates."vaultwarden.env".content = ''
       ADMIN_TOKEN=${config.sops.placeholder."vaultwarden-admin-token"}
-      DATABASE_URL=postgresql://vaultwarden:${config.sops.placeholder."vaultwarden-db-password"}@10.28.32.25/vaultwarden
+      DATABASE_URL=postgresql://vaultwarden:${config.sops.placeholder."vaultwarden-db-password"}@localhost/vaultwarden
     '';
   };
 

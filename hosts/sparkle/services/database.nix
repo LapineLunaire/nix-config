@@ -1,11 +1,7 @@
-{
-  config,
-  lib,
-  ...
-}: {
+{config, ...}: {
   services.postgresql = {
     enable = true;
-    settings.listen_addresses = lib.mkForce "localhost,10.28.32.25";
+
     ensureDatabases = ["forgejo" "vaultwarden"];
     ensureUsers = [
       {
@@ -23,7 +19,7 @@
     ];
     authentication = ''
       # Allow localhost and the Docker bridge subnet (172.17.0.0/16) to connect.
-      # The Docker subnet is needed for containerized services (pgAdmin, Vaultwarden).
+      # The Docker subnet is needed for containerized services (pgAdmin).
       host all all 127.0.0.1/32 scram-sha-256
       host all all ::1/128 scram-sha-256
       host all all 172.17.0.0/16 scram-sha-256

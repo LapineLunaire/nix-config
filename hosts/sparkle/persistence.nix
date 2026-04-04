@@ -5,6 +5,7 @@
       "/var/lib/acme"
       "/var/lib/docker"
       "/var/lib/forgejo"
+      "/var/lib/vaultwarden"
       "/var/lib/nixos"
       "/var/lib/postgresql"
       "/var/lib/private"
