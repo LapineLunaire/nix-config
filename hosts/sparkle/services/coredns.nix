@@ -9,7 +9,7 @@
     $TTL 3600
 
     @       IN SOA  sparkle.lunaire.moe. hostmaster.lunaire.moe. (
-                    2026040301 ; serial — format YYYYMMDDnn, bump on every zone change
+                    2026040401 ; serial — format YYYYMMDDnn, bump on every zone change
                     3600       ; refresh
                     900        ; retry
                     604800     ; expire
@@ -22,6 +22,7 @@
     camellya IN A    10.28.64.96
     git      IN CNAME sparkle.lunaire.moe.
     ha       IN CNAME sparkle.lunaire.moe.
+    misc     IN CNAME sparkle.lunaire.moe.
     pga      IN CNAME sparkle.lunaire.moe.
     qbt      IN CNAME sparkle.lunaire.moe.
     up       IN CNAME sparkle.lunaire.moe.

@@ -20,6 +20,7 @@
     certs."pga.lunaire.moe" = {};
     certs."qbt.lunaire.moe" = {};
     certs."up.lunaire.moe" = {};
+    certs."misc.lunaire.moe" = {};
     certs."vw.lunaire.moe" = {};
   };
 
@@ -47,6 +48,11 @@
     virtualHosts."up.lunaire.moe".extraConfig = ''
       tls /var/lib/acme/up.lunaire.moe/cert.pem /var/lib/acme/up.lunaire.moe/key.pem
       reverse_proxy localhost:8000
+    '';
+    virtualHosts."misc.lunaire.moe".extraConfig = ''
+      tls /var/lib/acme/misc.lunaire.moe/cert.pem /var/lib/acme/misc.lunaire.moe/key.pem
+      root * /mnt/samba/misc
+      file_server browse
     '';
     virtualHosts."vw.lunaire.moe".extraConfig = ''
       tls /var/lib/acme/vw.lunaire.moe/cert.pem /var/lib/acme/vw.lunaire.moe/key.pem
