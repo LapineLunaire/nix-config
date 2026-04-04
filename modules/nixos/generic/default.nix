@@ -28,6 +28,7 @@ in {
       experimental-features = ["nix-command" "flakes"];
       flake-registry = ""; # disable global registry, only use pinned inputs
       auto-optimise-store = true;
+      allowed-users = ["@users"];
     };
     channel.enable = false;
     # Pin nix.registry and nixPath to flake inputs

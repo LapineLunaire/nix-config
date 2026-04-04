@@ -1,4 +1,6 @@
 {...}: {
+  networking.firewall.enable = true;
+
   services.dbus.implementation = "broker";
   services.fstrim.enable = true;
   services.fwupd.enable = true;
