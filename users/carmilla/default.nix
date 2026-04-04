@@ -44,26 +44,22 @@
 
     options.userConfig.desktop.enable = lib.mkEnableOption "desktop environment configuration";
 
-    config = lib.mkMerge [
-      {
-        home = {
-          username = "carmilla";
-          homeDirectory = osConfig.users.users.carmilla.home;
-          stateVersion = "26.05";
-        };
+    config = {
+      home = {
+        username = "carmilla";
+        homeDirectory = osConfig.users.users.carmilla.home;
+        stateVersion = "26.05";
+      };
 
-        programs.home-manager.enable = true;
+      programs.home-manager.enable = true;
 
-        home.sessionVariables = {
-          PAGER = "nvimpager";
-          MANPAGER = "nvimpager";
-        };
-      }
+      home.sessionVariables = {
+        PAGER = "nvimpager";
+        MANPAGER = "nvimpager";
+      };
 
-      (lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-        # Activate new and changed systemd user services on `home-manager switch` without requiring a logout/login cycle.
-        systemd.user.startServices = "sd-switch";
-      })
-    ];
+      # Activate new and changed systemd user services on `home-manager switch` without requiring a logout/login cycle.
+      systemd.user.startServices = lib.mkIf pkgs.stdenv.hostPlatform.isLinux "sd-switch";
+    };
   };
 }
