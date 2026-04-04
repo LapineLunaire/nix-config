@@ -1,6 +1,8 @@
 {...}: {
   imports = [
+    ./cloudflared.nix
     ./coredns.nix
+    ./filebrowser.nix
     ./database.nix
     ./git.nix
     ./homeassistant.nix
