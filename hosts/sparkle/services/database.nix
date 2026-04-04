@@ -1,7 +1,12 @@
-{config, ...}: {
+{
+  config,
+  lib,
+  ...
+}: {
   services.postgresql = {
     enable = true;
-
+    # Also listen on the docker0 gateway so containerized services (pgAdmin) can connect.
+    settings.listen_addresses = lib.mkForce "localhost,172.17.0.1";
     ensureDatabases = ["forgejo" "vaultwarden"];
     ensureUsers = [
       {
