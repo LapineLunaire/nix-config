@@ -34,7 +34,7 @@
   networking.firewall.interfaces."docker0".allowedTCPPorts = [5432];
 
   virtualisation.oci-containers.containers.pgadmin = {
-    image = "dpage/pgadmin4:latest";
+    image = "dpage/pgadmin4@sha256:ff557f69d9808085dc3554f56c1b06a36ac8cddabe4485212920b9604261abdb";
     autoStart = true;
     environment = {
       PGADMIN_DEFAULT_EMAIL = "lapine@lunaire.eu";
