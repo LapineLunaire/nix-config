@@ -43,10 +43,6 @@
     "d '/var/lib/private' 0700 root root - -"
     "z '/var/lib/private' 0700 root root - -"
 
-    # File Browser data
-    "d '/var/lib/filebrowser' 0750 filebrowser filebrowser - -"
-    "z '/var/lib/filebrowser' 0750 filebrowser filebrowser - -"
-
     # Secure Boot keys directory
     "d '/var/lib/sbctl' 0700 root root - -"
     "z '/var/lib/sbctl' 0700 root root - -"

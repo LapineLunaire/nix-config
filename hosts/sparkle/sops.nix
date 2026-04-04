@@ -6,7 +6,7 @@
     secrets = {
       "carmilla-password-hash".neededForUsers = true;
       "cloudflare-dns-api-token" = {};
-      "cloudflare-tunnel-token" = {};
+      "wireguard-private-key" = {};
       "forgejo-runner-token" = {};
       "network/ipmi0-mac" = {};
       "network/sfp0-mac" = {};
@@ -57,12 +57,6 @@
       ADMIN_TOKEN=${config.sops.placeholder."vaultwarden-admin-token"}
       DATABASE_URL=postgresql://vaultwarden:${config.sops.placeholder."vaultwarden-db-password"}@localhost/vaultwarden
     '';
-    templates."cloudflare-tunnel.env" = {
-      content = ''
-        TUNNEL_TOKEN=${config.sops.placeholder."cloudflare-tunnel-token"}
-      '';
-      owner = "cloudflared";
-    };
   };
 
   environment.etc = {

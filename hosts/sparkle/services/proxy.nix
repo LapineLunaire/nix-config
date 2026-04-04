@@ -60,5 +60,10 @@
         header_up X-Real-IP {remote_host}
       }
     '';
+    # Public file server, accessible only via sparxie over WireGuard.
+    virtualHosts."http://10.73.212.2:9000".extraConfig = ''
+      root * /mnt/samba/misc
+      file_server browse
+    '';
   };
 }

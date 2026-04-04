@@ -8,6 +8,8 @@
       "cloudflare-dns-api-token" = {};
       "ejabberd-sql-password" = {};
       "tuwunel-registration-token" = {};
+      "wireguard-private-key" = {};
+      "pub-bnnuy-password-hash" = {};
     };
 
     templates."cloudflare-dns-api-token.env" = {
@@ -280,5 +282,14 @@
     templates."tuwunel.env".content = ''
       TUWUNEL_REGISTRATION_TOKEN=${config.sops.placeholder."tuwunel-registration-token"}
     '';
+
+    templates."caddy-pub-bnnuy-basicauth" = {
+      owner = "caddy";
+      content = ''
+        basic_auth {
+          bnnuy ${config.sops.placeholder."pub-bnnuy-password-hash"}
+        }
+      '';
+    };
   };
 }

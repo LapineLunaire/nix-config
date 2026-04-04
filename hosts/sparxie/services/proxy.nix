@@ -36,6 +36,7 @@ in {
     ];
     certs."chat.bunny.enterprises" = {};
     certs."matrix.bunny.enterprises" = {};
+    certs."pub.bunny.enterprises" = {};
   };
 
   users.users.caddy.extraGroups = ["acme"];
@@ -56,6 +57,13 @@ in {
     virtualHosts."matrix.bunny.enterprises:8448".extraConfig = ''
       tls /var/lib/acme/matrix.bunny.enterprises/cert.pem /var/lib/acme/matrix.bunny.enterprises/key.pem
       reverse_proxy [::1]:6167
+    '';
+    virtualHosts."pub.bunny.enterprises".extraConfig = ''
+      tls /var/lib/acme/pub.bunny.enterprises/cert.pem /var/lib/acme/pub.bunny.enterprises/key.pem
+      import ${config.sops.templates."caddy-pub-bnnuy-basicauth".path}
+      reverse_proxy 10.73.212.2:9000 {
+        header_up Host {upstream_hostport}
+      }
     '';
   };
 }
