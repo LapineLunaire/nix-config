@@ -4,6 +4,7 @@
     directories = [
       "/var/lib/acme"
       "/var/lib/docker"
+      "/var/lib/filebrowser"
       "/var/lib/forgejo"
       "/var/lib/vaultwarden"
       "/var/lib/nixos"
