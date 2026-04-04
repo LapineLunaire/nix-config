@@ -1,0 +1,42 @@
+name: Update Container Digests
+
+on:
+  schedule:
+    - cron: "0 2 * * 1"
+  workflow_dispatch: {}
+
+jobs:
+  update:
+    runs-on: debian
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install skopeo
+        run: apt update && apt install -y skopeo
+
+      - name: Update digests
+        run: |
+          pgadmin=$(skopeo inspect --format '{{.Digest}}' docker://dpage/pgadmin4:latest)
+          ha=$(skopeo inspect --format '{{.Digest}}' docker://ghcr.io/home-assistant/home-assistant:stable)
+
+          sed -i "s|dpage/pgadmin4@sha256:[a-f0-9]*|dpage/pgadmin4@${pgadmin}|" hosts/sparkle/services/database.nix
+          sed -i "s|home-assistant/home-assistant@sha256:[a-f0-9]*|home-assistant/home-assistant@${ha}|" hosts/sparkle/services/homeassistant.nix
+
+      - name: Check for changes
+        id: check
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and push
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          git config user.name "Lapine"
+          git config user.email "lapine@lunaire.eu"
+          git add hosts/sparkle/services/database.nix hosts/sparkle/services/homeassistant.nix
+          git commit -m "sparkle: update container image digests $(date +%Y-%m-%d)"
+          git push
