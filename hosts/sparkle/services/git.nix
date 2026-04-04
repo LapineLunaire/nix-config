@@ -38,6 +38,7 @@
         container = {
           network = "bridge";
           docker_host = "-";
+          pull_policy = "always";
         };
       };
     };
