@@ -48,6 +48,10 @@
     # qBittorrent runs in the qbtvpn network namespace, so it is unreachable on localhost. Proxy to the namespace's veth address instead.
     virtualHosts."qbt.lunaire.moe".extraConfig = ''
       tls /var/lib/acme/qbt.lunaire.moe/cert.pem /var/lib/acme/qbt.lunaire.moe/key.pem
+      forward_auth localhost:2000 {
+        uri /api/authz/forward-auth
+        copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+      }
       reverse_proxy ${config.vpnNamespaces.qbtvpn.namespaceAddress}:4000
     '';
     virtualHosts."up.lunaire.moe".extraConfig = ''

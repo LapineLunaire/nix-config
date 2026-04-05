@@ -33,6 +33,12 @@
     owner = "authelia-main";
   };
 
+  services.redis.servers.authelia = {
+    enable = true;
+    bind = "127.0.0.1";
+    port = 6380;
+  };
+
   services.authelia.instances.main = {
     enable = true;
     settingsFiles = [config.sops.templates."authelia.yaml".path];
@@ -47,12 +53,18 @@
       theme = "dark";
       log.level = "info";
       server.address = "tcp://127.0.0.1:2000/";
-      session.cookies = [
-        {
-          domain = "lunaire.moe";
-          authelia_url = "https://auth.lunaire.moe";
-        }
-      ];
+      session = {
+        redis = {
+          host = "127.0.0.1";
+          port = 6380;
+        };
+        cookies = [
+          {
+            domain = "lunaire.moe";
+            authelia_url = "https://auth.lunaire.moe";
+          }
+        ];
+      };
       storage.postgres = {
         address = "tcp://localhost:5432";
         database = "authelia";
@@ -66,7 +78,16 @@
         selection_criteria.user_verification = "preferred";
         timeout = "60s";
       };
-      access_control.default_policy = "two_factor";
+      access_control = {
+        default_policy = "two_factor";
+        rules = [
+          {
+            domain = "qbt.lunaire.moe";
+            policy = "two_factor";
+            subject = ["group:admins"];
+          }
+        ];
+      };
       notifier.smtp = {
         address = "smtp://smtp.protonmail.ch:587";
         username = "noreply@lunaire.eu";
