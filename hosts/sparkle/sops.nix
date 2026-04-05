@@ -21,6 +21,8 @@
       "authelia-oidc-hmac-secret".owner = "authelia-main";
       "authelia-oidc-issuer-key".owner = "authelia-main";
       "authelia-forgejo-client-secret-hash" = {};
+      "redis-authelia-password".owner = "redis-authelia";
+      "smtp-password" = {};
       "pgadmin-password" = {};
       "protonvpn-qbittorrent-conf" = {};
       "vaultwarden-admin-token" = {};
