@@ -8,6 +8,7 @@
       "cloudflare-dns-api-token" = {};
       "wireguard-private-key" = {};
       "forgejo-runner-token" = {};
+      "forgejo-smtp-password" = {};
       "network/ipmi0-mac" = {};
       "network/sfp0-mac" = {};
       "network/sfp1-mac" = {};
@@ -56,6 +57,10 @@
 
     templates."forgejo-runner-token.env".content = ''
       TOKEN=${config.sops.placeholder."forgejo-runner-token"}
+    '';
+
+    templates."forgejo.env".content = ''
+      FORGEJO__mailer__PASSWD=${config.sops.placeholder."forgejo-smtp-password"}
     '';
 
     templates."pgadmin.env".content = ''
