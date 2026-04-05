@@ -7,8 +7,12 @@
     enable = true;
     # Also listen on the docker0 gateway so containerized services (pgAdmin) can connect.
     settings.listen_addresses = lib.mkForce "localhost,172.17.0.1";
-    ensureDatabases = ["forgejo" "vaultwarden"];
+    ensureDatabases = ["authelia" "forgejo" "vaultwarden"];
     ensureUsers = [
+      {
+        name = "authelia";
+        ensureDBOwnership = true;
+      }
       {
         name = "forgejo";
         ensureDBOwnership = true;

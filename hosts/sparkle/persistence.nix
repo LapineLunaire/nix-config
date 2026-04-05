@@ -3,6 +3,7 @@
     hideMounts = true;
     directories = [
       "/var/lib/acme"
+      "/var/lib/authelia-main"
       "/var/lib/docker"
       "/var/lib/filebrowser"
       "/var/lib/forgejo"

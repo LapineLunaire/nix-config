@@ -11,6 +11,12 @@
       "network/ipmi0-mac" = {};
       "network/sfp0-mac" = {};
       "network/sfp1-mac" = {};
+      "authelia-jwt-secret".owner = "authelia-main";
+      "authelia-session-secret".owner = "authelia-main";
+      "authelia-storage-encryption-key".owner = "authelia-main";
+      "authelia-users".owner = "authelia-main";
+      "authelia-db-password" = {};
+      "authelia-smtp-password" = {};
       "pgadmin-password" = {};
       "protonvpn-qbittorrent-conf" = {};
       "vaultwarden-admin-token" = {};

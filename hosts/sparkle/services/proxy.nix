@@ -15,6 +15,7 @@
         "1.1.1.1:53"
       ];
     };
+    certs."auth.lunaire.moe" = {};
     certs."git.lunaire.moe" = {};
     certs."ha.lunaire.moe" = {};
     certs."pga.lunaire.moe" = {};
@@ -28,6 +29,10 @@
 
   services.caddy = {
     enable = true;
+    virtualHosts."auth.lunaire.moe".extraConfig = ''
+      tls /var/lib/acme/auth.lunaire.moe/cert.pem /var/lib/acme/auth.lunaire.moe/key.pem
+      reverse_proxy localhost:2000
+    '';
     virtualHosts."git.lunaire.moe".extraConfig = ''
       tls /var/lib/acme/git.lunaire.moe/cert.pem /var/lib/acme/git.lunaire.moe/key.pem
       reverse_proxy localhost:3000

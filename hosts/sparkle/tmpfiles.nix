@@ -1,5 +1,9 @@
 {...}: {
   systemd.tmpfiles.rules = [
+    # Authelia state directory
+    "d '/var/lib/authelia-main' 0700 authelia-main authelia-main - -"
+    "z '/var/lib/authelia-main' 0700 authelia-main authelia-main - -"
+
     # ACME certificates
     "d '/var/lib/acme' 0750 acme acme - -"
     "z '/var/lib/acme' 0750 acme acme - -"
