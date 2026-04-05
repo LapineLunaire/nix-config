@@ -17,6 +17,9 @@
       "authelia-users".owner = "authelia-main";
       "authelia-db-password" = {};
       "authelia-smtp-password" = {};
+      "authelia-oidc-hmac-secret".owner = "authelia-main";
+      "authelia-oidc-issuer-key".owner = "authelia-main";
+      "authelia-forgejo-client-secret-hash" = {};
       "pgadmin-password" = {};
       "protonvpn-qbittorrent-conf" = {};
       "vaultwarden-admin-token" = {};

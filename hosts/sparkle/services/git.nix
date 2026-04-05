@@ -15,7 +15,11 @@
         ROOT_URL = "https://git.lunaire.moe/";
         HTTP_PORT = 3000;
       };
-      service.DISABLE_REGISTRATION = true;
+      service = {
+        DISABLE_REGISTRATION = true;
+        ALLOW_ONLY_EXTERNAL_REGISTRATION = true;
+        SHOW_REGISTRATION_BUTTON = false;
+      };
       actions = {
         ENABLED = true;
         DEFAULT_ACTIONS_URL = "github";
