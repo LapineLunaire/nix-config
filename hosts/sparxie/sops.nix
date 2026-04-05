@@ -7,6 +7,7 @@
       "carmilla-password-hash".neededForUsers = true;
       "cloudflare-dns-api-token" = {};
       "ejabberd-sql-password" = {};
+      "redis-password".owner = "redis";
       "tuwunel-registration-token" = {};
       "wireguard-private-key" = {};
       "pub-bnnuy-password-hash" = {};
@@ -35,6 +36,7 @@
 
         redis_server: 127.0.0.1
         redis_db: 1
+        redis_password: ${config.sops.placeholder."redis-password"}
 
         disable_sasl_mechanisms: ["DIGEST-MD5", "PLAIN"]
 

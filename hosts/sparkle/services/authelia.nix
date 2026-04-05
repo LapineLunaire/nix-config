@@ -6,6 +6,9 @@
       storage:
         postgres:
           password: '${config.sops.placeholder."authelia-db-password"}'
+      session:
+        redis:
+          password: '${config.sops.placeholder."redis-authelia-password"}'
       notifier:
         smtp:
           password: '${config.sops.placeholder."authelia-smtp-password"}'
@@ -37,6 +40,7 @@
     enable = true;
     bind = "127.0.0.1";
     port = 6380;
+    requirePassFile = config.sops.secrets."redis-authelia-password".path;
   };
 
   services.authelia.instances.main = {
@@ -78,16 +82,7 @@
         selection_criteria.user_verification = "preferred";
         timeout = "60s";
       };
-      access_control = {
-        default_policy = "two_factor";
-        rules = [
-          {
-            domain = "qbt.lunaire.moe";
-            policy = "two_factor";
-            subject = ["group:admins"];
-          }
-        ];
-      };
+      access_control.default_policy = "two_factor";
       notifier.smtp = {
         address = "smtp://smtp.protonmail.ch:587";
         username = "noreply@lunaire.eu";

@@ -1,4 +1,4 @@
-{...}: {
+{config, ...}: {
   services.postgresql = {
     enable = true;
     ensureDatabases = ["ejabberd"];
@@ -23,5 +23,6 @@
     enable = true;
     bind = "127.0.0.1";
     port = 6379;
+    requirePassFile = config.sops.secrets."redis-password".path;
   };
 }

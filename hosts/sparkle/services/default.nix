@@ -2,6 +2,7 @@
   imports = [
     ./authelia.nix
     ./coredns.nix
+    ./monitoring.nix
     ./database.nix
     ./git.nix
     ./homeassistant.nix
