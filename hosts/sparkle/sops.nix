@@ -21,6 +21,8 @@
       "authelia-oidc-hmac-secret".owner = "authelia-main";
       "authelia-oidc-issuer-key".owner = "authelia-main";
       "authelia-forgejo-client-secret-hash" = {};
+      "pgadmin-oidc-client-secret" = {};
+      "pgadmin-oidc-client-secret-hash" = {};
       "redis-authelia-password".owner = "redis-authelia";
       "smtp-password" = {};
       "pgadmin-password" = {};
@@ -68,6 +70,9 @@
 
     templates."pgadmin.env".content = ''
       PGADMIN_DEFAULT_PASSWORD=${config.sops.placeholder."pgadmin-password"}
+      PGADMIN_CONFIG_AUTHENTICATION_SOURCES=['oauth2']
+      PGADMIN_CONFIG_OAUTH2_AUTO_CREATE_USER=True
+      PGADMIN_CONFIG_OAUTH2_CONFIG=[{'OAUTH2_NAME': 'authelia', 'OAUTH2_DISPLAY_NAME': 'Lunaire SSO', 'OAUTH2_CLIENT_ID': 'pgadmin', 'OAUTH2_CLIENT_SECRET': '${config.sops.placeholder."pgadmin-oidc-client-secret"}', 'OAUTH2_SERVER_METADATA_URL': 'https://auth.lunaire.moe/.well-known/openid-configuration', 'OAUTH2_SCOPE': 'openid email profile', 'OAUTH2_USERNAME_CLAIM': 'preferred_username'}]
     '';
 
     templates."vaultwarden.env".content = ''
