@@ -24,6 +24,7 @@
     casks = [
       "altserver"
       "appcleaner"
+      "linearmouse"
       "ghostty"
       "obs"
       "playcover-community"
