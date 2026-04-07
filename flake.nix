@@ -2,7 +2,7 @@
   description = "Carmilla's nix config";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable-small";
 
     aagl = {
       url = "github:ezKEa/aagl-gtk-on-nix";
