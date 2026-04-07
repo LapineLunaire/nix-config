@@ -1,4 +1,4 @@
-{...}: {
+{pkgs, ...}: {
   # "!" locks the root account — no password login is possible.
   users.users.root.hashedPassword = "!";
   users.mutableUsers = false;
@@ -43,6 +43,21 @@
   security.apparmor.enable = true;
   security.apparmor.enableCache = true;
   security.apparmor.killUnconfinedConfinables = true;
+
+  security.sudo.enable = false;
+
+  security.doas = {
+    enable = true;
+    extraRules = [
+      {
+        groups = ["wheel"];
+        keepEnv = true;
+        persist = true;
+      }
+    ];
+  };
+
+  environment.systemPackages = [pkgs.doas-sudo-shim];
 
   security.polkit.enable = true;
 

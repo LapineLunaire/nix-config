@@ -1,7 +1,4 @@
-{
-  config,
-  ...
-}: {
+{config, ...}: {
   # System SMTP relay so automated daemons (smartd) can send alerts via ProtonMail.
   programs.msmtp = {
     enable = true;
