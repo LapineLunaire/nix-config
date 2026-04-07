@@ -3,6 +3,41 @@
   pkgs,
   ...
 }: let
+  # Static well-known files previously served via Cloudflare Pages (bunny-web).
+  # Served by Caddy directly from the Nix store — no persistence needed.
+  bunnyWellKnown = pkgs.runCommand "bunny-well-known" {} ''
+    mkdir -p $out/.well-known/matrix
+    cp ${pkgs.writeText "host-meta" ''
+      <?xml version='1.0' encoding='utf-8'?>
+      <XRD xmlns='http://docs.oasis-open.org/ns/xri/xrd-1.0'>
+        <Link rel="urn:xmpp:alt-connections:xbosh"
+              href="https://xmpp.bunny.enterprises:5443/bosh" />
+        <Link rel="urn:xmpp:alt-connections:websocket"
+              href="wss://xmpp.bunny.enterprises:5443/ws" />
+      </XRD>
+    ''} $out/.well-known/host-meta
+    cp ${pkgs.writeText "host-meta.json" ''
+      {
+        "links": [
+          {
+            "rel": "urn:xmpp:alt-connections:xbosh",
+            "href": "https://xmpp.bunny.enterprises:5443/bosh"
+          },
+          {
+            "rel": "urn:xmpp:alt-connections:websocket",
+            "href": "wss://xmpp.bunny.enterprises:5443/ws"
+          }
+        ]
+      }
+    ''} $out/.well-known/host-meta.json
+    cp ${pkgs.writeText "matrix-client" ''
+      {"m.homeserver": {"base_url": "https://matrix.bunny.enterprises"}}
+    ''} $out/.well-known/matrix/client
+    cp ${pkgs.writeText "matrix-server" ''
+      {"m.server": "matrix.bunny.enterprises:443"}
+    ''} $out/.well-known/matrix/server
+  '';
+
   element-web = pkgs.element-web.override {
     conf.default_server_config."m.homeserver" = {
       base_url = "https://matrix.bunny.enterprises";
@@ -44,6 +79,29 @@ in {
 
   services.caddy = {
     enable = true;
+    virtualHosts."bunny.enterprises".extraConfig = ''
+      tls /var/lib/acme/bunny.enterprises/cert.pem /var/lib/acme/bunny.enterprises/key.pem
+
+      header /.well-known/* {
+        X-Frame-Options "DENY"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "no-referrer"
+      }
+      @hostMeta path /.well-known/host-meta
+      header @hostMeta Content-Type "application/xrd+xml"
+      header @hostMeta Access-Control-Allow-Origin "*"
+
+      @hostMetaJson path /.well-known/host-meta.json
+      header @hostMetaJson Content-Type "application/jrd+json"
+      header @hostMetaJson Access-Control-Allow-Origin "*"
+
+      @matrix path /.well-known/matrix/*
+      header @matrix Content-Type "application/json"
+      header @matrix Access-Control-Allow-Origin "*"
+
+      root * ${bunnyWellKnown}
+      file_server
+    '';
     virtualHosts."chat.bunny.enterprises".extraConfig = ''
       tls /var/lib/acme/chat.bunny.enterprises/cert.pem /var/lib/acme/chat.bunny.enterprises/key.pem
       root * ${element-web}
