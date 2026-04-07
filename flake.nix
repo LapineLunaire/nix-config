@@ -116,7 +116,6 @@
 
     nixosConfigurations = {
       camellya = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
         specialArgs = commonArgs;
         modules =
           [
@@ -129,7 +128,6 @@
       };
 
       sparkle = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
         specialArgs = commonArgs;
         modules =
           [
@@ -142,7 +140,6 @@
       };
 
       sparxie = nixpkgs.lib.nixosSystem {
-        system = "aarch64-linux";
         specialArgs = commonArgs;
         modules =
           [
