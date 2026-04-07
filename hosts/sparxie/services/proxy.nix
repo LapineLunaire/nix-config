@@ -104,6 +104,9 @@ in {
       header @matrix Content-Type "application/json"
       header @matrix Access-Control-Allow-Origin "*"
 
+      @root path /
+      redir @root https://youtu.be/eioYulMp_5k temporary
+
       root * ${bunnyWellKnown}
       file_server
     '';
