@@ -25,6 +25,7 @@
     ])
     ++ lib.optionals (config.userConfig.desktop.enable || pkgs.stdenv.hostPlatform.isDarwin) (with pkgs; [
       alejandra
+      azahar
       bat
       discord
       duf
