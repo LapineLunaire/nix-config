@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: {
   config = lib.mkIf config.userConfig.desktop.enable {
@@ -12,9 +13,29 @@
       Service.Restart = lib.mkForce "always";
     };
 
-    services.gnome-keyring = {
-      enable = true;
-      components = ["secrets"];
+    # oo7 is a modern Secret Service implementation (replaces gnome-keyring).
+    # Auto-unlock on login is handled by pam_oo7 (custom package) in the system PAM config.
+    systemd.user.services.oo7-daemon = {
+      Unit.Description = "Secret service (oo7 implementation)";
+      Service = {
+        Type = "simple";
+        ExecStart = "${pkgs.oo7-server}/libexec/oo7-daemon";
+        Restart = "on-failure";
+        TimeoutStartSec = "30s";
+        TimeoutStopSec = "30s";
+        NoNewPrivileges = true;
+        PrivateUsers = true;
+        ProtectSystem = "full";
+        PrivateTmp = true;
+        PrivateDevices = true;
+        PrivateNetwork = true;
+        ProtectKernelTunables = true;
+        ProtectKernelModules = true;
+        ProtectControlGroups = true;
+        MemoryDenyWriteExecute = true;
+        ProtectClock = true;
+      };
+      Install.WantedBy = ["default.target"];
     };
 
     services.hypridle = {
