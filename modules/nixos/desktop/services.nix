@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  config,
+  ...
+}: {
   services.kmscon = {
     enable = true;
     hwRender = true;
@@ -18,10 +22,43 @@
     freeSwapThreshold = 2;
   };
 
-  # Unlock the GNOME Keyring on login so applications can access stored secrets without a separate unlock prompt.
-  services.gnome.gnome-keyring.enable = true;
-  security.pam.services.greetd.enableGnomeKeyring = true;
-  security.pam.services.login.enableGnomeKeyring = true;
+  # pam_oo7 stashes the login password during auth and sends it to the oo7 daemon during session open, unlocking the keyring automatically without a separate prompt.
+  security.pam.services.greetd.rules = {
+    auth.oo7 = {
+      order = config.security.pam.services.greetd.rules.auth.unix.order + 10;
+      control = "optional";
+      modulePath = "${pkgs.pam_oo7}/lib/security/pam_oo7.so";
+    };
+    session.oo7 = {
+      order = config.security.pam.services.greetd.rules.session.unix.order + 10;
+      control = "optional";
+      modulePath = "${pkgs.pam_oo7}/lib/security/pam_oo7.so";
+      settings.auto_start = true;
+    };
+    password.oo7 = {
+      order = config.security.pam.services.greetd.rules.password.unix.order + 10;
+      control = "optional";
+      modulePath = "${pkgs.pam_oo7}/lib/security/pam_oo7.so";
+    };
+  };
+  security.pam.services.login.rules = {
+    auth.oo7 = {
+      order = config.security.pam.services.login.rules.auth.unix.order + 10;
+      control = "optional";
+      modulePath = "${pkgs.pam_oo7}/lib/security/pam_oo7.so";
+    };
+    session.oo7 = {
+      order = config.security.pam.services.login.rules.session.unix.order + 10;
+      control = "optional";
+      modulePath = "${pkgs.pam_oo7}/lib/security/pam_oo7.so";
+      settings.auto_start = true;
+    };
+    password.oo7 = {
+      order = config.security.pam.services.login.rules.password.unix.order + 10;
+      control = "optional";
+      modulePath = "${pkgs.pam_oo7}/lib/security/pam_oo7.so";
+    };
+  };
 
   # UWSM manages the Hyprland session as a set of systemd user units, enabling proper session lifecycle, cgroup tracking, and clean shutdown.
   services.greetd = {
