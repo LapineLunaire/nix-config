@@ -1,5 +1,6 @@
 {lib, ...}: {
   imports = [
+    ./backup.nix
     ./database.nix
     ./ejabberd.nix
     ./fail2ban.nix
