@@ -47,6 +47,10 @@
     "d '/var/lib/private' 0700 root root - -"
     "z '/var/lib/private' 0700 root root - -"
 
+    # Kavita data
+    "d '/var/lib/kavita' 0750 kavita kavita - -"
+    "z '/var/lib/kavita' 0750 kavita kavita - -"
+
     # Secure Boot keys directory
     "d '/var/lib/sbctl' 0700 root root - -"
     "z '/var/lib/sbctl' 0700 root root - -"

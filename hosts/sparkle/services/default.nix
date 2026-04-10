@@ -5,6 +5,7 @@
     ./monitoring.nix
     ./database.nix
     ./git.nix
+    ./kavita.nix
     ./homeassistant.nix
     ./iperf3.nix
     ./proxy.nix
