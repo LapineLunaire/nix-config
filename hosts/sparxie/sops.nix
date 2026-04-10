@@ -11,6 +11,10 @@
       "tuwunel-registration-token" = {};
       "wireguard-private-key" = {};
       "pub-bnnuy-password-hash" = {};
+      "borg-passphrase" = {};
+      "borg-ssh-key" = {};
+      "borg-repo" = {};
+      "borg-known-hosts" = {};
     };
 
     templates."cloudflare-dns-api-token.env" = {
@@ -283,6 +287,10 @@
     # Registration is open but token-gated. The token is injected via an env var so it doesn't appear in the world-readable tuwunel config file.
     templates."tuwunel.env".content = ''
       TUWUNEL_REGISTRATION_TOKEN=${config.sops.placeholder."tuwunel-registration-token"}
+    '';
+
+    templates."borg-known-hosts".content = ''
+      ${config.sops.placeholder."borg-known-hosts"}
     '';
 
     templates."caddy-pub-bnnuy-basicauth" = {

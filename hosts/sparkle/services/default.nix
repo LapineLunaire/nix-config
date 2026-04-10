@@ -1,6 +1,7 @@
 {...}: {
   imports = [
     ./authelia.nix
+    ./backup.nix
     ./coredns.nix
     ./monitoring.nix
     ./database.nix

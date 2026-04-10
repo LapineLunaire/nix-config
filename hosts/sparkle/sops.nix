@@ -30,6 +30,10 @@
       "vaultwarden-admin-token" = {};
       "vaultwarden-db-password" = {};
       "vaultwarden-smtp-password" = {};
+      "borg-passphrase" = {};
+      "borg-ssh-key" = {};
+      "borg-repo" = {};
+      "borg-known-hosts" = {};
     };
 
     templates."10-ipmi0.link".content = ''
@@ -73,6 +77,12 @@
       PGADMIN_CONFIG_AUTHENTICATION_SOURCES=['oauth2']
       PGADMIN_CONFIG_OAUTH2_AUTO_CREATE_USER=True
       PGADMIN_CONFIG_OAUTH2_CONFIG=[{'OAUTH2_NAME': 'authelia', 'OAUTH2_DISPLAY_NAME': 'Lunaire SSO', 'OAUTH2_CLIENT_ID': 'pgadmin', 'OAUTH2_CLIENT_SECRET': '${config.sops.placeholder."pgadmin-oidc-client-secret"}', 'OAUTH2_SERVER_METADATA_URL': 'https://auth.lunaire.moe/.well-known/openid-configuration', 'OAUTH2_USERINFO_ENDPOINT': 'https://auth.lunaire.moe/api/oidc/userinfo', 'OAUTH2_SCOPE': 'openid email profile', 'OAUTH2_USERNAME_CLAIM': 'preferred_username'}]
+    '';
+
+    # Full known_hosts line for the storage box.
+    # Get it with: ssh-keyscan -p 23 <hostname>
+    templates."borg-known-hosts".content = ''
+      ${config.sops.placeholder."borg-known-hosts"}
     '';
 
     templates."vaultwarden.env".content = ''
