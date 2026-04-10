@@ -6,6 +6,7 @@
       "/var/lib/authelia-main"
       "/var/lib/docker"
       "/var/lib/forgejo"
+      "/var/lib/kavita"
       "/var/lib/vaultwarden"
       "/var/lib/nixos"
       "/var/lib/postgresql"
