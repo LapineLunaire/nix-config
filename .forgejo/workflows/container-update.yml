@@ -19,9 +19,11 @@ jobs:
         run: |
           pgadmin=$(skopeo inspect --format '{{.Digest}}' docker://dpage/pgadmin4:latest)
           ha=$(skopeo inspect --format '{{.Digest}}' docker://ghcr.io/home-assistant/home-assistant:stable)
+          node=$(skopeo inspect --format '{{.Digest}}' docker://docker.io/library/node:25)
 
           sed -i "s|dpage/pgadmin4@sha256:[a-f0-9]*|dpage/pgadmin4@${pgadmin}|" hosts/sparkle/services/database.nix
           sed -i "s|home-assistant/home-assistant@sha256:[a-f0-9]*|home-assistant/home-assistant@${ha}|" hosts/sparkle/services/homeassistant.nix
+          sed -i "s|node:25@sha256:[a-f0-9]*|node:25@${node}|" hosts/sparkle/services/git.nix
 
       - name: Check for changes
         id: check
@@ -37,6 +39,6 @@ jobs:
         run: |
           git config user.name "Lapine"
           git config user.email "lapine@lunaire.eu"
-          git add hosts/sparkle/services/database.nix hosts/sparkle/services/homeassistant.nix
+          git add hosts/sparkle/services/database.nix hosts/sparkle/services/homeassistant.nix hosts/sparkle/services/git.nix
           git commit -m "sparkle: update container image digests $(date +%Y-%m-%d)"
           git push

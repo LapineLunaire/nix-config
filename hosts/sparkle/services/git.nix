@@ -44,14 +44,14 @@
       url = "https://git.lunaire.moe";
       tokenFile = config.sops.templates."forgejo-runner-token.env".path;
       labels = [
-        "debian:docker://node:25"
+        "debian:docker://node:25@sha256:3953ec6a2c10154a58ccf4ba48083ddfe3f8641d63f0d1d5cb8a4a78169123a7"
       ];
       settings = {
         runner.capacity = 1;
         container = {
           network = "bridge";
           docker_host = "-";
-          pull_policy = "always";
+          pull_policy = "if-not-present";
         };
       };
     };
