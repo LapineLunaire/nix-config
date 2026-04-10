@@ -26,6 +26,7 @@
     ++ lib.optionals (config.userConfig.desktop.enable || pkgs.stdenv.hostPlatform.isDarwin) (with pkgs; [
       alejandra
       azahar
+      texlive.combined.scheme-full
       bat
       discord
       duf
