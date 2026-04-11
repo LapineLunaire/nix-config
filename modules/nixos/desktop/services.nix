@@ -3,7 +3,9 @@
   config,
   ...
 }: {
+  # NetworkManager replaces systemd-networkd on desktops. Explicitly disable networkd so both stacks don't run simultaneously.
   networking.networkmanager.enable = true;
+  systemd.network.enable = false;
   services.kmscon = {
     enable = true;
     hwRender = true;

@@ -13,8 +13,6 @@ in {
     ../secureboot
   ];
 
-  networking.wireless.enable = lib.mkForce false;
-
   boot = {
     initrd.systemd.enable = true;
     loader = {
