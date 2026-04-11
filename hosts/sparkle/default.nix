@@ -23,21 +23,22 @@
   };
 
   # Interface names (sfp0, sfp1, ipmi0) are assigned by sops-rendered .link files
-  # in /etc/systemd/network/ based on MAC addresses. DHCP on both SFP+ uplinks;
-  # ipmi0 is left unmanaged — its static IP is configured on the BMC itself.
+  # in /etc/systemd/network/ based on MAC addresses. sfp0 is the primary uplink
+  # with a static IP; sfp1 and ipmi0 are left unmanaged.
   systemd.network.networks = {
     "10-sfp0" = {
       matchConfig.Name = "sfp0";
-      networkConfig.DHCP = "yes";
-      # Use CoreDNS on the host itself; don't accept DNS from DHCP.
-      dhcpV4Config.UseDNS = false;
-      dhcpV6Config.UseDNS = false;
+      networkConfig = {
+        DHCP = "no";
+        Address = "10.28.32.25/23";
+        Gateway = "10.28.32.1";
+        # CoreDNS runs locally.
+        DNS = "10.28.32.25";
+      };
     };
     "10-sfp1" = {
       matchConfig.Name = "sfp1";
-      networkConfig.DHCP = "yes";
-      dhcpV4Config.UseDNS = false;
-      dhcpV6Config.UseDNS = false;
+      linkConfig.Unmanaged = true;
     };
     "99-ipmi0" = {
       matchConfig.Name = "ipmi0";
