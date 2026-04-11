@@ -1,6 +1,12 @@
 {...}: {
   networking.firewall.enable = true;
 
+  # Use systemd-networkd on all servers. Desktops override this with NetworkManager
+  # via modules/nixos/desktop. Explicit useDHCP = false prevents the legacy
+  # scripted networking stack from racing with networkd.
+  systemd.network.enable = true;
+  networking.useDHCP = false;
+
   services.dbus.implementation = "broker";
   services.fstrim.enable = true;
   services.fwupd.enable = true;
@@ -11,7 +17,7 @@
     trim.enable = true;
     autoSnapshot = {
       enable = true;
-      frequent = 4;  # every 15 min, keep 4 (1 hour)
+      frequent = 4; # every 15 min, keep 4 (1 hour)
       hourly = 24;
       daily = 7;
       weekly = 4;

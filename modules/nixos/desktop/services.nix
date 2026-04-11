@@ -3,6 +3,7 @@
   config,
   ...
 }: {
+  networking.networkmanager.enable = true;
   services.kmscon = {
     enable = true;
     hwRender = true;
