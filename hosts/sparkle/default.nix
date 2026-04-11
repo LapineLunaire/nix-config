@@ -20,10 +20,29 @@
   networking = {
     hostName = "sparkle";
     hostId = "d38a0d1c";
-    networkmanager = {
-      enable = true;
-      # Keep the IPMI interface unmanaged so NetworkManager doesn't touch its static config.
-      unmanaged = ["ipmi0"];
+  };
+
+  # Interface names (sfp0, sfp1, ipmi0) are assigned by sops-rendered .link files
+  # in /etc/systemd/network/ based on MAC addresses. DHCP on both SFP+ uplinks;
+  # ipmi0 is left unmanaged — its static IP is configured on the BMC itself.
+  systemd.network.networks = {
+    "10-sfp0" = {
+      matchConfig.Name = "sfp0";
+      networkConfig.DHCP = "yes";
+      # Use CoreDNS on the host itself; don't accept DNS from DHCP.
+      dhcpV4Config.UseDNS = false;
+      dhcpV6Config.UseDNS = false;
+    };
+    "10-sfp1" = {
+      matchConfig.Name = "sfp1";
+      networkConfig.DHCP = "yes";
+      dhcpV4Config.UseDNS = false;
+      dhcpV6Config.UseDNS = false;
+    };
+    "99-ipmi0" = {
+      matchConfig.Name = "ipmi0";
+      # Leave the IPMI interface alone — static config lives on the BMC.
+      linkConfig.Unmanaged = true;
     };
   };
 

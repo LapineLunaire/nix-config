@@ -19,7 +19,6 @@
   networking = {
     hostName = "camellya";
     hostId = "0d339030";
-    networkmanager.enable = true;
   };
 
   boot = {

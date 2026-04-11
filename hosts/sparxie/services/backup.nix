@@ -1,4 +1,9 @@
-{config, lib, pkgs, ...}: {
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   services.borgbackup.jobs.hetzner = {
     repo = "unset"; # actual repo URL injected via BORG_REPO in preHook
     paths = ["/mnt/borg-snapshot"];
