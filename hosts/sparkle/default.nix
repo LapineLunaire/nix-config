@@ -20,7 +20,12 @@
   networking = {
     hostName = "sparkle";
     hostId = "d38a0d1c";
+    # systemd-resolved intercepts DNS and breaks CoreDNS. Disable it and point
+    # resolv.conf directly at the local CoreDNS instance instead.
+    nameservers = ["10.28.32.25"];
   };
+
+  services.resolved.enable = false;
 
   # Interface names (sfp0, sfp1, ipmi0) are assigned by sops-rendered .link files
   # in /etc/systemd/network/ based on MAC addresses. sfp0 is the primary uplink
@@ -32,8 +37,6 @@
         DHCP = "no";
         Address = "10.28.32.25/23";
         Gateway = "10.28.32.1";
-        # CoreDNS runs locally.
-        DNS = "10.28.32.25";
       };
     };
     "10-sfp1" = {
