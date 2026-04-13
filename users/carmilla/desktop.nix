@@ -61,8 +61,9 @@ in {
         };
 
         input = {
-          kb_layout = "us";
-          kb_variant = "colemak";
+          kb_layout = "us,us";
+          kb_variant = "colemak,";
+          kb_options = "grp:win_space_toggle";
           repeat_delay = 300;
           repeat_rate = 50;
 
