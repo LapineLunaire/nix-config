@@ -65,6 +65,7 @@
       playerctl
       slurp
       tidal-hifi
+      tibia
       usbutils
       wl-clipboard
       wootility
