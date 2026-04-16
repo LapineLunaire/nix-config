@@ -25,6 +25,7 @@
       "altserver"
       "discord"
       "appcleaner"
+      "moonlight"
       "linearmouse"
       "ghostty"
       "obs"
