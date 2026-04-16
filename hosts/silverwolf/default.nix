@@ -23,6 +23,7 @@
     global.autoUpdate = false;
     casks = [
       "altserver"
+      "discord"
       "appcleaner"
       "linearmouse"
       "ghostty"
