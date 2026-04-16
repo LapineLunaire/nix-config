@@ -30,7 +30,6 @@
       pandoc
       texlive.combined.scheme-full
       bat
-      discord
       duf
       eza
       firefox
@@ -51,6 +50,7 @@
     ])
     ++ lib.optionals config.userConfig.desktop.enable (with pkgs; [
       brightnessctl
+      discord
       elysia
       ffmpeg-full
       fluffychat
