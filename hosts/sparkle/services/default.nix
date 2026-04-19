@@ -1,19 +1,11 @@
 {...}: {
   imports = [
-    ./authelia.nix
     ./backup.nix
     ./coredns.nix
     ./monitoring.nix
-    ./database.nix
-    ./git.nix
-    ./kavita.nix
-    ./homeassistant.nix
     ./iperf3.nix
     ./proxy.nix
-    ./qbittorrent.nix
     ./smb.nix
-    ./uptime-kuma.nix
-    ./vaultwarden.nix
     ./wireguard.nix
   ];
 }

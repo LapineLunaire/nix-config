@@ -5,31 +5,13 @@
 
     secrets = {
       "carmilla-password-hash".neededForUsers = true;
+
       "cloudflare-dns-api-token" = {};
+      "smtp-password" = {};
       "wireguard-private-key" = {};
-      "forgejo-runner-token" = {};
-      "forgejo-smtp-password" = {};
       "network/ipmi0-mac" = {};
       "network/sfp0-mac" = {};
       "network/sfp1-mac" = {};
-      "authelia-jwt-secret".owner = "authelia-main";
-      "authelia-session-secret".owner = "authelia-main";
-      "authelia-storage-encryption-key".owner = "authelia-main";
-      "authelia-users".owner = "authelia-main";
-      "authelia-db-password" = {};
-      "authelia-smtp-password" = {};
-      "authelia-oidc-hmac-secret".owner = "authelia-main";
-      "authelia-oidc-issuer-key".owner = "authelia-main";
-      "authelia-forgejo-client-secret-hash" = {};
-      "pgadmin-oidc-client-secret" = {};
-      "pgadmin-oidc-client-secret-hash" = {};
-      "redis-authelia-password".owner = "redis-authelia";
-      "smtp-password" = {};
-      "pgadmin-password" = {};
-      "protonvpn-qbittorrent-conf" = {};
-      "vaultwarden-admin-token" = {};
-      "vaultwarden-db-password" = {};
-      "vaultwarden-smtp-password" = {};
       "borg-passphrase" = {};
       "borg-ssh-key" = {};
       "borg-repo" = {};
@@ -64,37 +46,10 @@
       owner = "acme";
     };
 
-    templates."forgejo-runner-token.env".content = ''
-      TOKEN=${config.sops.placeholder."forgejo-runner-token"}
-    '';
-
-    templates."forgejo.env".content = ''
-      FORGEJO__mailer__PASSWD=${config.sops.placeholder."forgejo-smtp-password"}
-    '';
-
-    templates."pgadmin.env".content = ''
-      PGADMIN_DEFAULT_PASSWORD=${config.sops.placeholder."pgadmin-password"}
-      PGADMIN_CONFIG_AUTHENTICATION_SOURCES=['oauth2']
-      PGADMIN_CONFIG_OAUTH2_AUTO_CREATE_USER=True
-      PGADMIN_CONFIG_OAUTH2_CONFIG=[{'OAUTH2_NAME': 'authelia', 'OAUTH2_DISPLAY_NAME': 'Lunaire SSO', 'OAUTH2_CLIENT_ID': 'pgadmin', 'OAUTH2_CLIENT_SECRET': '${config.sops.placeholder."pgadmin-oidc-client-secret"}', 'OAUTH2_SERVER_METADATA_URL': 'https://auth.lunaire.moe/.well-known/openid-configuration', 'OAUTH2_USERINFO_ENDPOINT': 'https://auth.lunaire.moe/api/oidc/userinfo', 'OAUTH2_SCOPE': 'openid email profile', 'OAUTH2_USERNAME_CLAIM': 'preferred_username'}]
-    '';
-
     # Full known_hosts line for the storage box.
     # Get it with: ssh-keyscan -p 23 <hostname>
     templates."borg-known-hosts".content = ''
       ${config.sops.placeholder."borg-known-hosts"}
-    '';
-
-    templates."vaultwarden.env".content = ''
-      ADMIN_TOKEN=${config.sops.placeholder."vaultwarden-admin-token"}
-      DATABASE_URL=postgresql://vaultwarden:${config.sops.placeholder."vaultwarden-db-password"}@localhost/vaultwarden
-      SMTP_HOST=smtp.protonmail.ch
-      SMTP_PORT=587
-      SMTP_SECURITY=starttls
-      SMTP_FROM=noreply@lunaire.eu
-      SMTP_FROM_NAME=Vaultwarden
-      SMTP_USERNAME=noreply@lunaire.eu
-      SMTP_PASSWORD=${config.sops.placeholder."vaultwarden-smtp-password"}
     '';
   };
 

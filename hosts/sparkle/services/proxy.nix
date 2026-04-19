@@ -15,6 +15,7 @@
         "1.1.1.1:53"
       ];
     };
+    certs."gf.lunaire.moe" = {};
     certs."auth.lunaire.moe" = {};
     certs."git.lunaire.moe" = {};
     certs."ha.lunaire.moe" = {};
@@ -30,43 +31,68 @@
 
   services.caddy = {
     enable = true;
+    virtualHosts."gf.lunaire.moe".extraConfig = ''
+      tls /var/lib/acme/gf.lunaire.moe/cert.pem /var/lib/acme/gf.lunaire.moe/key.pem
+      @not_allowed not remote_ip 10.28.64.0/24 10.28.96.0/24 10.100.0.0/24 10.1.0.0/24 10.28.34.18
+      respond @not_allowed 403
+      reverse_proxy 10.28.34.19:3000
+    '';
+    # auth: LAN/VPN + forgejo (OIDC backchannel) + pgadmin (OIDC backchannel) + uptime-kuma (health check).
     virtualHosts."auth.lunaire.moe".extraConfig = ''
       tls /var/lib/acme/auth.lunaire.moe/cert.pem /var/lib/acme/auth.lunaire.moe/key.pem
-      reverse_proxy localhost:2000
+      @not_allowed not remote_ip 10.28.64.0/24 10.28.96.0/24 10.100.0.0/24 10.1.0.0/24 10.28.34.12 10.28.34.20 10.28.34.18
+      respond @not_allowed 403
+      reverse_proxy 10.28.34.11:9091
     '';
+    # git: LAN/VPN + infra subnet (clones from other LAN hosts) + ci-runner + uptime-kuma.
     virtualHosts."git.lunaire.moe".extraConfig = ''
       tls /var/lib/acme/git.lunaire.moe/cert.pem /var/lib/acme/git.lunaire.moe/key.pem
-      reverse_proxy localhost:3000
+      @not_allowed not remote_ip 10.28.64.0/24 10.28.96.0/24 10.100.0.0/24 10.1.0.0/24 10.28.32.0/23 10.28.34.13 10.28.34.18
+      respond @not_allowed 403
+      reverse_proxy 10.28.34.12:3000
     '';
     virtualHosts."ha.lunaire.moe".extraConfig = ''
       tls /var/lib/acme/ha.lunaire.moe/cert.pem /var/lib/acme/ha.lunaire.moe/key.pem
-      reverse_proxy localhost:7000
+      @not_allowed not remote_ip 10.28.64.0/24 10.28.96.0/24 10.100.0.0/24 10.1.0.0/24 10.28.34.18
+      respond @not_allowed 403
+      reverse_proxy 10.28.34.14:8123
     '';
     virtualHosts."pga.lunaire.moe".extraConfig = ''
       tls /var/lib/acme/pga.lunaire.moe/cert.pem /var/lib/acme/pga.lunaire.moe/key.pem
-      reverse_proxy localhost:5000
+      @not_allowed not remote_ip 10.28.64.0/24 10.28.96.0/24 10.100.0.0/24 10.1.0.0/24 10.28.34.18
+      respond @not_allowed 403
+      reverse_proxy 10.28.34.20:5000
     '';
-    # qBittorrent runs in the qbtvpn network namespace, so it is unreachable on localhost. Proxy to the namespace's veth address instead.
     virtualHosts."qbt.lunaire.moe".extraConfig = ''
       tls /var/lib/acme/qbt.lunaire.moe/cert.pem /var/lib/acme/qbt.lunaire.moe/key.pem
-      reverse_proxy ${config.vpnNamespaces.qbtvpn.namespaceAddress}:4000
+      @not_allowed not remote_ip 10.28.64.0/24 10.28.96.0/24 10.100.0.0/24 10.1.0.0/24 10.28.34.18
+      respond @not_allowed 403
+      reverse_proxy 10.28.34.15:4000
     '';
     virtualHosts."up.lunaire.moe".extraConfig = ''
       tls /var/lib/acme/up.lunaire.moe/cert.pem /var/lib/acme/up.lunaire.moe/key.pem
-      reverse_proxy localhost:8000
+      @not_allowed not remote_ip 10.28.64.0/24 10.28.96.0/24 10.100.0.0/24 10.1.0.0/24
+      respond @not_allowed 403
+      reverse_proxy 10.28.34.18:3001
     '';
     virtualHosts."misc.lunaire.moe".extraConfig = ''
       tls /var/lib/acme/misc.lunaire.moe/cert.pem /var/lib/acme/misc.lunaire.moe/key.pem
+      @not_allowed not remote_ip 10.28.64.0/24 10.28.96.0/24 10.100.0.0/24 10.1.0.0/24 10.28.34.18
+      respond @not_allowed 403
       root * /mnt/samba/misc
       file_server browse
     '';
     virtualHosts."kv.lunaire.moe".extraConfig = ''
       tls /var/lib/acme/kv.lunaire.moe/cert.pem /var/lib/acme/kv.lunaire.moe/key.pem
-      reverse_proxy localhost:10000
+      @not_allowed not remote_ip 10.28.64.0/24 10.28.96.0/24 10.100.0.0/24 10.1.0.0/24 10.28.34.18
+      respond @not_allowed 403
+      reverse_proxy 10.28.34.17:5000
     '';
     virtualHosts."vw.lunaire.moe".extraConfig = ''
       tls /var/lib/acme/vw.lunaire.moe/cert.pem /var/lib/acme/vw.lunaire.moe/key.pem
-      reverse_proxy localhost:6000 {
+      @not_allowed not remote_ip 10.28.64.0/24 10.28.96.0/24 10.100.0.0/24 10.1.0.0/24 10.28.34.18
+      respond @not_allowed 403
+      reverse_proxy 10.28.34.16:8222 {
         header_up X-Real-IP {remote_host}
       }
     '';

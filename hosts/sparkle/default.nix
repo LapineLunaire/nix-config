@@ -10,12 +10,10 @@
     ./tmpfiles.nix
     ./sops.nix
     ./services
+    ./microvms
   ];
 
   secureboot.enable = true;
-
-  virtualisation.docker.enable = true;
-  virtualisation.oci-containers.backend = "docker";
 
   networking = {
     hostName = "sparkle";
@@ -49,6 +47,12 @@
       linkConfig.Unmanaged = true;
     };
   };
+
+  # Prevent host from claiming the Zigbee stick — passed through to the HA VM.
+  boot.blacklistedKernelModules = ["cp210x"];
+  services.udev.extraRules = ''
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0660", GROUP="kvm"
+  '';
 
   boot = {
     kernelPackages = pkgs.linuxPackages_6_19.extend (self: super: {
