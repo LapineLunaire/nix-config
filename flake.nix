@@ -52,6 +52,11 @@
     };
 
     vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
+
+    microvm = {
+      url = "github:microvm-nix/microvm.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -61,6 +66,7 @@
     home-manager,
     impermanence,
     lanzaboote,
+    microvm,
     nix-darwin,
     sops-nix,
     stylix,
@@ -97,6 +103,22 @@
       stylix.nixosModules.stylix
     ];
 
+    microvmBaseModules = [
+      sops-nix.nixosModules.sops
+      microvm.nixosModules.microvm
+      impermanence.nixosModules.impermanence
+      ./modules/nixos/microvm-guest.nix
+    ];
+
+    mkMicrovm = modules:
+      nixpkgs.lib.nixosSystem {
+        specialArgs = commonArgs;
+        modules =
+          [{nixpkgs.pkgs = pkgsFor "x86_64-linux";}]
+          ++ microvmBaseModules
+          ++ modules;
+      };
+
     darwinBaseModules = [
       home-manager.darwinModules.home-manager
       {
@@ -132,12 +154,37 @@
         modules =
           [
             {nixpkgs.pkgs = pkgsFor "x86_64-linux";}
-            vpn-confinement.nixosModules.default
+            microvm.nixosModules.host
             ./hosts/sparkle
             ./users/carmilla
           ]
           ++ nixosBaseModules;
       };
+
+      uptime-kuma = mkMicrovm [./hosts/sparkle/microvms/vms/uptime-kuma/config.nix];
+
+      monitoring = mkMicrovm [./hosts/sparkle/microvms/vms/monitoring/config.nix];
+
+      kavita = mkMicrovm [./hosts/sparkle/microvms/vms/kavita/config.nix];
+
+      authelia = mkMicrovm [./hosts/sparkle/microvms/vms/authelia/config.nix];
+
+      forgejo = mkMicrovm [./hosts/sparkle/microvms/vms/forgejo/config.nix];
+
+      vaultwarden = mkMicrovm [./hosts/sparkle/microvms/vms/vaultwarden/config.nix];
+
+      pgadmin = mkMicrovm [./hosts/sparkle/microvms/vms/pgadmin/config.nix];
+
+      homeassistant = mkMicrovm [./hosts/sparkle/microvms/vms/homeassistant/config.nix];
+
+      postgres = mkMicrovm [./hosts/sparkle/microvms/vms/postgres/config.nix];
+
+      ci-runner = mkMicrovm [./hosts/sparkle/microvms/vms/ci-runner/config.nix];
+
+      qbittorrent = mkMicrovm [
+        vpn-confinement.nixosModules.default
+        ./hosts/sparkle/microvms/vms/qbittorrent/config.nix
+      ];
 
       sparxie = nixpkgs.lib.nixosSystem {
         specialArgs = commonArgs;
