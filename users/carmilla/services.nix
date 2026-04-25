@@ -14,7 +14,6 @@
     };
 
     # oo7 is a modern Secret Service implementation (replaces gnome-keyring).
-    # Auto-unlock on login is handled by pam_oo7 (custom package) in the system PAM config.
     systemd.user.services.oo7-daemon = {
       Unit.Description = "Secret service (oo7 implementation)";
       Service = {

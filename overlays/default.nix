@@ -1,8 +1,6 @@
 {...}: {
-  # This overlay adds our custom packages from the 'pkgs' directory.
   additions = final: _prev: import ../pkgs final.pkgs;
 
-  # This overlay can be used to modify or add custom versions of packages.
   modifications = final: prev: {
     # TestFsType fails in Nix sandbox when build dir is on ZFS (magic 0x2fc12fc1 unrecognized by test)
     prometheus = prev.prometheus.overrideAttrs (oldAttrs: {
