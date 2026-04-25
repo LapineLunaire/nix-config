@@ -2,7 +2,6 @@
   lib,
   buildFHSEnv,
   makeDesktopItem,
-  fetchurl,
   stdenvNoCC,
   writeShellScript,
   # System libs
@@ -37,11 +36,10 @@
     # The download URL is unversioned; update the hash when upstream releases a new client.
     version = "unstable";
 
-    src = fetchurl {
+    # builtins.fetchurl uses Nix's own HTTP client (not curl), bypassing Cloudflare's TLS fingerprint detection.
+    src = builtins.fetchurl {
       url = "https://static.tibia.com/download/tibia.x64.tar.gz";
-      sha256 = "0gji5bz6dm8mpfdwz8pn4sin087d2s046acjphm228gkryxr8m0c";
-      # static.tibia.com returns 403 to the default curl User-Agent used by Nix.
-      curlOptsList = ["--user-agent" "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0"];
+      sha256 = "1n4agqwm76lm57bgp36n8h654zlhdyxjl1ydqm3xmz5gx8lb4hfl";
     };
 
     dontBuild = true;
