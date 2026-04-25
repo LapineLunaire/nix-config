@@ -78,34 +78,33 @@ in
   buildFHSEnv {
     name = "tibia";
 
-    targetPkgs = pkgs:
-      with pkgs; [
-        alsa-lib
-        brotli
-        dbus
-        expat
-        fontconfig
-        freetype
-        libdrm
-        libglvnd
-        libx11
-        libxcb
-        libxcb-cursor
-        libxcb-image
-        libxcb-keysyms
-        libxcb-render-util
-        libxcb-util
-        libxcb-wm
-        libxkbcommon
-        mesa
-        nspr
-        nss
-        openssl
-        stdenv.cc.cc.lib
-        vulkan-loader
-        wayland
-        zlib
-      ];
+    targetPkgs = _: [
+      alsa-lib
+      brotli
+      dbus
+      expat
+      fontconfig
+      freetype
+      libdrm
+      libglvnd
+      libx11
+      libxcb
+      libxcb-cursor
+      libxcb-image
+      libxcb-keysyms
+      libxcb-render-util
+      libxcb-util
+      libxcb-wm
+      libxkbcommon
+      mesa
+      nspr
+      nss
+      openssl
+      stdenv.cc.cc.lib
+      vulkan-loader
+      wayland
+      zlib
+    ];
 
     # Force XCB — Tibia's client has known issues with Wayland compositors.
     profile = ''
