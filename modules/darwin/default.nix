@@ -18,7 +18,6 @@ in {
     settings = {
       experimental-features = ["nix-command" "flakes"];
       flake-registry = "";
-      auto-optimise-store = true;
     };
     channel.enable = false;
     registry = lib.mapAttrs (_: flake: {inherit flake;}) flakeInputs;
