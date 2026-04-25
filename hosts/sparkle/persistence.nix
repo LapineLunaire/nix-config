@@ -3,15 +3,7 @@
     hideMounts = true;
     directories = [
       "/var/lib/acme"
-      "/var/lib/authelia-main"
-      "/var/lib/docker"
-      "/var/lib/forgejo"
-      "/var/lib/kavita"
-      "/var/lib/vaultwarden"
       "/var/lib/nixos"
-      "/var/lib/postgresql"
-      "/var/lib/private"
-      "/var/lib/qBittorrent"
       "/var/lib/samba"
       "/var/lib/sbctl"
       "/var/lib/systemd"
