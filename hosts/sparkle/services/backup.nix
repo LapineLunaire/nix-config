@@ -7,7 +7,6 @@
   services.borgbackup.jobs.hetzner = {
     repo = "unset"; # actual repo URL injected via BORG_REPO in preHook
     paths = ["/mnt/borg-snapshot"];
-    exclude = ["sh:/mnt/borg-snapshot/var/lib/docker"];
     encryption = {
       mode = "repokey-blake2";
       passCommand = "cat ${config.sops.secrets."borg-passphrase".path}";
