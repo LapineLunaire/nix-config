@@ -13,6 +13,12 @@
       then prev.direnv.overrideAttrs (_: {doCheck = false;})
       else prev.direnv;
 
+    # terminate_execution_run_event_loop_js fails on aarch64-darwin in deno 2.7.13
+    deno =
+      if prev.stdenv.hostPlatform.isDarwin
+      then prev.deno.overrideAttrs (_: {doCheck = false;})
+      else prev.deno;
+
     ffmpeg-full = prev.ffmpeg-full.override {withUnfree = true;};
 
     mpv = prev.mpv.override {
