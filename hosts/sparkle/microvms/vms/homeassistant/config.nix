@@ -46,7 +46,7 @@
   virtualisation.oci-containers.backend = "docker";
 
   virtualisation.oci-containers.containers.homeassistant = {
-    image = "ghcr.io/home-assistant/home-assistant@sha256:ae0800c81fea16bc1241ce03bddb9c6260566e90f58b09d3e5a629e4f68bdc0b";
+    image = "ghcr.io/home-assistant/home-assistant@sha256:c1e5f0147f4cb51ccb05bb30b62a1269cc1bd48a6274792d3b38a77ab274dfd2";
     autoStart = true;
     volumes = ["/persist/var/lib/hass:/config"];
     environment.TZ = "Etc/UTC";
