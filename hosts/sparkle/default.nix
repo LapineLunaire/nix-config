@@ -55,7 +55,7 @@
   '';
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_6_19.extend (self: super: {
+    kernelPackages = pkgs.linuxPackages_6_18.extend (self: super: {
       kernel = super.kernel.override {
         structuredExtraConfig = with lib.kernel; {
           # WARNING: X86_NATIVE_CPU detects the build machine's CPU at compile time.
