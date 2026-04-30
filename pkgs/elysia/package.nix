@@ -131,12 +131,10 @@ in
     pname = "elysia";
     version = "0.1.0-unstable-2026-01-29";
 
-    src = fetchFromGitea {
-      domain = "dawn.wine";
-      owner = "elysia";
-      repo = "elysia";
+    src = fetchgit {
+      url = "https://dawn.wine/elysia/elysia";
       rev = "16bc8e9b2daeeaa3922b54aa117372af9242df3b";
-      hash = "sha256-b5A7MdPBjm2UTHN2ci/OD8y9WkYe8j+4KZ4CIeealrw=";
+      hash = "sha256-/WKs95nbFc8MHEvvlh4lRaL7Nbsw0mkYG3fzvbbau8U=";
     };
 
     cargoHash = "sha256-lYg6dRPlIwsEYql9bDdrF29fAvr+8vYLueOxp98gLsc=";
