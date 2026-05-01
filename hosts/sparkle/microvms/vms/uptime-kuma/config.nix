@@ -30,7 +30,7 @@
   services.uptime-kuma = {
     enable = true;
     settings = {
-      HOST = "0.0.0.0";
+      HOST = "10.28.34.18";
       PORT = "3001";
     };
   };

@@ -1,6 +1,5 @@
 {config, ...}: {
-  # Port 9000 is safe to open globally — Caddy only binds to the WireGuard interface IP.
-  networking.firewall.allowedTCPPorts = [9000];
+  networking.firewall.interfaces.wg0.allowedTCPPorts = [9000];
 
   # Caddy binds to the WireGuard IP, so it must start after the interface is up.
   systemd.services.caddy.after = ["wg-quick-wg0.service"];

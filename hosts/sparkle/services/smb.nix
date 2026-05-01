@@ -12,9 +12,14 @@
     };
   };
 
+  networking.firewall.interfaces.sfp0 = {
+    allowedTCPPorts = [139 445 5357];
+    allowedUDPPorts = [137 138 3702];
+  };
+
   services.samba = {
     enable = true;
-    openFirewall = true;
+    openFirewall = false;
     settings = {
       global = {
         "workgroup" = "WORKGROUP";
@@ -61,6 +66,6 @@
   # wsdd makes the server discoverable in Windows Network without NetBIOS.
   services.samba-wsdd = {
     enable = true;
-    openFirewall = true;
+    openFirewall = false;
   };
 }

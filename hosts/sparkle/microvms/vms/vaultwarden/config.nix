@@ -48,7 +48,7 @@
     environmentFile = config.sops.templates."vaultwarden.env".path;
     config = {
       DOMAIN = "https://vw.lunaire.moe";
-      ROCKET_ADDRESS = "0.0.0.0";
+      ROCKET_ADDRESS = "10.28.34.16";
       ROCKET_PORT = 8222;
       SIGNUPS_ALLOWED = false;
     };

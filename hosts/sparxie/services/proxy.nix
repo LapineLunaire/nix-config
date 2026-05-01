@@ -11,6 +11,15 @@
       server_name = "bunny.enterprises";
     };
   };
+
+  securityHeaders = ''
+    header {
+      Strict-Transport-Security "max-age=31536000; includeSubDomains"
+      X-Content-Type-Options "nosniff"
+      Referrer-Policy "strict-origin-when-cross-origin"
+      -Server
+    }
+  '';
 in {
   # 8448: Matrix federation port for server-to-server traffic.
   networking.firewall.allowedTCPPorts = [80 443 8448];
@@ -48,6 +57,7 @@ in {
     enable = true;
     virtualHosts."bunny.enterprises".extraConfig = ''
       tls /var/lib/acme/bunny.enterprises/cert.pem /var/lib/acme/bunny.enterprises/key.pem
+      ${securityHeaders}
       root * ${bunny-web}
 
       @hostMeta path /.well-known/host-meta
@@ -66,20 +76,24 @@ in {
     '';
     virtualHosts."chat.bunny.enterprises".extraConfig = ''
       tls /var/lib/acme/chat.bunny.enterprises/cert.pem /var/lib/acme/chat.bunny.enterprises/key.pem
+      ${securityHeaders}
       root * ${element-web}
       file_server
     '';
     virtualHosts."matrix.bunny.enterprises".extraConfig = ''
       tls /var/lib/acme/matrix.bunny.enterprises/cert.pem /var/lib/acme/matrix.bunny.enterprises/key.pem
+      ${securityHeaders}
       reverse_proxy [::1]:6167
     '';
     # Federation listener on the default Matrix port.
     virtualHosts."matrix.bunny.enterprises:8448".extraConfig = ''
       tls /var/lib/acme/matrix.bunny.enterprises/cert.pem /var/lib/acme/matrix.bunny.enterprises/key.pem
+      ${securityHeaders}
       reverse_proxy [::1]:6167
     '';
     virtualHosts."pub.bunny.enterprises".extraConfig = ''
       tls /var/lib/acme/pub.bunny.enterprises/cert.pem /var/lib/acme/pub.bunny.enterprises/key.pem
+      ${securityHeaders}
       import ${config.sops.templates."caddy-pub-bnnuy-basicauth".path}
       reverse_proxy 10.73.212.2:9000 {
         header_up Host {upstream_hostport}

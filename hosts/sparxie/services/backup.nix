@@ -1,6 +1,5 @@
 {
   config,
-  lib,
   pkgs,
   ...
 }: {
@@ -33,6 +32,6 @@
   };
 
   systemd.services."borgbackup-job-hetzner".serviceConfig = {
-    ProtectSystem = lib.mkForce "false";
+    ReadWritePaths = ["/mnt"];
   };
 }

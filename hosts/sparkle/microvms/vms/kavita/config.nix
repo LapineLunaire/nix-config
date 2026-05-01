@@ -38,7 +38,7 @@
   services.kavita = {
     enable = true;
     tokenKeyFile = config.sops.secrets."kavita-token-key".path;
-    settings.IpAddresses = "0.0.0.0";
+    settings.IpAddresses = "10.28.34.17";
   };
   networking.firewall.extraInputRules = ''
     ip saddr 10.28.34.1 tcp dport 5000 accept
