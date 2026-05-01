@@ -62,7 +62,7 @@
       }
     ];
     authentication = ''
-      local all             postgres                        trust
+      local all             postgres                        peer
       host  authelia        authelia    10.28.34.11/32 scram-sha-256
       host  forgejo         forgejo     10.28.34.12/32 scram-sha-256
       host  vaultwarden     vaultwarden 10.28.34.16/32 scram-sha-256

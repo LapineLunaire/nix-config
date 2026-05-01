@@ -1,5 +1,5 @@
 {...}: {
-  networking.firewall = {
+  networking.firewall.interfaces.sfp0 = {
     allowedUDPPorts = [53];
     allowedTCPPorts = [53];
   };

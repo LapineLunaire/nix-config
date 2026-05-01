@@ -98,7 +98,7 @@
     settings = {
       theme = "dark";
       log.level = "info";
-      server.address = "tcp://0.0.0.0:9091/";
+      server.address = "tcp://10.28.34.11:9091/";
       session = {
         redis = {
           host = "127.0.0.1";

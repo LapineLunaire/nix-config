@@ -57,7 +57,7 @@
     };
     environmentFiles = [config.sops.templates."pgadmin.env".path];
     volumes = ["/persist/var/lib/pgadmin:/var/lib/pgadmin"];
-    ports = ["0.0.0.0:5000:5000"];
+    ports = ["10.28.34.20:5000:5000"];
   };
 
   networking.firewall.extraInputRules = ''
