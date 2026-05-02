@@ -161,37 +161,40 @@ lib.mkMerge [
       };
     };
 
-    programs.neovim.initLua = ''
-      vim.lsp.config('nixd', {
-        cmd = { 'nixd' },
-        filetypes = { 'nix' },
-        root_markers = { 'flake.nix', '.git' },
-        settings = {
-          nixd = {
-            formatting = { command = { 'alejandra' } },
+    programs.neovim = {
+      extraPackages = with pkgs; [nixd alejandra];
+      plugins = with pkgs.vimPlugins; [gruvbox-nvim];
+      initLua = ''
+        vim.lsp.config.nixd = {
+          cmd = { 'nixd' },
+          filetypes = { 'nix' },
+          root_markers = { 'flake.nix', '.git' },
+          settings = {
+            nixd = {
+              formatting = { command = { 'alejandra' } },
+            },
           },
-        },
-      })
-      vim.lsp.enable('nixd')
+        }
+        vim.lsp.enable('nixd')
 
-      vim.api.nvim_create_autocmd('LspAttach', {
-        callback = function(args)
-          local group = vim.api.nvim_create_augroup('lsp_format_' .. args.buf, { clear = true })
-          vim.api.nvim_create_autocmd('BufWritePre', {
-            group = group,
-            buffer = args.buf,
-            callback = function()
-              vim.lsp.buf.format({ bufnr = args.buf })
-            end,
-          })
-        end,
-      })
+        vim.api.nvim_create_autocmd('LspAttach', {
+          group = vim.api.nvim_create_augroup('user_lsp', { clear = true }),
+          callback = function(args)
+            local group = vim.api.nvim_create_augroup('lsp_format_' .. args.buf, { clear = true })
+            vim.api.nvim_create_autocmd('BufWritePre', {
+              group = group,
+              buffer = args.buf,
+              callback = function()
+                vim.lsp.buf.format({ bufnr = args.buf, async = false })
+              end,
+            })
+          end,
+        })
 
-      require('gruvbox').setup({ contrast = 'hard' })
-      vim.cmd('colorscheme gruvbox')
-    '';
-
-    programs.neovim.plugins = with pkgs.vimPlugins; [gruvbox-nvim];
+        require('gruvbox').setup({ contrast = 'hard' })
+        vim.cmd.colorscheme('gruvbox')
+      '';
+    };
 
     programs.ssh = {
       enable = true;
