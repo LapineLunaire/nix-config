@@ -21,6 +21,9 @@
     };
     # Prevent Homebrew from auto-updating during regular brew commands; updates happen only on nix-darwin activation.
     global.autoUpdate = false;
+    brews = [
+      "container"
+    ];
     casks = [
       "altserver"
       "discord"
