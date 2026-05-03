@@ -7,18 +7,6 @@
       checkFlags = (oldAttrs.checkFlags or []) ++ ["-skip=TestFsType"];
     });
 
-    # fish/zsh lack codesignatures in the Nix sandbox on aarch64-darwin, causing the direnv checkPhase to hang silently (nixpkgs #513019)
-    direnv =
-      if prev.stdenv.hostPlatform.isDarwin
-      then prev.direnv.overrideAttrs (_: {doCheck = false;})
-      else prev.direnv;
-
-    # terminate_execution_run_event_loop_js fails on aarch64-darwin in deno 2.7.13
-    deno =
-      if prev.stdenv.hostPlatform.isDarwin
-      then prev.deno.overrideAttrs (_: {doCheck = false;})
-      else prev.deno;
-
     # these packages' tests invoke ffmpeg which is killed by the Nix sandbox
     kvazaar = prev.kvazaar.overrideAttrs (_: {doCheck = false;});
     chromaprint = prev.chromaprint.overrideAttrs (_: {doCheck = false;});
