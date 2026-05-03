@@ -23,7 +23,10 @@ in {
 
   nix = {
     settings = {
-      experimental-features = ["nix-command" "flakes"];
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
       flake-registry = ""; # disable global registry, only use pinned inputs
       auto-optimise-store = true;
       allowed-users = ["@users"];

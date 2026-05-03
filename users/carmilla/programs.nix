@@ -162,7 +162,10 @@ lib.mkMerge [
     };
 
     programs.neovim = {
-      extraPackages = with pkgs; [nixd alejandra];
+      extraPackages = with pkgs; [
+        nixd
+        alejandra
+      ];
       plugins = with pkgs.vimPlugins; [gruvbox-nvim];
       initLua = ''
         vim.lsp.config.nixd = {
@@ -227,14 +230,20 @@ lib.mkMerge [
         load_direnv = "shell_hook";
         vim_mode = true;
         hour_format = "hour24";
-        languages.Nix.language_servers = ["nixd" "!nil"];
+        languages.Nix.language_servers = [
+          "nixd"
+          "!nil"
+        ];
         lsp.nixd.settings = {
           nixpkgs.expr = "import <nixpkgs> {}";
           formatting.command = ["alejandra"];
         };
       };
       extensions = ["nix"];
-      extraPackages = with pkgs; [nixd alejandra];
+      extraPackages = with pkgs; [
+        nixd
+        alejandra
+      ];
     };
   })
 

@@ -3,7 +3,15 @@
   lib,
   ...
 }: {
-  boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "mpt3sas" "nvme" "usbhid" "usb_storage" "sd_mod"];
+  boot.initrd.availableKernelModules = [
+    "xhci_pci"
+    "ahci"
+    "mpt3sas"
+    "nvme"
+    "usbhid"
+    "usb_storage"
+    "sd_mod"
+  ];
   boot.initrd.kernelModules = [];
   boot.kernelModules = ["kvm-intel"];
   boot.extraModulePackages = [];
@@ -11,19 +19,37 @@
   fileSystems."/" = {
     device = "none";
     fsType = "tmpfs";
-    options = ["defaults" "size=2G" "mode=755"];
+    options = [
+      "defaults"
+      "size=2G"
+      "mode=755"
+    ];
   };
 
   fileSystems."/tmp" = {
     device = "none";
     fsType = "tmpfs";
-    options = ["defaults" "size=4G" "mode=1777" "nosuid" "nodev" "noexec"];
+    options = [
+      "defaults"
+      "size=4G"
+      "mode=1777"
+      "nosuid"
+      "nodev"
+      "noexec"
+    ];
   };
 
   fileSystems."/var/tmp" = {
     device = "none";
     fsType = "tmpfs";
-    options = ["defaults" "size=4G" "mode=1777" "nosuid" "nodev" "noexec"];
+    options = [
+      "defaults"
+      "size=4G"
+      "mode=1777"
+      "nosuid"
+      "nodev"
+      "noexec"
+    ];
   };
 
   fileSystems."/nix" = {

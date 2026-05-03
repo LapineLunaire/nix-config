@@ -8,7 +8,10 @@
     }
   '';
 in {
-  networking.firewall.allowedTCPPorts = [80 443];
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+  ];
 
   # All certs use DNS-01 challenge via Cloudflare.
   # The --dns.resolvers flag points lego at Cloudflare's resolver (1.1.1.1) so it verifies DNS propagation against the same nameserver it just updated, avoiding stale cache issues.

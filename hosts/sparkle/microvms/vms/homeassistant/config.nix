@@ -50,7 +50,10 @@
     autoStart = true;
     volumes = ["/persist/var/lib/hass:/config"];
     environment.TZ = "Etc/UTC";
-    extraOptions = ["--device=/dev/ttyUSB0:/dev/ttyUSB0" "--network=host"];
+    extraOptions = [
+      "--device=/dev/ttyUSB0:/dev/ttyUSB0"
+      "--network=host"
+    ];
   };
 
   # udev rule to ensure the Zigbee stick is accessible by the container runtime.

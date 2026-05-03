@@ -56,9 +56,7 @@
       name = "sparkle";
       url = "https://git.lunaire.moe";
       tokenFile = config.sops.templates."runner-token.env".path;
-      labels = [
-        "debian:docker://node:25@sha256:c69f4e0640e5b065f2694579793e4309f1e0e49868b0f2fea29c44d9c0dc2caf"
-      ];
+      labels = ["debian:docker://node:25@sha256:c69f4e0640e5b065f2694579793e4309f1e0e49868b0f2fea29c44d9c0dc2caf"];
       settings = {
         runner.capacity = 2;
         container = {

@@ -42,7 +42,11 @@
       effective_cache_size = "1536MB";
       max_connections = 50;
     };
-    ensureDatabases = ["authelia" "forgejo" "vaultwarden"];
+    ensureDatabases = [
+      "authelia"
+      "forgejo"
+      "vaultwarden"
+    ];
     ensureUsers = [
       {
         name = "authelia";
