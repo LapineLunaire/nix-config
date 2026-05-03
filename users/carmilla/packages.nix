@@ -26,18 +26,19 @@
     ++ lib.optionals (config.userConfig.desktop.enable || pkgs.stdenv.hostPlatform.isDarwin) (with pkgs; [
       alejandra
       azahar
-      megatools
-      pandoc
-      texlive.combined.scheme-full
       bat
       duf
       eza
+      ffmpeg-full
       firefox
       gping
+      megatools
       nixd
       nmap
+      pandoc
       proton-vpn
       protonmail-desktop
+      texlive.combined.scheme-full
       winbox4
       yt-dlp
     ])
@@ -52,7 +53,6 @@
       brightnessctl
       discord
       elysia
-      ffmpeg-full
       fluffychat
       gcr
       grim
@@ -64,8 +64,8 @@
       pciutils
       playerctl
       slurp
-      tidal-hifi
       tibia
+      tidal-hifi
       usbutils
       wl-clipboard
       wootility

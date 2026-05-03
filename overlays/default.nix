@@ -19,12 +19,24 @@
       then prev.deno.overrideAttrs (_: {doCheck = false;})
       else prev.deno;
 
-    ffmpeg-full = prev.ffmpeg-full.override {withUnfree = true;};
+    # these packages' tests invoke ffmpeg which is killed by the Nix sandbox
+    kvazaar = prev.kvazaar.overrideAttrs (_: {doCheck = false;});
+    chromaprint = prev.chromaprint.overrideAttrs (_: {doCheck = false;});
+
+    ffmpeg-full = prev.ffmpeg-full.override {
+      withUnfree = true;
+      kvazaar = final.kvazaar;
+      chromaprint = final.chromaprint;
+    };
 
     mpv = prev.mpv.override {
       mpv-unwrapped = prev.mpv-unwrapped.override {
-        ffmpeg = prev.ffmpeg.override {withUnfree = true;};
+        ffmpeg = final.ffmpeg-full;
       };
+    };
+
+    yt-dlp = prev.yt-dlp.override {
+      ffmpeg-headless = final.ffmpeg-full;
     };
 
     # protonmail-desktop crashes under native Wayland, so it is forced to use X11 via XWayland.
