@@ -55,16 +55,18 @@
   '';
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_6_18.extend (self: super: {
-      kernel = super.kernel.override {
-        structuredExtraConfig = with lib.kernel; {
-          # WARNING: X86_NATIVE_CPU detects the build machine's CPU at compile time.
-          # This host must be built on sparkle itself (or a machine with an identical CPU).
-          # Building on a different microarchitecture will produce a mismatched kernel.
-          X86_NATIVE_CPU = yes;
+    kernelPackages = pkgs.linuxPackages_6_18.extend (
+      self: super: {
+        kernel = super.kernel.override {
+          structuredExtraConfig = with lib.kernel; {
+            # WARNING: X86_NATIVE_CPU detects the build machine's CPU at compile time.
+            # This host must be built on sparkle itself (or a machine with an identical CPU).
+            # Building on a different microarchitecture will produce a mismatched kernel.
+            X86_NATIVE_CPU = yes;
+          };
         };
-      };
-    });
+      }
+    );
     kernelParams = ["intel_pstate=active"];
     zfs.package = pkgs.zfs_2_4;
   };

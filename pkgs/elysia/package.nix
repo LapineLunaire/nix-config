@@ -1,7 +1,6 @@
 {
   alsa-lib,
   clang,
-  fetchFromGitea,
   fetchFromGitHub,
   fetchgit,
   ffmpeg_8,
@@ -176,7 +175,10 @@ in
         --replace-fail '"std::_Rb_tree.*",' '"std::_Rb_tree.*", "std::__rb_tree.*", "std::_rb_tree.*",'
     '';
 
-    cargoBuildFlags = ["--bin" "elysia"];
+    cargoBuildFlags = [
+      "--bin"
+      "elysia"
+    ];
 
     doCheck = false;
 

@@ -3,9 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  mod = "ALT";
-in {
+}: {
   config = lib.mkIf config.userConfig.desktop.enable {
     home.sessionVariables = {
       NIXOS_OZONE_WL = "1";
@@ -44,9 +42,7 @@ in {
 
         animations = {
           enabled = true;
-          bezier = [
-            "quick, 0.15, 0, 0.1, 1"
-          ];
+          bezier = ["quick, 0.15, 0, 0.1, 1"];
           animation = [
             "windows, 1, 2, quick, slide"
             "windowsOut, 1, 2, quick, slide"
@@ -76,7 +72,7 @@ in {
           };
         };
 
-        "$mod" = mod;
+        "$mod" = "ALT";
 
         # Window management
         bind = [
@@ -134,9 +130,7 @@ in {
         ];
 
         # App launcher (release-trigger so pressing again closes rofi)
-        bindr = [
-          "$mod, Space, exec, pkill rofi || rofi -show drun"
-        ];
+        bindr = ["$mod, Space, exec, pkill rofi || rofi -show drun"];
 
         # ALT is $mod, so these bindings intercept ALT+<key> and forward CTRL+<key> to the focused window, mimicking macOS-style shortcuts.
         binde = [
@@ -185,15 +179,17 @@ in {
 
         exec-once = [
           "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
-          (toString (pkgs.writeShellScript "random-wallpaper" ''
-            wallpaper="$(${pkgs.findutils}/bin/find ~/pictures/wallpapers -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) 2>/dev/null | ${pkgs.coreutils}/bin/shuf -n 1)"
-            if [ -n "$wallpaper" ]; then
-              ${pkgs.hyprpaper}/bin/hyprpaper &
-              sleep 1
-              hyprctl hyprpaper preload "$wallpaper"
-              hyprctl hyprpaper wallpaper ",$wallpaper"
-            fi
-          ''))
+          (toString (
+            pkgs.writeShellScript "random-wallpaper" ''
+              wallpaper="$(${pkgs.findutils}/bin/find ~/pictures/wallpapers -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) 2>/dev/null | ${pkgs.coreutils}/bin/shuf -n 1)"
+              if [ -n "$wallpaper" ]; then
+                ${pkgs.hyprpaper}/bin/hyprpaper &
+                sleep 1
+                hyprctl hyprpaper preload "$wallpaper"
+                hyprctl hyprpaper wallpaper ",$wallpaper"
+              fi
+            ''
+          ))
         ];
 
         windowrule = [
@@ -243,7 +239,12 @@ in {
 
         modules-left = ["hyprland/workspaces"];
         modules-center = ["clock"];
-        modules-right = ["tray" "network" "cpu" "memory"];
+        modules-right = [
+          "tray"
+          "network"
+          "cpu"
+          "memory"
+        ];
 
         tray.spacing = 8;
 
@@ -294,8 +295,14 @@ in {
 
       portal = {
         enable = true;
-        extraPortals = with pkgs; [xdg-desktop-portal-hyprland xdg-desktop-portal-gtk];
-        config.common.default = ["hyprland" "gtk"];
+        extraPortals = with pkgs; [
+          xdg-desktop-portal-hyprland
+          xdg-desktop-portal-gtk
+        ];
+        config.common.default = [
+          "hyprland"
+          "gtk"
+        ];
       };
 
       configFile."hypr/hyprpaper.conf".text = ''

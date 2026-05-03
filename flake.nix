@@ -75,12 +75,19 @@
   } @ inputs: let
     inherit (self) outputs;
     commonArgs = {inherit inputs outputs;};
-    forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
+    forAllSystems = nixpkgs.lib.genAttrs [
+      "x86_64-linux"
+      "aarch64-linux"
+      "aarch64-darwin"
+    ];
     overlays = import ./overlays {inherit inputs;};
     pkgsFor = system:
       import nixpkgs {
         inherit system;
-        overlays = [overlays.additions overlays.modifications];
+        overlays = [
+          overlays.additions
+          overlays.modifications
+        ];
         config.allowUnfree = true;
       };
 
@@ -113,10 +120,7 @@
     mkMicrovm = modules:
       nixpkgs.lib.nixosSystem {
         specialArgs = commonArgs;
-        modules =
-          [{nixpkgs.pkgs = pkgsFor "x86_64-linux";}]
-          ++ microvmBaseModules
-          ++ modules;
+        modules = [{nixpkgs.pkgs = pkgsFor "x86_64-linux";}] ++ microvmBaseModules ++ modules;
       };
 
     darwinBaseModules = [

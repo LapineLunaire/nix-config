@@ -22,7 +22,11 @@
   '';
 in {
   # 8448: Matrix federation port for server-to-server traffic.
-  networking.firewall.allowedTCPPorts = [80 443 8448];
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+    8448
+  ];
 
   security.acme = {
     acceptTerms = true;

@@ -3,11 +3,15 @@
   modulesPath,
   ...
 }: {
-  imports = [
-    (modulesPath + "/profiles/qemu-guest.nix")
-  ];
+  imports = [(modulesPath + "/profiles/qemu-guest.nix")];
 
-  boot.initrd.availableKernelModules = ["xhci_pci" "virtio_pci" "virtio_scsi" "usbhid" "sr_mod"];
+  boot.initrd.availableKernelModules = [
+    "xhci_pci"
+    "virtio_pci"
+    "virtio_scsi"
+    "usbhid"
+    "sr_mod"
+  ];
   boot.initrd.kernelModules = [];
   boot.kernelModules = [];
   boot.extraModulePackages = [];
@@ -15,19 +19,37 @@
   fileSystems."/" = {
     device = "none";
     fsType = "tmpfs";
-    options = ["defaults" "size=2G" "mode=755"];
+    options = [
+      "defaults"
+      "size=2G"
+      "mode=755"
+    ];
   };
 
   fileSystems."/tmp" = {
     device = "none";
     fsType = "tmpfs";
-    options = ["defaults" "size=4G" "mode=1777" "nosuid" "nodev" "noexec"];
+    options = [
+      "defaults"
+      "size=4G"
+      "mode=1777"
+      "nosuid"
+      "nodev"
+      "noexec"
+    ];
   };
 
   fileSystems."/var/tmp" = {
     device = "none";
     fsType = "tmpfs";
-    options = ["defaults" "size=4G" "mode=1777" "nosuid" "nodev" "noexec"];
+    options = [
+      "defaults"
+      "size=4G"
+      "mode=1777"
+      "nosuid"
+      "nodev"
+      "noexec"
+    ];
   };
 
   fileSystems."/nix" = {

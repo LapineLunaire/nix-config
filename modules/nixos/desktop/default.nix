@@ -57,9 +57,18 @@
           lcdfilter = "default";
         };
         defaultFonts = {
-          monospace = ["JetBrainsMono Nerd Font" "Noto Sans Mono CJK JP"];
-          sansSerif = ["Noto Sans" "Noto Sans CJK JP"];
-          serif = ["Noto Serif" "Noto Serif CJK JP"];
+          monospace = [
+            "JetBrainsMono Nerd Font"
+            "Noto Sans Mono CJK JP"
+          ];
+          sansSerif = [
+            "Noto Sans"
+            "Noto Sans CJK JP"
+          ];
+          serif = [
+            "Noto Serif"
+            "Noto Serif CJK JP"
+          ];
           emoji = ["Noto Color Emoji"];
         };
         localConf = ''
