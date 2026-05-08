@@ -9,7 +9,7 @@
 | sparxie | aarch64-linux | VPS |
 | silverwolf | aarch64-darwin | MacBook |
 
-Linux hosts use impermanence with tmpfs `/` — state persists only through explicitly declared paths. Secrets are sops-nix encrypted to each host's SSH ed25519 host key.
+Linux hosts use impermanence with tmpfs `/` - state persists only through explicitly declared paths. Secrets are sops-nix encrypted to each host's SSH ed25519 host key.
 
 ## Structure
 
@@ -33,6 +33,42 @@ overlays/       ffmpeg unfree codecs, protonmail-desktop X11 ozone workaround
 - Hyprland mod key is ALT with remapped macOS-style shortcuts (ALT+C/V → CTRL+C/V via `sendshortcut`)
 - protonmail-desktop overlay forces X11 ozone platform on Linux to avoid Wayland crashes
 - Console keymap is Colemak on all Linux hosts
+
+## Security model
+
+Threat model is device theft, remote compromise of internet-facing services, and accidental key exposure - not insider attacks or multi-tenant isolation.
+
+**Authentication**
+- SSH: FIDO2 resident keys (`ed25519-sk`) only, no passwords, root login disabled
+- Privilege escalation: `doas` (sudo disabled), wheel-only
+- macOS uses Touch ID for sudo
+
+**Secrets**
+- sops-nix encrypted to each host's SSH ed25519 host key
+- camellya and sparkle persist the host key on a ZFS native-encrypted dataset with an interactive boot passphrase, so disk theft is bounded by that passphrase
+- VM secrets are additionally encrypted to the sparkle host key so the host can rebuild any guest
+
+**Network**
+- Firewall enabled on every NixOS host; sparkle enforces a default-drop forward chain on the VM bridge with explicit per-flow allowlists
+- HTTP services on sparkle gated by per-vhost source-IP ACLs in Caddy with app-layer auth
+- ACME runs as a separate lego unit (NixOS `security.acme`); Caddy reads issued certs off disk and never holds the Cloudflare DNS API token
+- sparxie (the only public-internet host) exposes XMPP federation, Matrix federation (HTTPS + 8448), STUN/TURN, and HTTPS via Caddy; SSH is FIDO2-only with fail2ban
+
+**Boot integrity**
+- Lanzaboote secure boot with sbctl-enrolled keys on camellya and sparkle
+- TPM2 tooling available; disk decryption is interactive passphrase rather than TPM-sealed
+- Kernel hardening: KPTI, `slab_nomerge`, `page_alloc.shuffle`, `kptr_restrict=2`, `dmesg_restrict`, syncookies, strict rp_filter, ICMP redirects rejected
+- AppArmor enabled, killing any unconfined confinables
+
+**Backups**
+- Borg (repokey-blake2 + zstd) to Hetzner Storage Box, preceded by a ZFS snapshot of `*/persist`
+- Borg passphrase, SSH key, repo URL, and known_hosts all in sops
+
+**Known limitations**
+- sparxie has no disk encryption and the hypervisor is out of trust scope; its host key and on-disk sops content are readable by anyone with hypervisor-level access
+- Cloudflare Universal SSL precludes CAA pinning to Let's Encrypt
+- doas currently keeps environment and a short auth-cookie persistence
+- The Forgejo CI runner can push to `main` for scheduled `flake.lock` and container-digest updates
 
 ## Bootstrapping a new host
 
@@ -110,7 +146,7 @@ git clone <repo> /mnt/persist/nix-config
 nixos-install --flake /mnt/persist/nix-config#<hostname>
 ```
 
-**7. First boot — Secure Boot hosts only** (camellya, sparkle)
+**7. First boot - Secure Boot hosts only** (camellya, sparkle)
 
 After rebooting into the installed system:
 
@@ -123,7 +159,7 @@ sbctl enroll-keys --microsoft
 
 ### macOS (silverwolf)
 
-nix-darwin manages Homebrew declaratively but cannot install it — Homebrew must be installed before Nix.
+nix-darwin manages Homebrew declaratively but cannot install it - Homebrew must be installed before Nix.
 
 **1. Install Homebrew**
 
@@ -143,7 +179,7 @@ sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install)
 git clone <repo> ~/projects/nix-config
 ```
 
-**4. Bootstrap nix-darwin** (first run only — `nh` is not yet available)
+**4. Bootstrap nix-darwin** (first run only - `nh` is not yet available)
 
 ```sh
 sudo nix --extra-experimental-features "nix-command flakes" run nix-darwin -- switch --flake ~/projects/nix-config#silverwolf
