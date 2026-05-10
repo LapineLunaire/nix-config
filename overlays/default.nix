@@ -7,6 +7,11 @@
       checkFlags = (oldAttrs.checkFlags or []) ++ ["-skip=TestFsType"];
     });
 
+    # TestZoneReload is flaky in upstream coredns 1.14.x
+    coredns = prev.coredns.overrideAttrs (oldAttrs: {
+      checkFlags = (oldAttrs.checkFlags or []) ++ ["-skip=TestZoneReload"];
+    });
+
     # these packages' tests invoke ffmpeg which is killed by the Nix sandbox
     kvazaar = prev.kvazaar.overrideAttrs (_: {doCheck = false;});
     chromaprint = prev.chromaprint.overrideAttrs (_: {doCheck = false;});
