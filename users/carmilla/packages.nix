@@ -57,24 +57,16 @@
     )
     ++ lib.optionals config.userConfig.desktop.enable (
       with pkgs; [
-        brightnessctl
         discord
         elysia
         fluffychat
-        gcr
-        grim
         heroic
-        imv
-        libsecret
         minisign
         mpv
         pciutils
-        playerctl
-        slurp
         tibia
         tidal-hifi
         usbutils
-        wl-clipboard
         wootility
         xivlauncher
       ]

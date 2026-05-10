@@ -12,6 +12,8 @@
   services.fwupd.enable = true;
   services.smartd.enable = true;
 
+  boot.zfs.forceImportRoot = false;
+
   services.zfs = {
     autoScrub.enable = true;
     trim.enable = true;

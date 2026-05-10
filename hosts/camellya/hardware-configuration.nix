@@ -115,13 +115,15 @@
 
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
-  hardware.amdgpu = {
-    initrd.enable = true;
-    opencl.enable = true;
-  };
-
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
+  };
+
+  hardware.nvidia = {
+    # Required for Wayland; also needed by KMS/DRM-based compositors generally.
+    modesetting.enable = true;
+    # Blackwell (RTX 50-series) requires the open kernel modules; the proprietary modules don't support it.
+    open = true;
   };
 }

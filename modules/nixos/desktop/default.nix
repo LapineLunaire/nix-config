@@ -5,11 +5,12 @@
 }: {
   imports = [
     ./packages.nix
+    ./plasma.nix
     ./services.nix
-    ./stylix.nix
   ];
 
   config = {
+    home-manager.sharedModules = [inputs.plasma-manager.homeModules.plasma-manager];
     home-manager.users.carmilla.userConfig.desktop.enable = true;
 
     # ntsync: kernel-side NT synchronization primitives used by Wine/Proton to reduce syscall overhead for games that rely heavily on Win32 sync objects.

@@ -11,7 +11,6 @@
     ./tmpfiles.nix
     ./sops.nix
     ./services
-    ./display.nix
   ];
 
   secureboot.enable = true;

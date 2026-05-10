@@ -13,22 +13,29 @@
     ];
   };
 
-  services.speechd.enable = false;
-
   services.earlyoom = {
     enable = true;
     freeMemThreshold = 2;
     freeSwapThreshold = 2;
   };
 
-  # UWSM manages the Hyprland session as a set of systemd user units, enabling proper session lifecycle, cgroup tracking, and clean shutdown.
-  services.greetd = {
+  services.displayManager.sddm = {
     enable = true;
-    settings.default_session = {
-      command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd 'uwsm start hyprland-uwsm.desktop'";
-      user = "greeter";
-    };
+    wayland.enable = true;
   };
+
+  services.desktopManager.plasma6.enable = true;
+
+  services.xserver.xkb = {
+    layout = "us,us";
+    variant = "colemak,";
+    options = "grp:win_space_toggle";
+  };
+
+  environment.plasma6.excludePackages = with pkgs.kdePackages; [
+    elisa
+    kate
+  ];
 
   virtualisation.waydroid.enable = true;
 

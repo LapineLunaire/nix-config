@@ -1,10 +1,4 @@
 {pkgs, ...}: {
-  programs.hyprland = {
-    enable = true;
-    withUWSM = true;
-    xwayland.enable = true;
-  };
-
   programs.nix-ld.enable = true;
 
   programs.obs-studio = {

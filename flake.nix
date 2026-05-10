@@ -41,13 +41,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    sops-nix = {
-      url = "github:Mic92/sops-nix";
+    plasma-manager = {
+      url = "github:nix-community/plasma-manager";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
     };
 
-    stylix = {
-      url = "github:nix-community/stylix";
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -69,7 +70,6 @@
     microvm,
     nix-darwin,
     sops-nix,
-    stylix,
     vpn-confinement,
     ...
   } @ inputs: let
@@ -107,7 +107,6 @@
 
     nixosDesktopModules = [
       aagl.nixosModules.default
-      stylix.nixosModules.stylix
     ];
 
     microvmBaseModules = [

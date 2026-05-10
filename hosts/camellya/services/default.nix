@@ -1,3 +1,6 @@
 {...}: {
-  imports = [./pipewire.nix];
+  imports = [
+    ./pipewire.nix
+    ./xserver.nix
+  ];
 }

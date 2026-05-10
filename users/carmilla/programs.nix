@@ -270,8 +270,6 @@ lib.mkMerge [
     programs.ghostty = {
       enable = true;
       settings = {
-        window-decoration = false;
-        gtk-titlebar = false;
         window-padding-x = 8;
         window-padding-y = 8;
         background-opacity = 0.95;

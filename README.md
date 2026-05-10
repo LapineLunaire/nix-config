@@ -19,7 +19,7 @@ modules/
   darwin/       macOS system defaults, firewall, privacy settings
   nixos/
     generic/    Base NixOS: kernel hardening, SSH, ZFS, zram, chrony
-    desktop/    Hyprland, PipeWire, fonts, Stylix theming, Steam
+    desktop/    KDE Plasma 6, SDDM, PipeWire, fonts, Steam
     secureboot/ Lanzaboote secure boot
 users/carmilla/ home-manager: shell, git, neovim, SSH, desktop environment
 pkgs/           Custom derivations
@@ -30,7 +30,7 @@ overlays/       ffmpeg unfree codecs, protonmail-desktop X11 ozone workaround
 
 - qBittorrent on sparkle runs in a VPN-Confinement network namespace (ProtonVPN)
 - Ghostty on macOS: installed via homebrew cask (no darwin support in nixpkgs), configured via home-manager with `package = null`
-- Hyprland mod key is ALT with remapped macOS-style shortcuts (ALT+C/V → CTRL+C/V via `sendshortcut`)
+- KDE Plasma 6 on Wayland via SDDM; user-level Plasma config managed by plasma-manager
 - protonmail-desktop overlay forces X11 ozone platform on Linux to avoid Wayland crashes
 - Console keymap is Colemak on all Linux hosts
 
@@ -193,7 +193,6 @@ nh darwin switch ~/projects/nix-config
 
 ## Manual post-install steps
 
-- Place wallpapers in `~/pictures/wallpapers/` for the random wallpaper script to pick them up
 - Export FIDO2 resident SSH keys from YubiKey: `ssh-keygen -K` in `~/.ssh/`
 - Create `~/Pictures/Screenshots` on macOS
 - Grant App Management permission to the terminal emulator (System Settings → Privacy & Security → App Management)
