@@ -62,6 +62,7 @@
         fluffychat
         heroic
         minisign
+        mission-center
         mpv
         pciutils
         tibia
