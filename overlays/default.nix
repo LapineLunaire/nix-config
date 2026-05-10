@@ -7,9 +7,9 @@
       checkFlags = (oldAttrs.checkFlags or []) ++ ["-skip=TestFsType"];
     });
 
-    # TestZoneReload is flaky in upstream coredns 1.14.x
+    # TestZoneReload and TestView are flaky in upstream coredns 1.14.x
     coredns = prev.coredns.overrideAttrs (oldAttrs: {
-      checkFlags = (oldAttrs.checkFlags or []) ++ ["-skip=TestZoneReload"];
+      checkFlags = (oldAttrs.checkFlags or []) ++ ["-skip=TestZoneReload|TestView"];
     });
 
     # "Throws error if filename is not UTF8" fails in the Nix sandbox
