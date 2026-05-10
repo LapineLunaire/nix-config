@@ -125,5 +125,12 @@
     modesetting.enable = true;
     # Blackwell (RTX 50-series) requires the open kernel modules; the proprietary modules don't support it.
     open = true;
+    nvidiaSettings = true;
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    powerManagement = {
+      enable = true;
+      # Fine-grained dynamic power management; requires Turing (RTX 20-series) or later.
+      finegrained = true;
+    };
   };
 }
