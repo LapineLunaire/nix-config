@@ -12,6 +12,9 @@
       checkFlags = (oldAttrs.checkFlags or []) ++ ["-skip=TestZoneReload"];
     });
 
+    # "Throws error if filename is not UTF8" fails in the Nix sandbox
+    gjs = prev.gjs.overrideAttrs (_: {doCheck = false;});
+
     # these packages' tests invoke ffmpeg which is killed by the Nix sandbox
     kvazaar = prev.kvazaar.overrideAttrs (_: {doCheck = false;});
     chromaprint = prev.chromaprint.overrideAttrs (_: {doCheck = false;});
