@@ -29,6 +29,8 @@
       ];
     };
 
+  home-manager.backupFileExtension = "bak";
+
   home-manager.users.carmilla = {
     lib,
     osConfig,
