@@ -162,10 +162,6 @@ lib.mkMerge [
     };
 
     programs.neovim = {
-      extraPackages = with pkgs; [
-        nixd
-        alejandra
-      ];
       plugins = with pkgs.vimPlugins; [gruvbox-nvim];
       initLua = ''
         vim.lsp.config.nixd = {
@@ -230,6 +226,11 @@ lib.mkMerge [
         load_direnv = "shell_hook";
         vim_mode = true;
         hour_format = "hour24";
+        theme = {
+          mode = "dark";
+          dark = "Gruvbox Dark Hard";
+          light = "Gruvbox Light Hard";
+        };
         languages.Nix.language_servers = [
           "nixd"
           "!nil"
@@ -239,40 +240,18 @@ lib.mkMerge [
           formatting.command = ["alejandra"];
         };
       };
-      extensions = ["nix"];
-      extraPackages = with pkgs; [
-        nixd
-        alejandra
-      ];
+      extensions = ["nix" "gruvbox"];
     };
-  })
 
-  (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
     programs.ghostty = {
       enable = true;
       # Ghostty is not available on nixpkgs for macOS. Use the Homebrew package instead. home-manager manages the config only.
-      package = null;
+      package = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin null;
       settings = {
         theme = "Gruvbox Dark Hard";
         background-opacity = 0.95;
         window-padding-x = 8;
         window-padding-y = 8;
-      };
-    };
-
-    programs.nh = {
-      enable = true;
-      flake = "/users/carmilla/projects/nix-config";
-    };
-  })
-
-  (lib.mkIf config.userConfig.desktop.enable {
-    programs.ghostty = {
-      enable = true;
-      settings = {
-        window-padding-x = 8;
-        window-padding-y = 8;
-        background-opacity = 0.95;
       };
     };
   })
