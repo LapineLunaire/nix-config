@@ -34,19 +34,5 @@
     yt-dlp = prev.yt-dlp.override {
       ffmpeg-headless = final.ffmpeg-full;
     };
-
-    # protonmail-desktop crashes under native Wayland, so it is forced to use X11 via XWayland.
-    protonmail-desktop =
-      if prev.stdenv.hostPlatform.isLinux
-      then
-        prev.protonmail-desktop.overrideAttrs (oldAttrs: {
-          postFixup =
-            (oldAttrs.postFixup or "")
-            + ''
-              wrapProgram $out/bin/proton-mail \
-                --add-flags "--ozone-platform=x11"
-            '';
-        })
-      else prev.protonmail-desktop;
   };
 }
