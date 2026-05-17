@@ -39,7 +39,7 @@
     # builtins.fetchurl uses Nix's own HTTP client (not curl), bypassing Cloudflare's TLS fingerprint detection.
     src = builtins.fetchurl {
       url = "https://static.tibia.com/download/tibia.x64.tar.gz";
-      sha256 = "1r5k71i19g8kci0hq7c1gj9b66q1p17w6sqvv7db84zgpc15b6rd";
+      sha256 = "1wjapz5bmy64hzqbjl3x5wz1dq5f29napf65qrzz1ajv204ci74h";
     };
 
     dontBuild = true;
