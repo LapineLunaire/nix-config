@@ -127,10 +127,6 @@
     open = true;
     nvidiaSettings = true;
     package = config.boot.kernelPackages.nvidiaPackages.stable;
-    powerManagement = {
-      enable = true;
-      # Fine-grained dynamic power management; requires Turing (RTX 20-series) or later.
-      finegrained = true;
-    };
+    powerManagement.enable = true;
   };
 }
