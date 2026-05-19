@@ -1,5 +1,6 @@
 {lib, ...}: {
   networking.firewall.enable = true;
+  networking.nftables.enable = true;
 
   # Use systemd-networkd on all servers. Desktops override this with NetworkManager
   # via modules/nixos/desktop. Explicit useDHCP = false prevents the legacy

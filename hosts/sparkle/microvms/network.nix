@@ -21,9 +21,6 @@
     };
   };
 
-  # nftables required for filterForward (iptables backend doesn't support it).
-  networking.nftables.enable = true;
-
   # Default-drop on the forward chain. VMs can reach the internet via sfp0 and each other only through the explicit allowlist below.
   networking.firewall.filterForward = true;
 

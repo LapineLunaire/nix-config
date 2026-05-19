@@ -5,6 +5,7 @@
       "/var/lib/nixos"
       "/var/lib/sbctl"
       "/var/lib/systemd"
+      "/var/lib/waydroid"
       "/var/log"
     ];
     files = [
