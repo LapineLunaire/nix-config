@@ -200,7 +200,7 @@ lib.mkMerge [
       enableDefaultConfig = false; # deprecated by home-manager
       # Rebuild OpenSSH with FIDO2 support for sk-ssh-ed25519 resident keys stored on the YubiKey.
       package = pkgs.openssh.override {withFIDO = true;};
-      matchBlocks."*" = {
+      settings."*" = {
         identityFile = [
           "~/.ssh/id_ed25519_sk_rk_lapine"
           "~/.ssh/id_ed25519_sk_rk_lapine2"

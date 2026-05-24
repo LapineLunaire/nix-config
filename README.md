@@ -206,3 +206,11 @@ nh os switch .
 # macOS
 nh darwin switch .
 ```
+
+### One-off package builds
+
+To build a single package with overlays applied (e.g. to test an overlay change before a full rebuild):
+
+```sh
+nix build .\#nixosConfigurations.camellya.pkgs.<package>
+```

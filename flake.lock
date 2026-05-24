@@ -22,6 +22,7 @@
       },
       "original": {
         "owner": "ezKEa",
+        "ref": "main",
         "repo": "aagl-gtk-on-nix",
         "type": "github"
       }
@@ -52,6 +53,7 @@
       },
       "original": {
         "owner": "NixOS",
+        "ref": "master",
         "repo": "flake-compat",
         "type": "github"
       }
@@ -85,15 +87,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1779507042,
-        "narHash": "sha256-7wOwi8B6D0BYsieZCnHZZj2sNUzgJhLoIVSfkwB7lxQ=",
+        "lastModified": 1779627636,
+        "narHash": "sha256-J6JGf42zNzLo/CrRdKb5dNznpLI+eGxN/5KTLG1Mo5s=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "509ed3c603349a9d43de9e2ae6613baea6bd5b34",
+        "rev": "044c30c19550c0557997dece4ce9e54d2fa77ba1",
         "type": "github"
       },
       "original": {
         "owner": "nix-community",
+        "ref": "master",
         "repo": "home-manager",
         "type": "github"
       }
@@ -117,6 +120,7 @@
       },
       "original": {
         "owner": "nix-community",
+        "ref": "master",
         "repo": "impermanence",
         "type": "github"
       }
@@ -142,6 +146,7 @@
       },
       "original": {
         "owner": "nix-community",
+        "ref": "master",
         "repo": "lanzaboote",
         "type": "github"
       }
@@ -154,15 +159,16 @@
         "spectrum": "spectrum"
       },
       "locked": {
-        "lastModified": 1779300350,
-        "narHash": "sha256-slQySSmaIewOxdZXF0/g0GSiVg7vJy209Yjs7fDNms8=",
+        "lastModified": 1779623416,
+        "narHash": "sha256-FBeNvltobOcaqGNKAQ/Ht+j/SeXJcF+7kYnZFE4tBuo=",
         "owner": "microvm-nix",
         "repo": "microvm.nix",
-        "rev": "9755fd345bd64d1c75ba12b63089c926dd5d886e",
+        "rev": "461b839c2756673bb47f87cccbd185641c7e45c7",
         "type": "github"
       },
       "original": {
         "owner": "microvm-nix",
+        "ref": "main",
         "repo": "microvm.nix",
         "type": "github"
       }
@@ -190,16 +196,16 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1779543187,
-        "narHash": "sha256-6SjdsouT54k1+/DyBqTJwdFlja4RBNq9jP9N+8kBIa0=",
+        "lastModified": 1779631097,
+        "narHash": "sha256-ZdNmcrTRLdfIN+1bi+OOzZzHdtbcRHrkB4LOIxlHiMc=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "19942a940b16e7e7285e3cf58f09fa1aeb2f90cd",
+        "rev": "ef218436892ac80f9537831a5e65d81d062c6115",
         "type": "github"
       },
       "original": {
         "owner": "nixos",
-        "ref": "nixos-unstable-small",
+        "ref": "release-26.05",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -223,6 +229,7 @@
       },
       "original": {
         "owner": "nix-community",
+        "ref": "trunk",
         "repo": "plasma-manager",
         "type": "github"
       }
@@ -275,15 +282,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1779506148,
-        "narHash": "sha256-OffE5yuMrSW71zIJNLvtl9MCO6WTAHEjlFPUCvkd/QM=",
+        "lastModified": 1779592685,
+        "narHash": "sha256-p9d56GezhHRf4QfANxwa1d+fvwShvjB5XUhdIl7WEd0=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "d9973e2ab49747fada06ebbe26cda27eb0220cf1",
+        "rev": "3a58b199e7c83a80b85c28044f808085ba7e941c",
         "type": "github"
       },
       "original": {
         "owner": "oxalica",
+        "ref": "master",
         "repo": "rust-overlay",
         "type": "github"
       }
@@ -304,6 +312,7 @@
       },
       "original": {
         "owner": "Mic92",
+        "ref": "master",
         "repo": "sops-nix",
         "type": "github"
       }
@@ -335,6 +344,7 @@
       },
       "original": {
         "owner": "Maroka-chan",
+        "ref": "master",
         "repo": "VPN-Confinement",
         "type": "github"
       }

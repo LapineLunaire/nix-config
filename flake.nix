@@ -2,37 +2,37 @@
   description = "Carmilla's nix config";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable-small";
+    nixpkgs.url = "github:nixos/nixpkgs/release-26.05";
 
     aagl = {
-      url = "github:ezKEa/aagl-gtk-on-nix";
+      url = "github:ezKEa/aagl-gtk-on-nix/main";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.rust-overlay.follows = "rust-overlay";
       inputs.flake-compat.follows = "flake-compat";
     };
 
-    flake-compat.url = "github:NixOS/flake-compat";
+    flake-compat.url = "github:NixOS/flake-compat/master";
 
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     impermanence = {
-      url = "github:nix-community/impermanence";
+      url = "github:nix-community/impermanence/master";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
 
     lanzaboote = {
-      url = "github:nix-community/lanzaboote";
+      url = "github:nix-community/lanzaboote/master";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.rust-overlay.follows = "rust-overlay";
       inputs.pre-commit.inputs.flake-compat.follows = "flake-compat";
     };
 
     rust-overlay = {
-      url = "github:oxalica/rust-overlay";
+      url = "github:oxalica/rust-overlay/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -42,20 +42,20 @@
     };
 
     plasma-manager = {
-      url = "github:nix-community/plasma-manager";
+      url = "github:nix-community/plasma-manager/trunk";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
 
     sops-nix = {
-      url = "github:Mic92/sops-nix";
+      url = "github:Mic92/sops-nix/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
+    vpn-confinement.url = "github:Maroka-chan/VPN-Confinement/master";
 
     microvm = {
-      url = "github:microvm-nix/microvm.nix";
+      url = "github:microvm-nix/microvm.nix/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };

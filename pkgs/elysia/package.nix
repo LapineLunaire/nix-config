@@ -3,7 +3,7 @@
   clang,
   fetchFromGitHub,
   fetchgit,
-  ffmpeg_8,
+  ffmpeg_7,
   fontconfig,
   gn,
   lib,
@@ -147,7 +147,7 @@ in
 
     buildInputs = [
       openssl
-      ffmpeg_8
+      ffmpeg_7
       alsa-lib
       libGL
       libglvnd
