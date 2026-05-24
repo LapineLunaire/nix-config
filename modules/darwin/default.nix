@@ -5,6 +5,8 @@
   ...
 }: let
   flakeInputs = lib.filterAttrs (_: lib.isType "flake") inputs;
+  # Exclude nixpkgs - nixpkgs-flake.nix auto-registers the system's nixpkgs correctly per host.
+  registryInputs = lib.removeAttrs flakeInputs ["nixpkgs"];
 in {
   programs.zsh.enable = true;
 
@@ -23,7 +25,7 @@ in {
       flake-registry = "";
     };
     channel.enable = false;
-    registry = lib.mapAttrs (_: flake: {inherit flake;}) flakeInputs;
+    registry = lib.mapAttrs (_: flake: {inherit flake;}) registryInputs;
     nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
     gc = {
       automatic = true;

@@ -3,74 +3,76 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/release-26.05";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    aagl = {
-      url = "github:ezKEa/aagl-gtk-on-nix/main";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.rust-overlay.follows = "rust-overlay";
-      inputs.flake-compat.follows = "flake-compat";
+    home-manager = {
+      url = "github:nix-community/home-manager/master";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin/master";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
     flake-compat.url = "github:NixOS/flake-compat/master";
 
-    home-manager = {
-      url = "github:nix-community/home-manager/master";
-      inputs.nixpkgs.follows = "nixpkgs";
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay/master";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
     impermanence = {
       url = "github:nix-community/impermanence/master";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
       inputs.home-manager.follows = "home-manager";
     };
 
     lanzaboote = {
       url = "github:nix-community/lanzaboote/master";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
       inputs.rust-overlay.follows = "rust-overlay";
       inputs.pre-commit.inputs.flake-compat.follows = "flake-compat";
     };
 
-    rust-overlay = {
-      url = "github:oxalica/rust-overlay/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    nix-darwin = {
-      url = "github:nix-darwin/nix-darwin/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    plasma-manager = {
-      url = "github:nix-community/plasma-manager/trunk";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
-    };
-
     sops-nix = {
       url = "github:Mic92/sops-nix/master";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+
+    microvm = {
+      url = "github:microvm-nix/microvm.nix/main";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
     vpn-confinement.url = "github:Maroka-chan/VPN-Confinement/master";
 
-    microvm = {
-      url = "github:microvm-nix/microvm.nix/main";
-      inputs.nixpkgs.follows = "nixpkgs";
+    aagl = {
+      url = "github:ezKEa/aagl-gtk-on-nix/main";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.rust-overlay.follows = "rust-overlay";
+      inputs.flake-compat.follows = "flake-compat";
+    };
+
+    plasma-manager = {
+      url = "github:nix-community/plasma-manager/trunk";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.home-manager.follows = "home-manager";
     };
   };
 
   outputs = {
     self,
     nixpkgs,
-    aagl,
+    nixpkgs-unstable,
     home-manager,
+    nix-darwin,
     impermanence,
     lanzaboote,
-    microvm,
-    nix-darwin,
     sops-nix,
+    microvm,
     vpn-confinement,
+    aagl,
     ...
   } @ inputs: let
     inherit (self) outputs;
@@ -81,20 +83,16 @@
       "aarch64-darwin"
     ];
     overlays = import ./overlays {inherit inputs;};
-    pkgsFor = system:
-      import nixpkgs {
+    mkPkgs = np: system:
+      import np {
         inherit system;
-        overlays = [
-          overlays.additions
-          overlays.modifications
-        ];
+        overlays = [overlays.additions overlays.modifications];
         config.allowUnfree = true;
       };
+    pkgsFor = mkPkgs nixpkgs;
+    pkgsUnstableFor = mkPkgs nixpkgs-unstable;
 
-    nixosBaseModules = [
-      impermanence.nixosModules.impermanence
-      lanzaboote.nixosModules.lanzaboote
-      sops-nix.nixosModules.sops
+    hmModules = [
       home-manager.nixosModules.home-manager
       {
         home-manager = {
@@ -105,112 +103,115 @@
       }
     ];
 
-    nixosDesktopModules = [
-      aagl.nixosModules.default
-    ];
+    mkServerSystem = {
+      system,
+      modules,
+    }:
+      nixpkgs.lib.nixosSystem {
+        specialArgs = commonArgs;
+        modules =
+          [
+            {nixpkgs.pkgs = pkgsFor system;}
+            impermanence.nixosModules.impermanence
+            lanzaboote.nixosModules.lanzaboote
+            sops-nix.nixosModules.sops
+          ]
+          ++ hmModules ++ modules;
+      };
 
-    microvmBaseModules = [
-      sops-nix.nixosModules.sops
-      microvm.nixosModules.microvm
-      impermanence.nixosModules.impermanence
-      ./modules/nixos/microvm-guest.nix
-    ];
+    mkDesktopSystem = {
+      system,
+      modules,
+    }:
+      nixpkgs-unstable.lib.nixosSystem {
+        specialArgs = commonArgs;
+        modules =
+          [
+            {nixpkgs.pkgs = pkgsUnstableFor system;}
+            impermanence.nixosModules.impermanence
+            lanzaboote.nixosModules.lanzaboote
+            sops-nix.nixosModules.sops
+            aagl.nixosModules.default
+          ]
+          ++ hmModules ++ modules;
+      };
 
     mkMicrovm = modules:
       nixpkgs.lib.nixosSystem {
         specialArgs = commonArgs;
-        modules = [{nixpkgs.pkgs = pkgsFor "x86_64-linux";}] ++ microvmBaseModules ++ modules;
+        modules =
+          [
+            {nixpkgs.pkgs = pkgsFor "x86_64-linux";}
+            sops-nix.nixosModules.sops
+            microvm.nixosModules.microvm
+            impermanence.nixosModules.impermanence
+            ./modules/nixos/microvm-guest.nix
+          ]
+          ++ modules;
       };
 
-    darwinBaseModules = [
-      home-manager.darwinModules.home-manager
-      {
-        home-manager = {
-          useGlobalPkgs = true;
-          useUserPackages = true;
-          extraSpecialArgs = commonArgs;
-        };
-      }
-    ];
+    mkDarwinSystem = {
+      system,
+      modules,
+    }:
+      nix-darwin.lib.darwinSystem {
+        specialArgs = commonArgs;
+        modules =
+          [
+            {nixpkgs.pkgs = pkgsUnstableFor system;}
+            home-manager.darwinModules.home-manager
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                extraSpecialArgs = commonArgs;
+              };
+            }
+          ]
+          ++ modules;
+      };
   in {
     inherit overlays;
 
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
-
     packages = forAllSystems (system: import ./pkgs (pkgsFor system));
 
     nixosConfigurations = {
-      camellya = nixpkgs.lib.nixosSystem {
-        specialArgs = commonArgs;
-        modules =
-          [
-            {nixpkgs.pkgs = pkgsFor "x86_64-linux";}
-            ./hosts/camellya
-            ./users/carmilla
-          ]
-          ++ nixosBaseModules
-          ++ nixosDesktopModules;
+      camellya = mkDesktopSystem {
+        system = "x86_64-linux";
+        modules = [./hosts/camellya ./users/carmilla];
       };
 
-      sparkle = nixpkgs.lib.nixosSystem {
-        specialArgs = commonArgs;
-        modules =
-          [
-            {nixpkgs.pkgs = pkgsFor "x86_64-linux";}
-            microvm.nixosModules.host
-            ./hosts/sparkle
-            ./users/carmilla
-          ]
-          ++ nixosBaseModules;
+      sparkle = mkServerSystem {
+        system = "x86_64-linux";
+        modules = [microvm.nixosModules.host ./hosts/sparkle ./users/carmilla];
+      };
+
+      sparxie = mkServerSystem {
+        system = "aarch64-linux";
+        modules = [./hosts/sparxie ./users/carmilla];
       };
 
       uptime-kuma = mkMicrovm [./hosts/sparkle/microvms/vms/uptime-kuma/config.nix];
-
       monitoring = mkMicrovm [./hosts/sparkle/microvms/vms/monitoring/config.nix];
-
       kavita = mkMicrovm [./hosts/sparkle/microvms/vms/kavita/config.nix];
-
       authelia = mkMicrovm [./hosts/sparkle/microvms/vms/authelia/config.nix];
-
       forgejo = mkMicrovm [./hosts/sparkle/microvms/vms/forgejo/config.nix];
-
       vaultwarden = mkMicrovm [./hosts/sparkle/microvms/vms/vaultwarden/config.nix];
-
       pgadmin = mkMicrovm [./hosts/sparkle/microvms/vms/pgadmin/config.nix];
-
       homeassistant = mkMicrovm [./hosts/sparkle/microvms/vms/homeassistant/config.nix];
-
       postgres = mkMicrovm [./hosts/sparkle/microvms/vms/postgres/config.nix];
-
       ci-runner = mkMicrovm [./hosts/sparkle/microvms/vms/ci-runner/config.nix];
-
       qbittorrent = mkMicrovm [
         vpn-confinement.nixosModules.default
         ./hosts/sparkle/microvms/vms/qbittorrent/config.nix
       ];
-
-      sparxie = nixpkgs.lib.nixosSystem {
-        specialArgs = commonArgs;
-        modules =
-          [
-            {nixpkgs.pkgs = pkgsFor "aarch64-linux";}
-            ./hosts/sparxie
-            ./users/carmilla
-          ]
-          ++ nixosBaseModules;
-      };
     };
 
     darwinConfigurations = {
-      silverwolf = nix-darwin.lib.darwinSystem {
-        specialArgs = commonArgs;
-        modules =
-          [
-            {nixpkgs.pkgs = pkgsFor "aarch64-darwin";}
-            ./hosts/silverwolf
-            ./users/carmilla
-          ]
-          ++ darwinBaseModules;
+      silverwolf = mkDarwinSystem {
+        system = "aarch64-darwin";
+        modules = [./hosts/silverwolf ./users/carmilla];
       };
     };
   };

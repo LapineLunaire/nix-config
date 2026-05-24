@@ -6,7 +6,7 @@
           "flake-compat"
         ],
         "nixpkgs": [
-          "nixpkgs"
+          "nixpkgs-unstable"
         ],
         "rust-overlay": [
           "rust-overlay"
@@ -83,7 +83,7 @@
     "home-manager": {
       "inputs": {
         "nixpkgs": [
-          "nixpkgs"
+          "nixpkgs-unstable"
         ]
       },
       "locked": {
@@ -107,7 +107,7 @@
           "home-manager"
         ],
         "nixpkgs": [
-          "nixpkgs"
+          "nixpkgs-unstable"
         ]
       },
       "locked": {
@@ -129,7 +129,7 @@
       "inputs": {
         "crane": "crane",
         "nixpkgs": [
-          "nixpkgs"
+          "nixpkgs-unstable"
         ],
         "pre-commit": "pre-commit",
         "rust-overlay": [
@@ -154,7 +154,7 @@
     "microvm": {
       "inputs": {
         "nixpkgs": [
-          "nixpkgs"
+          "nixpkgs-unstable"
         ],
         "spectrum": "spectrum"
       },
@@ -176,7 +176,7 @@
     "nix-darwin": {
       "inputs": {
         "nixpkgs": [
-          "nixpkgs"
+          "nixpkgs-unstable"
         ]
       },
       "locked": {
@@ -196,16 +196,32 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1779631097,
-        "narHash": "sha256-ZdNmcrTRLdfIN+1bi+OOzZzHdtbcRHrkB4LOIxlHiMc=",
+        "lastModified": 1779638520,
+        "narHash": "sha256-AVUZS2jThz4JvC4elXpYfFVhRIye0yKKAW0QXLzPwoA=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "ef218436892ac80f9537831a5e65d81d062c6115",
+        "rev": "ebdb5acac5ed863cd4860a994e499edb2760dae1",
         "type": "github"
       },
       "original": {
         "owner": "nixos",
         "ref": "release-26.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-unstable": {
+      "locked": {
+        "lastModified": 1779508470,
+        "narHash": "sha256-Ap9KJX+5xHIn3bPIpfNgT6MEXdAECECwo4/rmlQD74M=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "29916453413845e54a65b8a1cf996842300cd299",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -216,7 +232,7 @@
           "home-manager"
         ],
         "nixpkgs": [
-          "nixpkgs"
+          "nixpkgs-unstable"
         ]
       },
       "locked": {
@@ -269,6 +285,7 @@
         "microvm": "microvm",
         "nix-darwin": "nix-darwin",
         "nixpkgs": "nixpkgs",
+        "nixpkgs-unstable": "nixpkgs-unstable",
         "plasma-manager": "plasma-manager",
         "rust-overlay": "rust-overlay",
         "sops-nix": "sops-nix",
@@ -278,7 +295,7 @@
     "rust-overlay": {
       "inputs": {
         "nixpkgs": [
-          "nixpkgs"
+          "nixpkgs-unstable"
         ]
       },
       "locked": {
@@ -299,7 +316,7 @@
     "sops-nix": {
       "inputs": {
         "nixpkgs": [
-          "nixpkgs"
+          "nixpkgs-unstable"
         ]
       },
       "locked": {

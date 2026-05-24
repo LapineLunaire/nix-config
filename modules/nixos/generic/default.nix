@@ -5,6 +5,8 @@
   ...
 }: let
   flakeInputs = lib.filterAttrs (_: lib.isType "flake") inputs;
+  # Exclude nixpkgs - nixpkgs-flake.nix auto-registers the system's nixpkgs correctly per host.
+  registryInputs = lib.removeAttrs flakeInputs ["nixpkgs"];
 in {
   imports = [
     ./packages.nix
@@ -34,7 +36,7 @@ in {
     channel.enable = false;
     # Pin nix.registry and nixPath to flake inputs
     # so `nix run nixpkgs#foo` and `<nixpkgs>` always resolve to the locked revision rather than fetching from the upstream registry.
-    registry = lib.mapAttrs (_: flake: {inherit flake;}) flakeInputs;
+    registry = lib.mapAttrs (_: flake: {inherit flake;}) registryInputs;
     nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
   };
 
