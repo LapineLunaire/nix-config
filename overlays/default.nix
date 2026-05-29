@@ -2,6 +2,10 @@
   additions = final: _prev: import ../pkgs final.pkgs;
 
   modifications = final: prev: {
+    discord = prev.discord.override {
+      commandLineArgs = "--force-device-scale-factor=1";
+    };
+
     ffmpeg-full = prev.ffmpeg-full.override {
       withUnfree = true;
     };
