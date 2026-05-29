@@ -38,7 +38,7 @@
         {
           location = "top";
           height = 24;
-          floating = true;
+          floating = false;
           opacity = "translucent";
           widgets = [
             {
