@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: {
   imports = [./sops.nix];
@@ -36,6 +37,7 @@
 
   services.postgresql = {
     enable = true;
+    package = pkgs.postgresql_18;
     settings = {
       listen_addresses = lib.mkForce "127.0.0.1,10.28.34.10";
       shared_buffers = "512MB";
