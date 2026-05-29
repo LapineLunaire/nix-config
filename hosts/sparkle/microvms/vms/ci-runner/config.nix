@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   pkgs,
   ...
 }: {
@@ -50,7 +51,7 @@
   '';
 
   services.gitea-actions-runner = {
-    package = pkgs.forgejo-runner;
+    package = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux.forgejo-runner;
     instances.sparkle = {
       enable = true;
       name = "sparkle";
