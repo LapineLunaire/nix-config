@@ -65,6 +65,7 @@
         mission-center
         mpv
         pciutils
+        prismlauncher
         tibia
         tidal-hifi
         usbutils
