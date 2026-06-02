@@ -2,15 +2,11 @@
   # NetworkManager replaces systemd-networkd on desktops. Explicitly disable networkd so both stacks don't run simultaneously.
   networking.networkmanager.enable = true;
   systemd.network.enable = false;
+  fonts.packages = [pkgs.nerd-fonts.jetbrains-mono];
   services.kmscon = {
     enable = true;
-    hwRender = true;
-    fonts = [
-      {
-        name = "JetBrainsMono Nerd Font";
-        package = pkgs.nerd-fonts.jetbrains-mono;
-      }
-    ];
+    config.hwaccel = true;
+    config.font-name = "JetBrainsMono Nerd Font";
   };
 
   services.earlyoom = {
