@@ -1,6 +1,7 @@
 {
   lib,
   buildFHSEnv,
+  icoutils,
   makeDesktopItem,
   stdenvNoCC,
   writeShellScript,
@@ -114,7 +115,8 @@ in
 
     extraInstallCommands = ''
       install -Dm444 ${desktopItem}/share/applications/*.desktop -t $out/share/applications
-      install -Dm444 ${tibia-unwrapped}/opt/tibia/tibia.ico $out/share/pixmaps/tibia.ico
+      ${icoutils}/bin/icotool -x --width=256 ${tibia-unwrapped}/opt/tibia/tibia.ico -o $TMPDIR
+      install -Dm444 $TMPDIR/tibia_*.png $out/share/icons/hicolor/256x256/apps/tibia.png
     '';
 
     meta = {
