@@ -67,4 +67,15 @@ in {
     font = "Lat2-Terminus16";
     earlySetup = true;
   };
+
+  networking.firewall.enable = true;
+  networking.nftables.enable = true;
+
+  # Use systemd-networkd on all servers. Desktops override this with NetworkManager
+  # via modules/nixos/desktop. Explicit useDHCP = false prevents the legacy
+  # scripted networking stack from racing with networkd.
+  systemd.network.enable = lib.mkDefault true;
+  networking.useDHCP = false;
+
+  boot.zfs.forceImportRoot = false;
 }

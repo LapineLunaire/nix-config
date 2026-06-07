@@ -10,6 +10,16 @@
   ];
 
   config = {
+    # NetworkManager replaces systemd-networkd on desktops. Explicitly disable networkd so both stacks don't run simultaneously.
+    networking.networkmanager.enable = true;
+    systemd.network.enable = false;
+
+    boot.extraModprobeConfig = ''
+      options snd_hda_intel power_save=0
+    '';
+
+    virtualisation.waydroid.enable = true;
+
     home-manager.sharedModules = [inputs.plasma-manager.homeModules.plasma-manager];
     home-manager.users.carmilla.userConfig.desktop.enable = true;
 

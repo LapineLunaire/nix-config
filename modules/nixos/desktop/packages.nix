@@ -1,4 +1,10 @@
 {pkgs, ...}: {
+  environment.plasma6.excludePackages = with pkgs.kdePackages; [
+    elisa
+    kate
+    konsole
+  ];
+
   programs.nix-ld.enable = true;
 
   programs.obs-studio = {
@@ -17,4 +23,5 @@
     enable = true;
     extraCompatPackages = [pkgs.proton-ge-bin];
   };
+
 }
