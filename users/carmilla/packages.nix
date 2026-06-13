@@ -57,6 +57,7 @@
     )
     ++ lib.optionals config.userConfig.desktop.enable (
       with pkgs; [
+        alsa-ucm-conf
         discord
         elysia
         fluffychat
