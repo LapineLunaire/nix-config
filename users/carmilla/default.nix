@@ -32,6 +32,7 @@
   home-manager.backupFileExtension = "bak";
 
   home-manager.users.carmilla = {
+    config,
     lib,
     osConfig,
     pkgs,
@@ -50,7 +51,10 @@
       home = {
         username = "carmilla";
         homeDirectory = osConfig.users.users.carmilla.home;
-        stateVersion = "26.05";
+        stateVersion =
+          if config.userConfig.desktop.enable || pkgs.stdenv.hostPlatform.isDarwin
+          then "26.11"
+          else "26.05";
       };
 
       programs.home-manager.enable = true;
