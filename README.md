@@ -23,7 +23,7 @@ modules/
     secureboot/ Lanzaboote secure boot
 users/carmilla/ home-manager: shell, git, neovim, SSH, desktop environment
 pkgs/           Custom derivations
-overlays/       ffmpeg unfree codecs, protonmail-desktop X11 ozone workaround
+overlays/       package overrides (ffmpeg unfree codecs, mpv/yt-dlp ffmpeg, discord, winbox4)
 ```
 
 ## Implementation notes
@@ -31,7 +31,6 @@ overlays/       ffmpeg unfree codecs, protonmail-desktop X11 ozone workaround
 - qBittorrent on sparkle runs in a VPN-Confinement network namespace (ProtonVPN)
 - Ghostty on macOS: installed via homebrew cask (no darwin support in nixpkgs), configured via home-manager with `package = null`
 - KDE Plasma 6 on Wayland via SDDM; user-level Plasma config managed by plasma-manager
-- protonmail-desktop overlay forces X11 ozone platform on Linux to avoid Wayland crashes
 - Console keymap is Colemak on all Linux hosts
 
 ## Security model
