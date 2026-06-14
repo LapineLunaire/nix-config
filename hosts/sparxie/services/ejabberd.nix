@@ -13,12 +13,15 @@
   };
 
   systemd.services.ejabberd = {
+    # Wait for postgresql-passwords so the ejabberd role's password is set before the first DB connection.
     after = [
       "postgresql.service"
+      "postgresql-passwords.service"
       "redis.service"
     ];
     requires = [
       "postgresql.service"
+      "postgresql-passwords.service"
       "redis.service"
     ];
   };
