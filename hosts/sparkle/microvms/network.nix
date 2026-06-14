@@ -1,7 +1,7 @@
 {lib, ...}: {
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
 
-  # Bridge for VM TAP interfaces. Sparkle uses systemd-networkd exclusively — do NOT use networking.bridges (scripted networking) alongside networkd.
+  # Bridge for VM TAP interfaces. Sparkle uses systemd-networkd exclusively; do NOT use networking.bridges (scripted networking) alongside networkd.
   systemd.network.netdevs."10-vm-br0" = {
     netdevConfig = {
       Kind = "bridge";
@@ -16,7 +16,7 @@
       ConfigureWithoutCarrier = true;
     };
     linkConfig = {
-      # Don't block systemd-networkd-wait-online — bridge has no carrier until the first VM TAP attaches.
+      # Don't block systemd-networkd-wait-online; bridge has no carrier until the first VM TAP attaches.
       RequiredForOnline = "no";
     };
   };

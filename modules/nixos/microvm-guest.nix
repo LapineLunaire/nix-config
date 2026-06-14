@@ -21,7 +21,7 @@
     hypervisor = "cloud-hypervisor";
     vcpu = lib.mkDefault 4;
     mem = lib.mkDefault 2048;
-    # Shared host nix store (read-only). Do NOT set fileSystems."/nix/store" manually — microvm.nix manages the overlay when writableStoreOverlay is set.
+    # Shared host nix store (read-only). Do NOT set fileSystems."/nix/store" manually; microvm.nix manages the overlay when writableStoreOverlay is set.
     shares = [
       {
         tag = "ro-store";
@@ -66,7 +66,7 @@
   networking.nftables.enable = true;
   networking.firewall.enable = true;
   networking.useDHCP = false;
-  # Force eth0 naming — all VM configs reference eth0.
+  # Force eth0 naming; all VM configs reference eth0.
   networking.usePredictableInterfaceNames = false;
   networking.nameservers = ["10.28.34.1"];
   networking.defaultGateway = {

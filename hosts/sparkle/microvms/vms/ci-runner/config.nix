@@ -25,7 +25,7 @@
         proto = "virtiofs";
       }
     ];
-    # Dedicated XFS volume for Docker — overlayfs can't run on virtiofs.
+    # Dedicated XFS volume for Docker; overlayfs can't run on virtiofs.
     volumes = [
       {
         image = "/persist/vms/ci-runner/volumes/docker.img";

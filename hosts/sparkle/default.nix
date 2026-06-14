@@ -44,7 +44,7 @@
     };
     "99-ipmi0" = {
       matchConfig.Name = "ipmi0";
-      # Leave the IPMI interface alone — static config lives on the BMC.
+      # Leave the IPMI interface alone; static config lives on the BMC.
       linkConfig.Unmanaged = true;
     };
   };
@@ -64,7 +64,7 @@
     };
   };
 
-  # Prevent host from claiming the Zigbee stick — passed through to the HA VM.
+  # Prevent host from claiming the Zigbee stick; passed through to the HA VM.
   boot.blacklistedKernelModules = ["cp210x"];
   services.udev.extraRules = ''
     SUBSYSTEM=="usb", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0660", GROUP="kvm"

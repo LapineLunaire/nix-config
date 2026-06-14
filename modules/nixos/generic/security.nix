@@ -1,5 +1,5 @@
 {pkgs, ...}: {
-  # "!" locks the root account — no password login is possible.
+  # "!" locks the root account; no password login is possible.
   users.users.root.hashedPassword = "!";
   users.mutableUsers = false;
 

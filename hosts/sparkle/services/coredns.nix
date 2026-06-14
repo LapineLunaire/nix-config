@@ -9,7 +9,7 @@
     $TTL 3600
 
     @       IN SOA  sparkle.lunaire.moe. hostmaster.lunaire.moe. (
-                    2026041902 ; serial — format YYYYMMDDnn, bump on every zone change
+                    2026041902 ; serial: format YYYYMMDDnn, bump on every zone change
                     3600       ; refresh
                     900        ; retry
                     604800     ; expire
@@ -39,7 +39,7 @@
     $TTL 3600
 
     @       IN SOA  sparkle.lunaire.moe. hostmaster.lunaire.moe. (
-                    2026040301 ; serial — format YYYYMMDDnn, bump on every zone change
+                    2026040301 ; serial: format YYYYMMDDnn, bump on every zone change
                     3600       ; refresh
                     900        ; retry
                     604800     ; expire

@@ -82,7 +82,7 @@
   assertions = [
     {
       assertion = config.systemd.services ? qbittorrent;
-      message = "systemd service 'qbittorrent' not found — the service name may have changed upstream";
+      message = "systemd service 'qbittorrent' not found; the service name may have changed upstream";
     }
   ];
 

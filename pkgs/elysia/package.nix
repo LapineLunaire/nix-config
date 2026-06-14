@@ -26,7 +26,7 @@
     fetchSubmodules = true;
   };
 
-  # third_party/externals — from Skia's DEPS at the above rev
+  # third_party/externals, from Skia's DEPS at the above rev
   dep-brotli = fetchFromGitHub {
     owner = "google";
     repo = "brotli";

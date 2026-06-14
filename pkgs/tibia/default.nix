@@ -105,7 +105,7 @@ in
       zlib
     ];
 
-    # Force XCB — Tibia's client has known issues with Wayland compositors.
+    # Force XCB; Tibia's client has known issues with Wayland compositors.
     profile = ''
       export QT_QPA_PLATFORM=xcb
       unset WAYLAND_DISPLAY
