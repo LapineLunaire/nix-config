@@ -31,7 +31,7 @@ overlays/       package overrides (ffmpeg unfree codecs, mpv/yt-dlp ffmpeg, disc
 - qBittorrent on sparkle runs in a VPN-Confinement network namespace (ProtonVPN)
 - Ghostty on macOS: installed via homebrew cask (no darwin support in nixpkgs), configured via home-manager with `package = null`
 - KDE Plasma 6 on Wayland via SDDM; user-level Plasma config managed by plasma-manager
-- Console keymap is Colemak on all Linux hosts
+- Console keymap is Colemak on desktop hosts
 
 ## Security model
 
