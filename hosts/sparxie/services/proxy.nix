@@ -39,6 +39,8 @@ in {
         "--dns.resolvers"
         "1.1.1.1:53"
       ];
+      # Caddy reads cert files off disk rather than managing ACME itself, so reload it after each renewal to pick up the new cert.
+      reloadServices = ["caddy.service"];
     };
     # Single SAN cert covering all ejabberd component subdomains:
     # conference (MUC), proxy (SOCKS5 file transfer), pubsub, upload (HTTP upload).
@@ -49,6 +51,8 @@ in {
       "pubsub.bunny.enterprises"
       "upload.bunny.enterprises"
     ];
+    # ejabberd loads these cert files at startup and only re-reads them on restart, so reload it (alongside caddy) when this cert renews.
+    certs."bunny.enterprises".reloadServices = config.security.acme.defaults.reloadServices ++ ["ejabberd.service"];
     certs."chat.bunny.enterprises" = {};
     certs."matrix.bunny.enterprises" = {};
     certs."pub.bunny.enterprises" = {};

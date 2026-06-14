@@ -26,6 +26,8 @@ in {
         "--dns.resolvers"
         "1.1.1.1:53"
       ];
+      # Caddy reads cert files off disk rather than managing ACME itself, so reload it after each renewal to pick up the new cert.
+      reloadServices = ["caddy.service"];
     };
     certs."gf.lunaire.moe" = {};
     certs."auth.lunaire.moe" = {};
