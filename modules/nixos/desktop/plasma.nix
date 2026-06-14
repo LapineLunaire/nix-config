@@ -82,11 +82,6 @@
           ];
         }
       ];
-
-      configFile."kwinrc"."Wayland"."InputMethod" = {
-        value = "/run/current-system/sw/share/applications/org.freedesktop.IBus.Panel.Wayland.Gtk3.desktop";
-        immutable = true;
-      };
     };
   };
 }
