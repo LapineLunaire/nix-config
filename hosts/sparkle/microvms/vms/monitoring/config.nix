@@ -65,6 +65,8 @@
     settings.server = {
       http_addr = "10.28.34.19";
       http_port = 3000;
+      domain = "gf.lunaire.moe";
+      root_url = "https://gf.lunaire.moe/";
     };
   };
 
