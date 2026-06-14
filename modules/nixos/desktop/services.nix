@@ -1,6 +1,7 @@
 {...}: {
   services.kmscon = {
     enable = true;
+    useXkbConfig = true;
     config.hwaccel = true;
     config.font-name = "JetBrainsMono Nerd Font";
   };
