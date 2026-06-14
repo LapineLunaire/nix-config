@@ -1,4 +1,6 @@
 {lib, ...}: {
+  imports = [../docker-common.nix];
+
   microvm = {
     hypervisor = lib.mkForce "qemu";
     vcpu = 2;
@@ -41,9 +43,6 @@
       prefixLength = 24;
     }
   ];
-
-  virtualisation.docker.enable = true;
-  virtualisation.oci-containers.backend = "docker";
 
   virtualisation.oci-containers.containers.homeassistant = {
     image = "ghcr.io/home-assistant/home-assistant@sha256:59aa8824955c9db491b75d2eebe42bd68494f80c2ec69ec0d66d9dae37d37514";

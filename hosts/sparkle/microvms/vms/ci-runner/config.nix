@@ -1,10 +1,9 @@
 {
   config,
   inputs,
-  pkgs,
   ...
 }: {
-  imports = [./sops.nix];
+  imports = [./sops.nix ../docker-common.nix];
 
   microvm = {
     vcpu = 8;
@@ -43,8 +42,6 @@
       prefixLength = 24;
     }
   ];
-
-  virtualisation.docker.enable = true;
 
   sops.templates."runner-token.env".content = ''
     TOKEN=${config.sops.placeholder."forgejo-runner-token"}

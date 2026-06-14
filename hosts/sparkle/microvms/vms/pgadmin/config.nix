@@ -1,5 +1,5 @@
 {config, ...}: {
-  imports = [./sops.nix];
+  imports = [./sops.nix ../docker-common.nix];
 
   microvm = {
     vcpu = 1;
@@ -37,9 +37,6 @@
       prefixLength = 24;
     }
   ];
-
-  virtualisation.docker.enable = true;
-  virtualisation.oci-containers.backend = "docker";
 
   sops.templates."pgadmin.env".content = ''
     PGADMIN_DEFAULT_PASSWORD=${config.sops.placeholder."pgadmin-password"}
