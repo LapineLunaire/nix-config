@@ -21,8 +21,8 @@ in {
       keyType = "ec384";
       dnsProvider = "cloudflare";
       environmentFile = config.sops.templates."cloudflare-dns-api-token.env".path;
-      # Skip the DNS propagation pre-check; it was timing out and failing renewals, and Cloudflare propagates fast enough for the ACME server to validate directly.
-      dnsPropagationCheck = false;
+      # Port-53 DNS from this host resolves through the local split-horizon CoreDNS, which never holds the public _acme-challenge record, so lego's propagation check can never pass. Wait a fixed time for Cloudflare to publish the record before the ACME server validates.
+      extraLegoFlags = ["--dns.propagation-wait" "60s"];
       # Caddy reads cert files off disk rather than managing ACME itself, so reload it after each renewal to pick up the new cert.
       reloadServices = ["caddy.service"];
     };
