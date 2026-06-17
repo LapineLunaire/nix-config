@@ -24,9 +24,12 @@
   };
 
   # ensureUsers creates the ejabberd role without a password, but pg_hba requires scram-sha-256 over TCP, so set it from sops.
-  sops.templates."pg-passwords.sql".content = ''
-    ALTER USER ejabberd WITH PASSWORD '${config.sops.placeholder."ejabberd-sql-password"}';
-  '';
+  sops.templates."pg-passwords.sql" = {
+    owner = "postgres";
+    content = ''
+      ALTER USER ejabberd WITH PASSWORD '${config.sops.placeholder."ejabberd-sql-password"}';
+    '';
+  };
 
   systemd.services.postgresql-passwords = {
     description = "Set PostgreSQL user passwords from sops secrets";
