@@ -181,16 +181,11 @@ in {
     '')
   ];
 
-  # Device-specific tuning for the FiiO K11 USB DAC: force the pro-audio profile for bit-perfect output. period-size=256 and headroom=0 reduce buffering latency. S32LE matches its native 32-bit format.
+  # Force the pro-audio profile for the FiiO K11 USB DAC so it passes through its native 32-bit format for bit-perfect output.
   services.pipewire.wireplumber.extraConfig."51-fiio-k11"."monitor.alsa.rules" = [
     {
       matches = [{"device.name" = "alsa_card.usb-FIIO_FiiO_K11-01";}];
-      actions."update-props" = {
-        "device.profile" = "pro-audio";
-        "api.alsa.period-size" = 256;
-        "api.alsa.headroom" = 0;
-        "audio.format" = "S32LE";
-      };
+      actions."update-props"."device.profile" = "pro-audio";
     }
   ];
 }
