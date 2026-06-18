@@ -62,13 +62,13 @@
         elysia
         fluffychat
         heroic
+        high-tide
         minisign
         mission-center
         mpv
         pciutils
         prismlauncher
         tibia
-        tidal-hifi
         usbutils
         wootility
         xivlauncher
