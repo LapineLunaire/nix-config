@@ -6,6 +6,11 @@
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
     home-manager = {
+      url = "github:nix-community/home-manager/release-26.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    home-manager-unstable = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
@@ -25,7 +30,7 @@
     impermanence = {
       url = "github:nix-community/impermanence/master";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
-      inputs.home-manager.follows = "home-manager";
+      inputs.home-manager.follows = "home-manager-unstable";
     };
 
     lanzaboote = {
@@ -37,12 +42,12 @@
 
     sops-nix = {
       url = "github:Mic92/sops-nix/master";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     microvm = {
       url = "github:microvm-nix/microvm.nix/main";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     vpn-confinement.url = "github:Maroka-chan/VPN-Confinement/master";
@@ -57,7 +62,7 @@
     plasma-manager = {
       url = "github:nix-community/plasma-manager/trunk";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
-      inputs.home-manager.follows = "home-manager";
+      inputs.home-manager.follows = "home-manager-unstable";
     };
   };
 
@@ -66,6 +71,7 @@
     nixpkgs,
     nixpkgs-unstable,
     home-manager,
+    home-manager-unstable,
     nix-darwin,
     impermanence,
     lanzaboote,
@@ -92,8 +98,8 @@
     pkgsFor = mkPkgs nixpkgs;
     pkgsUnstableFor = mkPkgs nixpkgs-unstable;
 
-    hmModules = [
-      home-manager.nixosModules.home-manager
+    mkHmModules = hm: [
+      hm.nixosModules.home-manager
       {
         home-manager = {
           useGlobalPkgs = true;
@@ -116,7 +122,7 @@
             lanzaboote.nixosModules.lanzaboote
             sops-nix.nixosModules.sops
           ]
-          ++ hmModules ++ modules;
+          ++ (mkHmModules home-manager) ++ modules;
       };
 
     mkDesktopSystem = {
@@ -133,7 +139,7 @@
             sops-nix.nixosModules.sops
             aagl.nixosModules.default
           ]
-          ++ hmModules ++ modules;
+          ++ (mkHmModules home-manager-unstable) ++ modules;
       };
 
     mkMicrovm = modules:
@@ -159,7 +165,7 @@
         modules =
           [
             {nixpkgs.pkgs = pkgsUnstableFor system;}
-            home-manager.darwinModules.home-manager
+            home-manager-unstable.darwinModules.home-manager
             {
               home-manager = {
                 useGlobalPkgs = true;
