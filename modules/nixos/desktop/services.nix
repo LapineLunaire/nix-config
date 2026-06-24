@@ -12,10 +12,7 @@
     freeSwapThreshold = 2;
   };
 
-  services.displayManager.sddm = {
-    enable = true;
-    wayland.enable = true;
-  };
+  services.displayManager.plasma-login-manager.enable = true;
 
   services.desktopManager.plasma6.enable = true;
 
