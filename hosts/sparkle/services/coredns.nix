@@ -9,7 +9,7 @@
     $TTL 3600
 
     @       IN SOA  sparkle.lunaire.moe. hostmaster.lunaire.moe. (
-                    2026041902 ; serial: format YYYYMMDDnn, bump on every zone change
+                    2026062402 ; serial: format YYYYMMDDnn, bump on every zone change
                     3600       ; refresh
                     900        ; retry
                     604800     ; expire
@@ -31,6 +31,7 @@
     up       IN CNAME sparkle.lunaire.moe.
     kv       IN CNAME sparkle.lunaire.moe.
     vw       IN CNAME sparkle.lunaire.moe.
+    unifi    IN A     10.28.34.21
   '';
 
   # Reverse DNS zone for 10.28.0.0/16.

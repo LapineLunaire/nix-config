@@ -52,6 +52,11 @@
 
     vpn-confinement.url = "github:Maroka-chan/VPN-Confinement/master";
 
+    unifi-os-server = {
+      url = "github:rcambrj/unifi-os-server";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+
     aagl = {
       url = "github:ezKEa/aagl-gtk-on-nix/main";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -78,6 +83,7 @@
     sops-nix,
     microvm,
     vpn-confinement,
+    unifi-os-server,
     aagl,
     ...
   } @ inputs: let
@@ -211,6 +217,10 @@
       qbittorrent = mkMicrovm [
         vpn-confinement.nixosModules.default
         ./hosts/sparkle/microvms/vms/qbittorrent/config.nix
+      ];
+      unifi = mkMicrovm [
+        unifi-os-server.nixosModules.unifi-os-server
+        ./hosts/sparkle/microvms/vms/unifi/config.nix
       ];
     };
 

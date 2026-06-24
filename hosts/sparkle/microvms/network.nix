@@ -40,6 +40,12 @@
 
       # monitoring: scrape node_exporter on all VMs.
       iifname "vm-br0" oifname "vm-br0" ip saddr 10.28.34.19 tcp dport 9100 accept
+
+      # UniFi devices reach the controller VM for L3 inform/adoption and service traffic.
+      iifname "sfp0" oifname "vm-br0" ip daddr 10.28.34.21 ip saddr 10.28.16.0/24 tcp dport { 8080, 8443, 6789, 8880, 8843 } accept
+      iifname "sfp0" oifname "vm-br0" ip daddr 10.28.34.21 ip saddr 10.28.16.0/24 udp dport { 3478, 10001 } accept
+      # Admins reach the controller web UI directly (no reverse proxy).
+      iifname "sfp0" oifname "vm-br0" ip daddr 10.28.34.21 ip saddr { 10.28.64.0/24, 10.28.96.0/24, 10.100.0.0/24, 10.1.0.0/24 } tcp dport 443 accept
     ''
     (lib.mkAfter ''
       iifname "vm-br0" drop

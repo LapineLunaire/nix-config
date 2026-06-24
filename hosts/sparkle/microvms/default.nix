@@ -12,5 +12,6 @@
     ./vms/pgadmin
     ./vms/homeassistant
     ./vms/qbittorrent
+    ./vms/unifi
   ];
 }

@@ -36,6 +36,8 @@ in {
     certs."misc.lunaire.moe" = {};
     certs."kv.lunaire.moe" = {};
     certs."vw.lunaire.moe" = {};
+    # unifi-core (served directly, no proxy) only accepts an RSA cert via its unifi-core.crt/.key files.
+    certs."unifi.lunaire.moe" = {keyType = "rsa4096";};
   };
 
   users.users.caddy.extraGroups = ["acme"];
