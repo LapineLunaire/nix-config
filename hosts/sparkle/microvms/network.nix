@@ -1,6 +1,11 @@
 {lib, ...}: {
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
 
+  # br_netfilter routes bridged frames through the inet forward chain, without which same-bridge VM-to-VM traffic bypasses the forward-allow rules below entirely.
+  boot.kernelModules = ["br_netfilter"];
+  boot.kernel.sysctl."net.bridge.bridge-nf-call-iptables" = 1;
+  boot.kernel.sysctl."net.bridge.bridge-nf-call-ip6tables" = 1;
+
   # Bridge for VM TAP interfaces. Sparkle uses systemd-networkd exclusively; do NOT use networking.bridges (scripted networking) alongside networkd.
   systemd.network.netdevs."10-vm-br0" = {
     netdevConfig = {
