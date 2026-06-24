@@ -112,6 +112,28 @@ in {
                     audio.position = [ AUX8 AUX9 ]
                 }
             }
+        },
+
+        # RODECaster Input to FiiO K11
+        {
+            name = libpipewire-module-loopback
+            args = {
+                node.name = "loopback.input-to-fiio"
+                node.description = "RODECaster Input to FiiO K11"
+                audio.position = [ FL FR ]
+
+                capture.props = {
+                    target.object = "alsa_input.usb-R__DE_RODECaster_Duo_${serial}.pro-input-1"
+                    stream.dont-remix = true
+                    audio.position = [ AUX0 AUX1 ]
+                }
+
+                playback.props = {
+                    target.object = "alsa_output.usb-FIIO_FiiO_K11-01.pro-output-0"
+                    stream.dont-remix = true
+                    audio.position = [ AUX0 AUX1 ]
+                }
+            }
         }
     ]
 
