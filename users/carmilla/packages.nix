@@ -28,6 +28,7 @@
         alejandra
         azahar
         bat
+        brave
         duf
         eza
         ffmpeg-full
