@@ -7,6 +7,7 @@
     ./proxy.nix
     ./tuwunel.nix
     ./wireguard.nix
+    ./zfs.nix
   ];
 
   # Disabled: sparxie is a VPS with no physical disks or firmware to manage.

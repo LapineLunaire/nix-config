@@ -7,5 +7,6 @@
     ./proxy.nix
     ./smb.nix
     ./wireguard.nix
+    ./zfs.nix
   ];
 }

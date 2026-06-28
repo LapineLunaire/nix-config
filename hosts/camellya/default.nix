@@ -17,7 +17,6 @@
 
   networking = {
     hostName = "camellya";
-    hostId = "0d339030";
   };
 
   boot = {
@@ -35,7 +34,6 @@
     );
     # With amd_pstate active, powersave lets the firmware (CPPC) handle frequency scaling.
     kernelParams = ["amd_pstate=active"];
-    zfs.package = pkgs.zfs_2_4;
   };
 
   powerManagement.cpuFreqGovernor = "powersave";
