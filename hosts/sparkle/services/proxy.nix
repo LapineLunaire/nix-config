@@ -16,7 +16,7 @@
   net = import ../microvms/vm-net.nix;
   # uptimeKuma in extraAllow is uptime-kuma probing each service through the proxy.
   uptimeKuma = net.ip."uptime-kuma";
-  # Each entry becomes <name>.lunaire.moe behind the wildcard cert. extraAllow lists callers beyond baseAllow; body is the service-specific Caddy config.
+  # Each entry becomes <name>.lunaire.moe behind the wildcard cert, and coredns.nix generates a zone CNAME per entry (bump the zone serial when this set changes). extraAllow lists callers beyond baseAllow; body is the service-specific Caddy config.
   vhosts = {
     gf = {
       extraAllow = [uptimeKuma];
