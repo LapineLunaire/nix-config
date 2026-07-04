@@ -33,7 +33,10 @@
   networking.firewall.extraForwardRules = lib.mkMerge [
     ''
       ct state established,related accept
-      iifname "vm-br0" oifname "sfp0" accept
+      # VMs reach the internet but not RFC1918 space; LAN flows VMs initiate need explicit rules below.
+      iifname "vm-br0" oifname "sfp0" ip daddr != { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } accept
+      # UniFi controller reaches devices on the management network for adoption, provisioning, and firmware pushes.
+      iifname "vm-br0" oifname "sfp0" ip saddr 10.28.34.21 ip daddr 10.28.16.0/24 accept
       # LAN/VPN → VMs: SSH and ICMP only.
       iifname "sfp0" oifname "vm-br0" ip saddr { 10.28.64.0/24, 10.28.96.0/24, 10.100.0.0/24, 10.1.0.0/24 } tcp dport 22 accept
       iifname "sfp0" oifname "vm-br0" ip saddr { 10.28.64.0/24, 10.28.96.0/24, 10.100.0.0/24, 10.1.0.0/24 } icmp type echo-request accept
