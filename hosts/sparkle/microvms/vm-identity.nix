@@ -2,7 +2,11 @@
 # The MAC prefix is a randomly generated locally-administered unicast OUI (02 + 4 random bytes) so the VMs can never collide with real hardware or another 02:00:... scheme on the LAN.
 name: let
   vm = (import ./vm-registry.nix).${name};
-  octet = toString vm.index;
+  # Indices below 10 would produce a one-digit MAC octet and vsock CIDs below 3 are reserved; above 99 overflows the octet.
+  octet =
+    if vm.index >= 10 && vm.index <= 99
+    then toString vm.index
+    else throw "vm-registry index ${toString vm.index} for ${name} is outside 10-99; it is spliced into the MAC and IP as a two-digit octet";
 in
   {...}: {
     microvm = {

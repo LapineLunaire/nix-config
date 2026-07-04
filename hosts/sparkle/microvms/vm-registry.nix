@@ -1,4 +1,5 @@
 # Central VM registry. index becomes the vsock CID, the last MAC octet (behind the random prefix in vm-identity.nix), and the last IP octet (10.28.34.<index>); deps order microvm@<name> after other VMs.
+# index must be between 10 and 99: it is spliced into the MAC address as a two-digit octet (vm-identity.nix enforces this at eval time).
 {
   postgres = {index = 10;};
   authelia = {
