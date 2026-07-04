@@ -34,6 +34,7 @@
 
   boot = {
     kernelPackages = pkgs.linuxPackages_6_18;
+    # Explicit zfs major version pin, upgraded deliberately in lockstep with the kernel pin above.
     zfs.package = pkgs.zfs_2_4;
   };
 

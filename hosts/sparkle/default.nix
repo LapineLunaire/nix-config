@@ -84,6 +84,7 @@
       }
     );
     kernelParams = ["intel_pstate=active"];
+    # Explicit zfs major version pin, upgraded deliberately in lockstep with the kernel pin above.
     zfs.package = pkgs.zfs_2_4;
   };
 
