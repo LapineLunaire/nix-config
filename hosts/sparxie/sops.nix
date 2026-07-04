@@ -119,6 +119,9 @@
             use_turn: true
             turn_ipv4_address: "46.225.108.230"
             turn_ipv6_address: "2a01:4f8:1c19:a249::1"
+            # Relay allocation range, matching allowedUDPPortRanges in ejabberd.nix.
+            turn_min_port: 49152
+            turn_max_port: 49500
 
         acl:
           admin:

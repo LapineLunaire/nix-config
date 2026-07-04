@@ -35,5 +35,12 @@
       5443
     ];
     allowedUDPPorts = [3478];
+    # TURN relay allocations, matching turn_min_port/turn_max_port in the ejabberd listener.
+    allowedUDPPortRanges = [
+      {
+        from = 49152;
+        to = 49500;
+      }
+    ];
   };
 }
