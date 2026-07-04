@@ -198,7 +198,8 @@
     inherit overlays;
 
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
-    packages = forAllSystems (system: import ./pkgs (pkgsFor system));
+    # Only expose packages whose meta.platforms includes the target system, so cross-system eval (and nix flake check) doesn't hit "unsupported system".
+    packages = forAllSystems (system: nixpkgs.lib.filterAttrs (_: p: nixpkgs.lib.meta.availableOn (nixpkgs.lib.systems.elaborate system) p) (import ./pkgs (pkgsFor system)));
 
     nixosConfigurations =
       {
