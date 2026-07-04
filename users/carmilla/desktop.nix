@@ -9,6 +9,8 @@
       QT_QPA_PLATFORM = "wayland";
     };
 
+    services.ssh-agent.enable = true;
+
     xdg = {
       enable = true;
 

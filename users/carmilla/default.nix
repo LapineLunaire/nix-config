@@ -42,7 +42,6 @@
       ./desktop.nix
       ./packages.nix
       ./programs.nix
-      ./services.nix
     ];
 
     options.userConfig.desktop.enable = lib.mkEnableOption "desktop environment configuration";
