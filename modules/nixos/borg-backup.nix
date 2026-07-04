@@ -19,6 +19,8 @@
     inherit startAt;
     preHook = ''
       export BORG_REPO=$(< ${config.sops.secrets."borg-repo".path})
+      # Unmount any snapshot left behind by an interrupted run; a mounted snapshot makes the destroy below fail and the snapshot create abort on the leftover.
+      ${pkgs.util-linux}/bin/umount /mnt/borg-snapshot 2>/dev/null || true
       ${pkgs.zfs}/bin/zfs destroy ${pool}/persist@borg-backup 2>/dev/null || true
       ${pkgs.zfs}/bin/zfs snapshot ${pool}/persist@borg-backup
       ${pkgs.coreutils}/bin/mkdir -p /mnt/borg-snapshot
