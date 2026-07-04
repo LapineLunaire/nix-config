@@ -58,8 +58,8 @@
     };
   };
 
+  # Git-over-SSH on port 22 rides the system sshd, which microvm-guest.nix already opens to the trusted subnets.
   networking.firewall.extraInputRules = ''
     ip saddr 10.28.34.1 tcp dport 3000 accept
-    ip saddr { 10.28.64.0/24, 10.28.96.0/24, 10.100.0.0/24, 10.1.0.0/24 } tcp dport 22 accept
   '';
 }
