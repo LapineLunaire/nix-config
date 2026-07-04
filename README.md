@@ -9,7 +9,7 @@
 | sparxie | aarch64-linux | VPS |
 | silverwolf | aarch64-darwin | MacBook |
 
-sparkle additionally runs a fleet of microVMs (cloud-hypervisor via microvm.nix), one per service: postgres, authelia, forgejo, ci-runner, homeassistant, qbittorrent, vaultwarden, kavita, uptime-kuma, monitoring, pgadmin, and unifi. Each VM is its own `nixosConfigurations` output, generated from `hosts/sparkle/microvms/vm-registry.nix`, and is what the CI eval step transitively checks through sparkle's toplevel.
+sparkle additionally runs a fleet of microVMs (cloud-hypervisor via microvm.nix), one per service: postgres, authelia, forgejo, ci-runner, homeassistant, qbittorrent, vaultwarden, kavita, uptime-kuma, monitoring, pgadmin, and unifi. homeassistant is the sole exception to cloud-hypervisor: it runs on qemu because the Zigbee stick USB passthrough requires it. Each VM is its own `nixosConfigurations` output, generated from `hosts/sparkle/microvms/vm-registry.nix`, and is what the CI eval step transitively checks through sparkle's toplevel.
 
 Linux hosts use impermanence with tmpfs `/` - state persists only through explicitly declared paths. Secrets are sops-nix encrypted to each host's SSH ed25519 host key.
 

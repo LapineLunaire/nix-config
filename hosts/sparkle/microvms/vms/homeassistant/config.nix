@@ -2,6 +2,7 @@
   imports = [../docker-common.nix];
 
   microvm = {
+    # qemu instead of the cloud-hypervisor default: the Zigbee stick USB passthrough (devices below) needs it. This is the only VM not on cloud-hypervisor.
     hypervisor = lib.mkForce "qemu";
     vcpu = 2;
     mem = 2560;
