@@ -19,7 +19,7 @@ modules/
   darwin/       macOS system defaults, firewall, privacy settings
   nixos/
     generic/    Base NixOS: kernel hardening, SSH, ZFS, zram, chrony
-    desktop/    KDE Plasma 6, SDDM, PipeWire, fonts, Steam
+    desktop/    KDE Plasma 6, Plasma Login Manager, PipeWire, fonts, Steam
     secureboot/ Lanzaboote secure boot
 users/carmilla/ home-manager: shell, git, neovim, SSH, desktop environment
 pkgs/           Custom derivations
@@ -30,7 +30,7 @@ overlays/       package overrides (ffmpeg unfree codecs, mpv/yt-dlp ffmpeg, disc
 
 - qBittorrent on sparkle runs in a VPN-Confinement network namespace (ProtonVPN)
 - Ghostty on macOS: installed via homebrew cask (no darwin support in nixpkgs), configured via home-manager with `package = null`
-- KDE Plasma 6 on Wayland via SDDM; user-level Plasma config managed by plasma-manager
+- KDE Plasma 6 on Wayland via Plasma Login Manager; user-level Plasma config managed by plasma-manager
 - Console keymap is Colemak on desktop hosts
 
 ## Security model
@@ -44,7 +44,8 @@ Threat model is device theft, remote compromise of internet-facing services, and
 
 **Secrets**
 - sops-nix encrypted to each host's SSH ed25519 host key
-- camellya and sparkle persist the host key on a ZFS native-encrypted dataset with an interactive boot passphrase, so disk theft is bounded by that passphrase
+- sparkle persists the host key on a ZFS native-encrypted dataset with an interactive boot passphrase, so disk theft is bounded by that passphrase
+- camellya persists the host key on a LUKS2 volume (LVM + XFS) unlocked via TPM2 with a passphrase keyslot as fallback; a pulled disk is unreadable, but the whole stolen device boots to the login screen, so theft protection rests on the login password and the secure boot chain
 - VM secrets are additionally encrypted to the sparkle host key so the host can rebuild any guest
 
 **Network**
@@ -55,7 +56,7 @@ Threat model is device theft, remote compromise of internet-facing services, and
 
 **Boot integrity**
 - Lanzaboote secure boot with sbctl-enrolled keys on camellya and sparkle
-- TPM2 tooling available; disk decryption is interactive passphrase rather than TPM-sealed
+- sparkle's disk decryption is an interactive passphrase; camellya's is TPM2-sealed (`tpm2-device=auto`), trading passphrase-at-boot for reliance on secure boot integrity and the login screen
 - Kernel hardening: KPTI, `slab_nomerge`, `page_alloc.shuffle`, `kptr_restrict=2`, `dmesg_restrict`, syncookies, strict rp_filter, ICMP redirects rejected
 - AppArmor enabled, killing any unconfined confinables
 
@@ -86,7 +87,7 @@ parted /dev/nvme0n1 -- mkpart primary 1GiB 100%
 mkfs.vfat -F32 /dev/nvme0n1p1
 ```
 
-**2. Create ZFS pool and datasets**
+**2a. Create ZFS pool and datasets** (sparkle layout)
 
 ```sh
 zpool create -o ashift=12 -o autotrim=on \
@@ -105,15 +106,41 @@ Without encryption: omit `-O encryption=on -O keylocation=prompt -O keyformat=pa
 
 With mirror: replace the vdev with `mirror /dev/disk/by-id/<disk1>-part2 /dev/disk/by-id/<disk2>-part2`
 
+**2b. Create LUKS2 + LVM + XFS volumes** (camellya layout)
+
+```sh
+cryptsetup luksFormat --type luks2 /dev/nvme0n1p2
+cryptsetup open /dev/nvme0n1p2 cryptroot
+
+pvcreate /dev/mapper/cryptroot
+vgcreate <hostname> /dev/mapper/cryptroot
+lvcreate -L 200G -n nix <hostname>
+lvcreate -L 100G -n persist <hostname>
+lvcreate -l 100%FREE -n home <hostname>
+
+mkfs.xfs /dev/<hostname>/nix
+mkfs.xfs /dev/<hostname>/persist
+mkfs.xfs /dev/<hostname>/home
+```
+
+TPM2 enrollment happens after first boot (step 7); the passphrase keyslot stays as fallback.
+
 **3. Mount**
 
 ```sh
 mount -t tmpfs -o size=2G,mode=755 none /mnt
 mkdir -p /mnt/{boot,nix,persist,home}
 mount /dev/nvme0n1p1 /mnt/boot
+
+# ZFS layout:
 mount -t zfs -o zfsutil <hostname>/nix /mnt/nix
 mount -t zfs -o zfsutil <hostname>/persist /mnt/persist
 mount -t zfs -o zfsutil <hostname>/home /mnt/home
+
+# LUKS/LVM layout:
+mount -o noatime /dev/<hostname>/nix /mnt/nix
+mount -o noatime /dev/<hostname>/persist /mnt/persist
+mount -o noatime /dev/<hostname>/home /mnt/home
 ```
 
 **4. Generate the SSH host key (required for sops)**
@@ -152,6 +179,12 @@ After rebooting into the installed system:
 ```sh
 sbctl create-keys
 sbctl enroll-keys --microsoft
+```
+
+On camellya, enroll the TPM2 into the LUKS header after secure boot is enrolled and verified (`bootctl status`), since the seal binds to PCR 7:
+
+```sh
+systemd-cryptenroll --tpm2-device=auto /dev/nvme0n1p2
 ```
 
 ---
