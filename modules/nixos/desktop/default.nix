@@ -14,6 +14,7 @@
     networking.networkmanager.enable = true;
     systemd.network.enable = false;
 
+    # Keep the HDA codec powered; entering and leaving power save causes an audible pop.
     boot.extraModprobeConfig = ''
       options snd_hda_intel power_save=0
     '';
