@@ -11,11 +11,6 @@
       "network/ipmi0-mac" = {};
       "network/sfp0-mac" = {};
       "network/sfp1-mac" = {};
-      "borg-passphrase" = {};
-      "borg-ssh-key" = {};
-      "borg-repo" = {};
-      # Full known_hosts line for the storage box. Get it with: ssh-keyscan -p 23 <hostname>
-      "borg-known-hosts" = {};
     };
 
     templates."10-ipmi0.link".content = ''

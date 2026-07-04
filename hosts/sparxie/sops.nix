@@ -10,10 +10,6 @@
       "tuwunel-registration-token" = {};
       "wireguard-private-key" = {};
       "pub-bnnuy-password-hash" = {};
-      "borg-passphrase" = {};
-      "borg-ssh-key" = {};
-      "borg-repo" = {};
-      "borg-known-hosts" = {};
     };
 
     templates."ejabberd.yml" = {

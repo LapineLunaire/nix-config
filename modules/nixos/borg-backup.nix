@@ -7,6 +7,14 @@
   pkgs,
   ...
 }: {
+  sops.secrets = {
+    "borg-passphrase" = {};
+    "borg-ssh-key" = {};
+    "borg-repo" = {};
+    # Full known_hosts line for the storage box. Get it with: ssh-keyscan -p 23 <hostname>
+    "borg-known-hosts" = {};
+  };
+
   services.borgbackup.jobs.hetzner = {
     repo = "unset"; # actual repo URL injected via BORG_REPO in preHook
     paths = ["/mnt/borg-snapshot"];
