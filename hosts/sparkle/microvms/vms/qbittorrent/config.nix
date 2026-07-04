@@ -32,6 +32,7 @@
         protocol = "tcp";
       }
     ];
+    # 57140 is the port ProtonVPN forwards to this WireGuard config; update it here and in torrentingPort below if the assignment changes.
     openVPNPorts = [
       {
         port = 57140;
