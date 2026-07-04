@@ -6,7 +6,7 @@
 }: let
   net = import ../../vm-net.nix;
 in {
-  imports = [./sops.nix];
+  imports = [./sops.nix ../../../../../modules/nixos/postgres-passwords.nix];
 
   microvm = {
     vcpu = 2;
@@ -60,18 +60,6 @@ in {
     ALTER USER forgejo     WITH PASSWORD '${config.sops.placeholder."forgejo-db-password"}';
     ALTER USER vaultwarden WITH PASSWORD '${config.sops.placeholder."vaultwarden-db-password"}';
   '';
-
-  systemd.services.postgresql-passwords = {
-    description = "Set PostgreSQL user passwords from sops secrets";
-    after = ["postgresql.service"];
-    requires = ["postgresql.service"];
-    wantedBy = ["multi-user.target"];
-    serviceConfig = {
-      Type = "oneshot";
-      User = "postgres";
-      ExecStart = "${config.services.postgresql.package}/bin/psql -f ${config.sops.templates."pg-passwords.sql".path}";
-    };
-  };
 
   networking.firewall.extraInputRules = ''
     ip saddr { ${lib.concatStringsSep ", " (map (name: net.ip.${name}) net.postgresClients)} } tcp dport 5432 accept

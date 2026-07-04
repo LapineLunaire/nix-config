@@ -3,6 +3,8 @@
   pkgs,
   ...
 }: {
+  imports = [../../../modules/nixos/postgres-passwords.nix];
+
   services.postgresql = {
     enable = true;
     package = pkgs.postgresql_18;
@@ -29,18 +31,6 @@
     content = ''
       ALTER USER ejabberd WITH PASSWORD '${config.sops.placeholder."ejabberd-sql-password"}';
     '';
-  };
-
-  systemd.services.postgresql-passwords = {
-    description = "Set PostgreSQL user passwords from sops secrets";
-    after = ["postgresql.service"];
-    requires = ["postgresql.service"];
-    wantedBy = ["multi-user.target"];
-    serviceConfig = {
-      Type = "oneshot";
-      User = "postgres";
-      ExecStart = "${config.services.postgresql.package}/bin/psql -f ${config.sops.templates."pg-passwords.sql".path}";
-    };
   };
 
   # ejabberd uses Redis for session and cache storage (db 1, configured in ejabberd.yml).
