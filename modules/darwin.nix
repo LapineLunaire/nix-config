@@ -1,13 +1,10 @@
 {
-  inputs,
   lib,
   pkgs,
   ...
-}: let
-  flakeInputs = lib.filterAttrs (_: lib.isType "flake") inputs;
-  # Exclude nixpkgs - nixpkgs-flake.nix auto-registers the system's nixpkgs correctly per host.
-  registryInputs = lib.removeAttrs flakeInputs ["nixpkgs"];
-in {
+}: {
+  imports = [./nix-settings.nix];
+
   programs.zsh.enable = true;
 
   # Allow Touch ID to authenticate sudo prompts in terminal.
@@ -17,16 +14,6 @@ in {
 
   nix = {
     package = pkgs.nix;
-    settings = {
-      experimental-features = [
-        "nix-command"
-        "flakes"
-      ];
-      flake-registry = "";
-    };
-    channel.enable = false;
-    registry = lib.mapAttrs (_: flake: {inherit flake;}) registryInputs;
-    nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
     gc = {
       automatic = true;
       interval.Weekday = 7; # Sunday
