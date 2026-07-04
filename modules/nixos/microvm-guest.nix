@@ -61,7 +61,7 @@
   ];
   networking.firewall.extraInputRules = lib.mkBefore ''
     ip saddr 10.28.34.19 tcp dport 9100 accept
-    ip saddr { 10.28.64.0/24, 10.28.96.0/24, 10.100.0.0/24, 10.1.0.0/24 } tcp dport 22 accept
+    ip saddr { ${lib.concatStringsSep ", " (import ../../hosts/sparkle/trusted-subnets.nix)} } tcp dport 22 accept
   '';
   networking.nftables.enable = true;
   networking.firewall.enable = true;

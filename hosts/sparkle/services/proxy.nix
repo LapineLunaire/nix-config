@@ -11,9 +11,10 @@
       -Server
     }
   '';
-  # Source-IP base allowlist applied to every vhost: LAN, guest, WireGuard, and site-to-site subnets.
-  baseAllow = ["10.28.64.0/24" "10.28.96.0/24" "10.100.0.0/24" "10.1.0.0/24"];
+  # Source-IP base allowlist applied to every vhost: both LANs and both WireGuard subnets (see trusted-subnets.nix).
+  baseAllow = import ../trusted-subnets.nix;
   # Each entry becomes <name>.lunaire.moe behind the wildcard cert. extraAllow lists callers beyond baseAllow; body is the service-specific Caddy config.
+  # 10.28.34.18 in extraAllow is uptime-kuma probing each service through the proxy.
   vhosts = {
     gf = {
       extraAllow = ["10.28.34.18"];

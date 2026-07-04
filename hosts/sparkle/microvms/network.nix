@@ -1,4 +1,7 @@
-{lib, ...}: {
+{lib, ...}: let
+  # Both LANs and both WireGuard subnets (see trusted-subnets.nix), shared with the Caddy vhost ACLs and VM SSH ingress.
+  trusted = lib.concatStringsSep ", " (import ../trusted-subnets.nix);
+in {
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
 
   # br_netfilter routes bridged frames through the inet forward chain, without which same-bridge VM-to-VM traffic bypasses the forward-allow rules below entirely.
@@ -38,8 +41,8 @@
       # UniFi controller reaches devices on the management network for adoption, provisioning, and firmware pushes.
       iifname "vm-br0" oifname "sfp0" ip saddr 10.28.34.21 ip daddr 10.28.16.0/24 accept
       # LAN/VPN → VMs: SSH and ICMP only.
-      iifname "sfp0" oifname "vm-br0" ip saddr { 10.28.64.0/24, 10.28.96.0/24, 10.100.0.0/24, 10.1.0.0/24 } tcp dport 22 accept
-      iifname "sfp0" oifname "vm-br0" ip saddr { 10.28.64.0/24, 10.28.96.0/24, 10.100.0.0/24, 10.1.0.0/24 } icmp type echo-request accept
+      iifname "sfp0" oifname "vm-br0" ip saddr { ${trusted} } tcp dport 22 accept
+      iifname "sfp0" oifname "vm-br0" ip saddr { ${trusted} } icmp type echo-request accept
 
       # monitoring: scrape node_exporter on all VMs.
       iifname "vm-br0" oifname "vm-br0" ip saddr 10.28.34.19 tcp dport 9100 accept
@@ -51,7 +54,7 @@
       iifname "sfp0" oifname "vm-br0" ip daddr 10.28.34.21 ip saddr 10.28.16.0/24 tcp dport { 8080, 8443, 6789, 8880, 8843 } accept
       iifname "sfp0" oifname "vm-br0" ip daddr 10.28.34.21 ip saddr 10.28.16.0/24 udp dport { 3478, 10001 } accept
       # Admins reach the controller web UI directly (no reverse proxy).
-      iifname "sfp0" oifname "vm-br0" ip daddr 10.28.34.21 ip saddr { 10.28.64.0/24, 10.28.96.0/24, 10.100.0.0/24, 10.1.0.0/24 } tcp dport 443 accept
+      iifname "sfp0" oifname "vm-br0" ip daddr 10.28.34.21 ip saddr { ${trusted} } tcp dport 443 accept
     ''
     (lib.mkAfter ''
       iifname "vm-br0" drop
