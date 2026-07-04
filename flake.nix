@@ -148,7 +148,7 @@
           ++ (mkHmModules home-manager-unstable) ++ modules;
       };
 
-    mkMicrovm = modules:
+    mkMicrovm = name: extraModules:
       nixpkgs.lib.nixosSystem {
         specialArgs = commonArgs;
         modules =
@@ -158,9 +158,21 @@
             microvm.nixosModules.microvm
             impermanence.nixosModules.impermanence
             ./modules/nixos/microvm-guest.nix
+            (import ./hosts/sparkle/microvms/vm-identity.nix name)
+            ./hosts/sparkle/microvms/vms/${name}/config.nix
           ]
-          ++ modules;
+          ++ extraModules;
       };
+
+    # One nixosConfiguration per registry entry; VMs needing extra flake-input modules list them here.
+    microvmConfigurations = let
+      extraModules = {
+        qbittorrent = [vpn-confinement.nixosModules.default];
+        unifi = [unifi-os-server.nixosModules.unifi-os-server];
+      };
+    in
+      nixpkgs.lib.mapAttrs (name: _: mkMicrovm name (extraModules.${name} or []))
+      (import ./hosts/sparkle/microvms/vm-registry.nix);
 
     mkDarwinSystem = {
       system,
@@ -188,41 +200,24 @@
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
     packages = forAllSystems (system: import ./pkgs (pkgsFor system));
 
-    nixosConfigurations = {
-      camellya = mkDesktopSystem {
-        system = "x86_64-linux";
-        modules = [./hosts/camellya ./users/carmilla];
-      };
+    nixosConfigurations =
+      {
+        camellya = mkDesktopSystem {
+          system = "x86_64-linux";
+          modules = [./hosts/camellya ./users/carmilla];
+        };
 
-      sparkle = mkServerSystem {
-        system = "x86_64-linux";
-        modules = [microvm.nixosModules.host ./hosts/sparkle ./users/carmilla];
-      };
+        sparkle = mkServerSystem {
+          system = "x86_64-linux";
+          modules = [microvm.nixosModules.host ./hosts/sparkle ./users/carmilla];
+        };
 
-      sparxie = mkServerSystem {
-        system = "aarch64-linux";
-        modules = [./hosts/sparxie ./users/carmilla];
-      };
-
-      uptime-kuma = mkMicrovm [./hosts/sparkle/microvms/vms/uptime-kuma/config.nix];
-      monitoring = mkMicrovm [./hosts/sparkle/microvms/vms/monitoring/config.nix];
-      kavita = mkMicrovm [./hosts/sparkle/microvms/vms/kavita/config.nix];
-      authelia = mkMicrovm [./hosts/sparkle/microvms/vms/authelia/config.nix];
-      forgejo = mkMicrovm [./hosts/sparkle/microvms/vms/forgejo/config.nix];
-      vaultwarden = mkMicrovm [./hosts/sparkle/microvms/vms/vaultwarden/config.nix];
-      pgadmin = mkMicrovm [./hosts/sparkle/microvms/vms/pgadmin/config.nix];
-      homeassistant = mkMicrovm [./hosts/sparkle/microvms/vms/homeassistant/config.nix];
-      postgres = mkMicrovm [./hosts/sparkle/microvms/vms/postgres/config.nix];
-      ci-runner = mkMicrovm [./hosts/sparkle/microvms/vms/ci-runner/config.nix];
-      qbittorrent = mkMicrovm [
-        vpn-confinement.nixosModules.default
-        ./hosts/sparkle/microvms/vms/qbittorrent/config.nix
-      ];
-      unifi = mkMicrovm [
-        unifi-os-server.nixosModules.unifi-os-server
-        ./hosts/sparkle/microvms/vms/unifi/config.nix
-      ];
-    };
+        sparxie = mkServerSystem {
+          system = "aarch64-linux";
+          modules = [./hosts/sparxie ./users/carmilla];
+        };
+      }
+      // microvmConfigurations;
 
     darwinConfigurations = {
       silverwolf = mkDarwinSystem {

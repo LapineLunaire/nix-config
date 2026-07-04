@@ -5,14 +5,6 @@
     vcpu = 2;
     mem = 1536;
     initialBalloonMem = 256;
-    vsock.cid = 12;
-    interfaces = [
-      {
-        type = "tap";
-        id = "forgejo";
-        mac = "02:00:00:00:00:12";
-      }
-    ];
     shares = [
       {
         tag = "state";
@@ -22,13 +14,6 @@
       }
     ];
   };
-  networking.hostName = "forgejo";
-  networking.interfaces.eth0.ipv4.addresses = [
-    {
-      address = "10.28.34.12";
-      prefixLength = 24;
-    }
-  ];
 
   sops.templates."forgejo.env".content = ''
     FORGEJO__mailer__PASSWD=${config.sops.placeholder."forgejo-smtp-password"}

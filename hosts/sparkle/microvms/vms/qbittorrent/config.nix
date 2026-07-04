@@ -5,14 +5,6 @@
     vcpu = 2;
     mem = 1024;
     initialBalloonMem = 256;
-    vsock.cid = 15;
-    interfaces = [
-      {
-        type = "tap";
-        id = "qbittorrent";
-        mac = "02:00:00:00:00:15";
-      }
-    ];
     shares = [
       {
         tag = "state";
@@ -28,13 +20,6 @@
       }
     ];
   };
-  networking.hostName = "qbittorrent";
-  networking.interfaces.eth0.ipv4.addresses = [
-    {
-      address = "10.28.34.15";
-      prefixLength = 24;
-    }
-  ];
 
   vpnNamespaces.qbtvpn = {
     enable = true;

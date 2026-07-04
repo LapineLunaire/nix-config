@@ -3,14 +3,6 @@
     vcpu = 4;
     mem = 6144;
     initialBalloonMem = 2048;
-    vsock.cid = 21;
-    interfaces = [
-      {
-        type = "tap";
-        id = "unifi";
-        mac = "02:00:00:00:00:21";
-      }
-    ];
     shares = [
       {
         tag = "state";
@@ -35,13 +27,6 @@
       }
     ];
   };
-  networking.hostName = "unifi";
-  networking.interfaces.eth0.ipv4.addresses = [
-    {
-      address = "10.28.34.21";
-      prefixLength = 24;
-    }
-  ];
 
   virtualisation.podman.enable = true;
   virtualisation.oci-containers.backend = "podman";

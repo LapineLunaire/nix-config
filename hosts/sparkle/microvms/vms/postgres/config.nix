@@ -10,14 +10,6 @@
     vcpu = 2;
     mem = 3072;
     initialBalloonMem = 1024;
-    vsock.cid = 10;
-    interfaces = [
-      {
-        type = "tap";
-        id = "postgres";
-        mac = "02:00:00:00:00:10";
-      }
-    ];
     shares = [
       {
         tag = "state";
@@ -27,13 +19,6 @@
       }
     ];
   };
-  networking.hostName = "postgres";
-  networking.interfaces.eth0.ipv4.addresses = [
-    {
-      address = "10.28.34.10";
-      prefixLength = 24;
-    }
-  ];
 
   services.postgresql = {
     enable = true;

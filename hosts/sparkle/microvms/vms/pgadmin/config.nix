@@ -5,14 +5,6 @@
     vcpu = 1;
     mem = 1536;
     initialBalloonMem = 256;
-    vsock.cid = 20;
-    interfaces = [
-      {
-        type = "tap";
-        id = "pgadmin";
-        mac = "02:00:00:00:00:20";
-      }
-    ];
     shares = [
       {
         tag = "state";
@@ -30,13 +22,6 @@
       }
     ];
   };
-  networking.hostName = "pgadmin";
-  networking.interfaces.eth0.ipv4.addresses = [
-    {
-      address = "10.28.34.20";
-      prefixLength = 24;
-    }
-  ];
 
   sops.templates."pgadmin.env".content = ''
     PGADMIN_DEFAULT_PASSWORD=${config.sops.placeholder."pgadmin-password"}

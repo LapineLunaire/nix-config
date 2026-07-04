@@ -9,14 +9,6 @@
     vcpu = 8;
     mem = 12288;
     initialBalloonMem = 4096;
-    vsock.cid = 13;
-    interfaces = [
-      {
-        type = "tap";
-        id = "ci-runner";
-        mac = "02:00:00:00:00:13";
-      }
-    ];
     shares = [
       {
         tag = "state";
@@ -35,13 +27,6 @@
       }
     ];
   };
-  networking.hostName = "ci-runner";
-  networking.interfaces.eth0.ipv4.addresses = [
-    {
-      address = "10.28.34.13";
-      prefixLength = 24;
-    }
-  ];
 
   sops.templates."runner-token.env".content = ''
     TOKEN=${config.sops.placeholder."forgejo-runner-token"}

@@ -5,14 +5,6 @@
     vcpu = 1;
     mem = 768;
     initialBalloonMem = 256;
-    vsock.cid = 11;
-    interfaces = [
-      {
-        type = "tap";
-        id = "authelia";
-        mac = "02:00:00:00:00:11";
-      }
-    ];
     shares = [
       {
         tag = "state";
@@ -22,13 +14,6 @@
       }
     ];
   };
-  networking.hostName = "authelia";
-  networking.interfaces.eth0.ipv4.addresses = [
-    {
-      address = "10.28.34.11";
-      prefixLength = 24;
-    }
-  ];
 
   sops.templates."authelia.yaml".content = ''
     storage:

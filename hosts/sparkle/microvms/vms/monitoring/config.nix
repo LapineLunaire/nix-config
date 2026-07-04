@@ -5,14 +5,6 @@
     vcpu = 2;
     mem = 2048;
     initialBalloonMem = 1024;
-    vsock.cid = 19;
-    interfaces = [
-      {
-        type = "tap";
-        id = "monitoring";
-        mac = "02:00:00:00:00:19";
-      }
-    ];
     shares = [
       {
         tag = "state";
@@ -22,13 +14,6 @@
       }
     ];
   };
-  networking.hostName = "monitoring";
-  networking.interfaces.eth0.ipv4.addresses = [
-    {
-      address = "10.28.34.19";
-      prefixLength = 24;
-    }
-  ];
 
   services.prometheus = {
     enable = true;

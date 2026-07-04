@@ -41,6 +41,9 @@
       # monitoring: scrape node_exporter on all VMs.
       iifname "vm-br0" oifname "vm-br0" ip saddr 10.28.34.19 tcp dport 9100 accept
 
+      # PostgreSQL: app VMs + pgadmin (admin) + uptime-kuma (health check).
+      iifname "vm-br0" oifname "vm-br0" ip daddr 10.28.34.10 tcp dport 5432 ip saddr { 10.28.34.11, 10.28.34.12, 10.28.34.16, 10.28.34.18, 10.28.34.20 } accept
+
       # UniFi devices reach the controller VM for L3 inform/adoption and service traffic.
       iifname "sfp0" oifname "vm-br0" ip daddr 10.28.34.21 ip saddr 10.28.16.0/24 tcp dport { 8080, 8443, 6789, 8880, 8843 } accept
       iifname "sfp0" oifname "vm-br0" ip daddr 10.28.34.21 ip saddr 10.28.16.0/24 udp dport { 3478, 10001 } accept
