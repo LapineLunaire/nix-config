@@ -9,22 +9,48 @@
 | sparxie | aarch64-linux | VPS |
 | silverwolf | aarch64-darwin | MacBook |
 
+sparkle additionally runs a fleet of microVMs (cloud-hypervisor via microvm.nix), one per service: postgres, authelia, forgejo, ci-runner, homeassistant, qbittorrent, vaultwarden, kavita, uptime-kuma, monitoring, pgadmin, and unifi. Each VM is its own `nixosConfigurations` output, generated from `hosts/sparkle/microvms/vm-registry.nix`, and is what the CI eval step transitively checks through sparkle's toplevel.
+
 Linux hosts use impermanence with tmpfs `/` - state persists only through explicitly declared paths. Secrets are sops-nix encrypted to each host's SSH ed25519 host key.
 
 ## Structure
 
 ```
 hosts/          Per-host hardware, services, secrets, persistence declarations
+  sparkle/microvms/
+    vm-registry.nix   Central registry: name -> index (vsock CID, MAC/IP octet) and startup deps
+    vm-identity.nix   Guest identity (hostname, MAC, static IP) derived from the registry
+    network.nix       vm-br0 bridge and the default-drop forward chain with per-flow allowlists
+    vms/<name>/       Per-VM config.nix (+ sops.nix/secrets.yaml where needed)
+  sparkle/trusted-subnets.nix  Client subnets trusted to reach admin surfaces, shared by proxy/firewall rules
 modules/
   darwin.nix    macOS system defaults, firewall, privacy settings
   nixos/
     generic/    Base NixOS: kernel hardening, SSH, ZFS, zram, chrony
     desktop/    KDE Plasma 6, Plasma Login Manager, PipeWire, fonts, Steam
+    borg-backup.nix     Parameterised Borg job to Hetzner from a ZFS snapshot of <pool>/persist
+    microvm-guest.nix   Shared VM guest baseline: virtiofs persistence, sops, sshd, node_exporter
     secureboot.nix Lanzaboote secure boot
+    zfs-maintenance.nix Scrub, TRIM, auto-snapshot retention
 users/carmilla/ home-manager: shell, git, neovim, SSH, desktop environment
 pkgs/           Custom derivations
 overlays.nix    package overrides (ffmpeg unfree codecs, mpv/yt-dlp ffmpeg, discord, winbox4)
 ```
+
+## Network layout
+
+| Subnet | Role |
+|--------|------|
+| 10.28.16.0/24 | Management network (UniFi devices) |
+| 10.28.32.0/23 | Infrastructure (sparkle at 10.28.32.25, CoreDNS) |
+| 10.28.34.0/24 | sparkle VM bridge `vm-br0`; last octet is the vm-registry index, `.1` is the host |
+| 10.28.64.0/24 | LAN clients |
+| 10.28.96.0/24 | WireGuard VPN clients |
+| 10.100.0.0/24 | Nox's LAN |
+| 10.1.0.0/24 | Nox's WireGuard VPN clients |
+| 10.73.212.0/24 | sparkle (`.2`) <-> sparxie (`.1`) WireGuard tunnel |
+
+The four client subnets trusted to reach admin surfaces (both LANs and both WireGuard subnets) are defined once in `hosts/sparkle/trusted-subnets.nix` and reused by the Caddy vhost ACLs, the VM bridge forward policy, VM SSH ingress, and iperf3.
 
 ## Implementation notes
 
@@ -102,9 +128,17 @@ zfs create <hostname>/persist
 zfs create <hostname>/home
 ```
 
+Mark datasets for auto-snapshotting - `services.zfs.autoSnapshot` (modules/nixos/zfs-maintenance.nix) only snapshots datasets with the property set:
+
+```sh
+zfs set com.sun:auto-snapshot=true <hostname>/persist <hostname>/home
+```
+
 Without encryption: omit `-O encryption=on -O keylocation=prompt -O keyformat=passphrase`
 
 With mirror: replace the vdev with `mirror /dev/disk/by-id/<disk1>-part2 /dev/disk/by-id/<disk2>-part2`
+
+ZFS hosts also need a unique `networking.hostId` in the host config; generate one with `head -c4 /dev/urandom | od -An -tx4 | tr -d ' '`.
 
 **2b. Create LUKS2 + LVM + XFS volumes** (camellya layout)
 
@@ -186,6 +220,38 @@ On camellya, enroll the TPM2 into the LUKS header after secure boot is enrolled 
 ```sh
 systemd-cryptenroll --tpm2-device=auto /dev/nvme0n1p2
 ```
+
+---
+
+### microVM (sparkle)
+
+**1. Register the VM**
+
+Pick a free index (10-99) and add the VM to `hosts/sparkle/microvms/vm-registry.nix`. The index becomes the vsock CID, the MAC suffix, and the IP `10.28.34.<index>`. List `deps` if it must start after another VM (e.g. postgres).
+
+**2. Write the config**
+
+Create `hosts/sparkle/microvms/vms/<name>/config.nix` with the VM's `microvm` resources and a virtiofs share mapping `/persist/vms/<name>` to `/persist`. Container-based VMs also need a dedicated XFS volume for `/var/lib/docker` (overlayfs cannot run on virtiofs) and an import of `vms/docker-common.nix`.
+
+**3. Create state and the guest host key on sparkle**
+
+```sh
+mkdir -p /persist/vms/<name>/etc/ssh
+ssh-keygen -t ed25519 -N "" -f /persist/vms/<name>/etc/ssh/ssh_host_ed25519_key
+```
+
+**4. Secrets (if any)**
+
+Convert the guest key (`ssh-to-age < /persist/vms/<name>/etc/ssh/ssh_host_ed25519_key.pub`), add it to `.sops.yaml` with a creation rule for `hosts/sparkle/microvms/vms/<name>/secrets.yaml` that also includes `sparkle_host` (so the host can rebuild the guest), then create the secrets file and a `sops.nix` importing it.
+
+**5. Wire it into the flake and network**
+
+- Extra flake-input modules (if needed): add to `extraModules` in `flake.nix`.
+- Reverse proxy: add a vhost to `hosts/sparkle/services/proxy.nix`.
+- DNS: add a CNAME in `hosts/sparkle/services/coredns.nix` and bump the zone serial.
+- Firewall: the VM's own ingress allowlist lives in its `config.nix`; VM-to-VM or VM-to-LAN flows need forward-chain rules in `hosts/sparkle/microvms/network.nix`.
+
+Monitoring picks up the VM's node_exporter automatically from the registry; uptime-kuma probes are added manually in its UI.
 
 ---
 
