@@ -9,14 +9,6 @@
     vcpu = 8;
     mem = 12288;
     initialBalloonMem = 4096;
-    shares = [
-      {
-        tag = "state";
-        source = "/persist/vms/ci-runner";
-        mountPoint = "/persist";
-        proto = "virtiofs";
-      }
-    ];
     # Dedicated XFS volume for Docker; overlayfs can't run on virtiofs.
     volumes = [
       {

@@ -7,14 +7,6 @@ in {
     vcpu = 1;
     mem = 768;
     initialBalloonMem = 256;
-    shares = [
-      {
-        tag = "state";
-        source = "/persist/vms/vaultwarden";
-        mountPoint = "/persist";
-        proto = "virtiofs";
-      }
-    ];
   };
 
   sops.templates."vaultwarden.env".content = ''
@@ -41,7 +33,5 @@ in {
     };
   };
 
-  networking.firewall.extraInputRules = ''
-    ip saddr 10.28.34.1 tcp dport 8222 accept
-  '';
+  microvmGuest.hostIngressTCPPorts = [8222];
 }

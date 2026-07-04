@@ -7,14 +7,6 @@ in {
     vcpu = 2;
     mem = 1536;
     initialBalloonMem = 256;
-    shares = [
-      {
-        tag = "state";
-        source = "/persist/vms/forgejo";
-        mountPoint = "/persist";
-        proto = "virtiofs";
-      }
-    ];
   };
 
   sops.templates."forgejo.env".content = ''
@@ -61,7 +53,5 @@ in {
   };
 
   # Git-over-SSH on port 22 rides the system sshd, which microvm-guest.nix already opens to the trusted subnets.
-  networking.firewall.extraInputRules = ''
-    ip saddr 10.28.34.1 tcp dport 3000 accept
-  '';
+  microvmGuest.hostIngressTCPPorts = [3000];
 }

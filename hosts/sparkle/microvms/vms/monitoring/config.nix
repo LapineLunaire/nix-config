@@ -7,14 +7,6 @@ in {
     vcpu = 2;
     mem = 2048;
     initialBalloonMem = 1024;
-    shares = [
-      {
-        tag = "state";
-        source = "/persist/vms/monitoring";
-        mountPoint = "/persist";
-        proto = "virtiofs";
-      }
-    ];
   };
 
   services.prometheus = {
@@ -45,7 +37,5 @@ in {
     };
   };
 
-  networking.firewall.extraInputRules = lib.mkAfter ''
-    ip saddr 10.28.34.1 tcp dport 3000 accept
-  '';
+  microvmGuest.hostIngressTCPPorts = [3000];
 }

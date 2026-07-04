@@ -1,4 +1,4 @@
-# Guest-side identity derived from vm-registry.nix: vsock CID, tap interface, MAC, hostname, and static IP.
+# Guest-side identity derived from vm-registry.nix: vsock CID, tap interface, MAC, hostname, static IP, and the default state share.
 # The MAC prefix is a randomly generated locally-administered unicast OUI (02 + 4 random bytes) so the VMs can never collide with real hardware or another 02:00:... scheme on the LAN.
 name: let
   vm = (import ./vm-registry.nix).${name};
@@ -17,6 +17,15 @@ in
           type = "tap";
           id = name;
           mac = "02:76:96:0e:fe:${octet}";
+        }
+      ];
+      # State share for every VM; VM configs add extra shares (media, certs) on top.
+      shares = [
+        {
+          tag = "state";
+          source = "/persist/vms/${name}";
+          mountPoint = "/persist";
+          proto = "virtiofs";
         }
       ];
     };

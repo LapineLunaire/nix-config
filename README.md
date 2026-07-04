@@ -231,7 +231,7 @@ Pick a free index (10-99) and add the VM to `hosts/sparkle/microvms/vm-registry.
 
 **2. Write the config**
 
-Create `hosts/sparkle/microvms/vms/<name>/config.nix` with the VM's `microvm` resources and a virtiofs share mapping `/persist/vms/<name>` to `/persist`. Container-based VMs also need a dedicated XFS volume for `/var/lib/docker` (overlayfs cannot run on virtiofs) and an import of `vms/docker-common.nix`.
+Create `hosts/sparkle/microvms/vms/<name>/config.nix` with the VM's `microvm` resources; the virtiofs state share mapping `/persist/vms/<name>` to `/persist` comes from `vm-identity.nix`. If the host proxies the VM's web UI, list the port in `microvmGuest.hostIngressTCPPorts` (and add the Caddy vhost). Container-based VMs also need a dedicated XFS volume for `/var/lib/docker` (overlayfs cannot run on virtiofs) and an import of `vms/docker-common.nix`.
 
 **3. Create state and the guest host key on sparkle**
 

@@ -9,12 +9,6 @@ in {
     initialBalloonMem = 256;
     shares = [
       {
-        tag = "state";
-        source = "/persist/vms/qbittorrent";
-        mountPoint = "/persist";
-        proto = "virtiofs";
-      }
-      {
         tag = "torrents";
         source = "/mnt/samba/torrents";
         mountPoint = "/mnt/samba/torrents";
@@ -72,7 +66,5 @@ in {
     vpnNamespace = "qbtvpn";
   };
 
-  networking.firewall.extraInputRules = ''
-    ip saddr 10.28.34.1 tcp dport 4000 accept
-  '';
+  microvmGuest.hostIngressTCPPorts = [4000];
 }

@@ -7,14 +7,6 @@ in {
     vcpu = 1;
     mem = 768;
     initialBalloonMem = 256;
-    shares = [
-      {
-        tag = "state";
-        source = "/persist/vms/authelia";
-        mountPoint = "/persist";
-        proto = "virtiofs";
-      }
-    ];
   };
 
   sops.templates."authelia.yaml".content = ''
@@ -120,7 +112,5 @@ in {
     };
   };
 
-  networking.firewall.extraInputRules = ''
-    ip saddr 10.28.34.1 tcp dport 9091 accept
-  '';
+  microvmGuest.hostIngressTCPPorts = [9091];
 }

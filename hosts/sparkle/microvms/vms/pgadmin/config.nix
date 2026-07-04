@@ -7,14 +7,6 @@ in {
     vcpu = 1;
     mem = 1536;
     initialBalloonMem = 256;
-    shares = [
-      {
-        tag = "state";
-        source = "/persist/vms/pgadmin";
-        mountPoint = "/persist";
-        proto = "virtiofs";
-      }
-    ];
     volumes = [
       {
         image = "/persist/vms/pgadmin/volumes/docker.img";
@@ -44,7 +36,5 @@ in {
     ports = ["${net.ip.pgadmin}:5000:5000"];
   };
 
-  networking.firewall.extraInputRules = ''
-    ip saddr 10.28.34.1 tcp dport 5000 accept
-  '';
+  microvmGuest.hostIngressTCPPorts = [5000];
 }

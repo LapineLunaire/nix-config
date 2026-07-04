@@ -12,14 +12,6 @@ in {
     vcpu = 2;
     mem = 3072;
     initialBalloonMem = 1024;
-    shares = [
-      {
-        tag = "state";
-        source = "/persist/vms/postgres";
-        mountPoint = "/persist";
-        proto = "virtiofs";
-      }
-    ];
   };
 
   services.postgresql = {

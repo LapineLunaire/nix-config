@@ -7,12 +7,6 @@ in {
     initialBalloonMem = 2048;
     shares = [
       {
-        tag = "state";
-        source = "/persist/vms/unifi";
-        mountPoint = "/persist";
-        proto = "virtiofs";
-      }
-      {
         tag = "acme-cert";
         source = "/persist/var/lib/acme/unifi.lunaire.moe";
         mountPoint = "/run/acme-cert";

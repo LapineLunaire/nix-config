@@ -6,14 +6,6 @@
     hypervisor = lib.mkForce "qemu";
     vcpu = 2;
     mem = 2560;
-    shares = [
-      {
-        tag = "state";
-        source = "/persist/vms/homeassistant";
-        mountPoint = "/persist";
-        proto = "virtiofs";
-      }
-    ];
     volumes = [
       {
         image = "/persist/vms/homeassistant/volumes/docker.img";
@@ -46,7 +38,5 @@
     SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", GROUP="dialout", MODE="0660"
   '';
 
-  networking.firewall.extraInputRules = ''
-    ip saddr 10.28.34.1 tcp dport 8123 accept
-  '';
+  microvmGuest.hostIngressTCPPorts = [8123];
 }

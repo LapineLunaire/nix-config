@@ -9,12 +9,6 @@ in {
     initialBalloonMem = 512;
     shares = [
       {
-        tag = "state";
-        source = "/persist/vms/kavita";
-        mountPoint = "/persist";
-        proto = "virtiofs";
-      }
-      {
         tag = "library";
         source = "/mnt/samba/misc";
         mountPoint = "/media/library";
@@ -27,7 +21,5 @@ in {
     tokenKeyFile = config.sops.secrets."kavita-token-key".path;
     settings.IpAddresses = net.ip.kavita;
   };
-  networking.firewall.extraInputRules = ''
-    ip saddr 10.28.34.1 tcp dport 5000 accept
-  '';
+  microvmGuest.hostIngressTCPPorts = [5000];
 }
