@@ -1,4 +1,6 @@
-{config, ...}: {
+{config, ...}: let
+  net = import ../../vm-net.nix;
+in {
   imports = [./sops.nix];
 
   microvm = {
@@ -24,14 +26,14 @@
     enable = true;
     database = {
       type = "postgres";
-      host = "10.28.34.10";
+      host = net.ip.postgres;
       passwordFile = config.sops.secrets."forgejo-db-password".path;
       createDatabase = false;
     };
     settings = {
       security = {
         REVERSE_PROXY_LIMIT = 1;
-        REVERSE_PROXY_TRUSTED_PROXIES = "10.28.34.1";
+        REVERSE_PROXY_TRUSTED_PROXIES = net.host;
       };
       server = {
         DOMAIN = "git.lunaire.moe";

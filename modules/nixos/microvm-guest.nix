@@ -2,7 +2,9 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  net = import ../../hosts/sparkle/microvms/vm-net.nix;
+in {
   environment.systemPackages = [pkgs.ghostty.terminfo];
   # /var/lib and /var/log bind-mounted from /persist (virtiofs share at /persist).
   fileSystems."/persist".neededForBoot = true;
@@ -39,7 +41,7 @@
   # sops-nix derives age key from the persisted SSH host key.
   sops.age.sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
 
-  # node_exporter on every VM, scraped by monitoring (10.28.34.19) only.
+  # node_exporter on every VM, scraped by the monitoring VM only.
   services.prometheus.exporters.node.enable = true;
 
   services.openssh = {
@@ -60,7 +62,7 @@
     "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIMqXDPM9z04YBOp2fVDox7sgPFNpad+9p8UA+od8V8nxAAAACnNzaDpsYXBpbmU="
   ];
   networking.firewall.extraInputRules = lib.mkBefore ''
-    ip saddr 10.28.34.19 tcp dport 9100 accept
+    ip saddr ${net.ip.monitoring} tcp dport 9100 accept
     ip saddr { ${lib.concatStringsSep ", " (import ../../hosts/sparkle/trusted-subnets.nix)} } tcp dport 22 accept
   '';
   networking.nftables.enable = true;
@@ -68,9 +70,9 @@
   networking.useDHCP = false;
   # Force eth0 naming; all VM configs reference eth0.
   networking.usePredictableInterfaceNames = false;
-  networking.nameservers = ["10.28.34.1"];
+  networking.nameservers = [net.host];
   networking.defaultGateway = {
-    address = "10.28.34.1";
+    address = net.host;
     interface = "eth0";
   };
 

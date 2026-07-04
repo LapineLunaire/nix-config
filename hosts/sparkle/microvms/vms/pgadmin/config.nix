@@ -1,4 +1,6 @@
-{config, ...}: {
+{config, ...}: let
+  net = import ../../vm-net.nix;
+in {
   imports = [./sops.nix ../docker-common.nix];
 
   microvm = {
@@ -39,7 +41,7 @@
     };
     environmentFiles = [config.sops.templates."pgadmin.env".path];
     volumes = ["/persist/var/lib/pgadmin:/var/lib/pgadmin"];
-    ports = ["10.28.34.20:5000:5000"];
+    ports = ["${net.ip.pgadmin}:5000:5000"];
   };
 
   networking.firewall.extraInputRules = ''

@@ -1,4 +1,6 @@
-{lib, ...}: {
+{lib, ...}: let
+  net = import ../../vm-net.nix;
+in {
   imports = [./sops.nix];
 
   microvm = {
@@ -26,7 +28,7 @@
         static_configs = [
           {
             # node_exporter on the host bridge IP plus every VM in the registry.
-            targets = ["10.28.34.1:9100"] ++ lib.mapAttrsToList (_: vm: "10.28.34.${toString vm.index}:9100") (import ../../vm-registry.nix);
+            targets = ["${net.host}:9100"] ++ lib.mapAttrsToList (_: ip: "${ip}:9100") net.ip;
           }
         ];
       }
@@ -36,7 +38,7 @@
   services.grafana = {
     enable = true;
     settings.server = {
-      http_addr = "10.28.34.19";
+      http_addr = net.ip.monitoring;
       http_port = 3000;
       domain = "gf.lunaire.moe";
       root_url = "https://gf.lunaire.moe/";

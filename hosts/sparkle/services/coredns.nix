@@ -1,4 +1,6 @@
-{...}: {
+{...}: let
+  net = import ../microvms/vm-net.nix;
+in {
   networking.firewall.interfaces.sfp0 = {
     allowedUDPPorts = [53];
     allowedTCPPorts = [53];
@@ -22,7 +24,7 @@
     camellya IN A    10.28.64.96
     auth     IN CNAME sparkle.lunaire.moe.
     git      IN CNAME sparkle.lunaire.moe.
-    git-ssh  IN A     10.28.34.12
+    git-ssh  IN A     ${net.ip.forgejo}
     ha       IN CNAME sparkle.lunaire.moe.
     misc     IN CNAME sparkle.lunaire.moe.
     pga      IN CNAME sparkle.lunaire.moe.
@@ -31,7 +33,7 @@
     up       IN CNAME sparkle.lunaire.moe.
     kv       IN CNAME sparkle.lunaire.moe.
     vw       IN CNAME sparkle.lunaire.moe.
-    unifi    IN A     10.28.34.21
+    unifi    IN A     ${net.ip.unifi}
   '';
 
   # Reverse DNS zone for 10.28.0.0/16.

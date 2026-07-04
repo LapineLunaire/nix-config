@@ -1,4 +1,6 @@
-{config, ...}: {
+{config, ...}: let
+  net = import ../../vm-net.nix;
+in {
   imports = [./sops.nix];
 
   microvm = {
@@ -83,7 +85,7 @@
     settings = {
       theme = "dark";
       log.level = "info";
-      server.address = "tcp://10.28.34.11:9091/";
+      server.address = "tcp://${net.ip.authelia}:9091/";
       session = {
         redis = {
           host = "127.0.0.1";
@@ -97,7 +99,7 @@
         ];
       };
       storage.postgres = {
-        address = "tcp://10.28.34.10:5432";
+        address = "tcp://${net.ip.postgres}:5432";
         database = "authelia";
         username = "authelia";
       };

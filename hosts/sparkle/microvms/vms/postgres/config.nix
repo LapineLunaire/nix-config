@@ -3,7 +3,9 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  net = import ../../vm-net.nix;
+in {
   imports = [./sops.nix];
 
   microvm = {
@@ -24,7 +26,7 @@
     enable = true;
     package = pkgs.postgresql_18;
     settings = {
-      listen_addresses = lib.mkForce "127.0.0.1,10.28.34.10";
+      listen_addresses = lib.mkForce "127.0.0.1,${net.ip.postgres}";
       shared_buffers = "512MB";
       effective_cache_size = "1536MB";
       max_connections = 50;
@@ -54,10 +56,10 @@
     ];
     authentication = ''
       local all             postgres                        peer
-      host  authelia        authelia    10.28.34.11/32 scram-sha-256
-      host  forgejo         forgejo     10.28.34.12/32 scram-sha-256
-      host  vaultwarden     vaultwarden 10.28.34.16/32 scram-sha-256
-      host  all             carmilla    10.28.34.20/32 scram-sha-256
+      host  authelia        authelia    ${net.ip.authelia}/32 scram-sha-256
+      host  forgejo         forgejo     ${net.ip.forgejo}/32 scram-sha-256
+      host  vaultwarden     vaultwarden ${net.ip.vaultwarden}/32 scram-sha-256
+      host  all             carmilla    ${net.ip.pgadmin}/32 scram-sha-256
     '';
   };
 
@@ -80,6 +82,6 @@
   };
 
   networking.firewall.extraInputRules = ''
-    ip saddr { 10.28.34.11, 10.28.34.12, 10.28.34.16, 10.28.34.18, 10.28.34.20 } tcp dport 5432 accept
+    ip saddr { ${lib.concatStringsSep ", " (map (name: net.ip.${name}) net.postgresClients)} } tcp dport 5432 accept
   '';
 }

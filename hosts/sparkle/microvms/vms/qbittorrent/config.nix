@@ -1,4 +1,6 @@
-{config, ...}: {
+{config, ...}: let
+  net = import ../../vm-net.nix;
+in {
   imports = [./sops.nix];
 
   microvm = {
@@ -24,7 +26,7 @@
   vpnNamespaces.qbtvpn = {
     enable = true;
     wireguardConfigFile = config.sops.secrets."protonvpn-qbittorrent-conf".path;
-    accessibleFrom = ["10.28.34.1/32"];
+    accessibleFrom = ["${net.host}/32"];
     portMappings = [
       {
         from = 4000;

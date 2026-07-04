@@ -1,4 +1,6 @@
-{config, ...}: {
+{config, ...}: let
+  net = import ../../vm-net.nix;
+in {
   imports = [./sops.nix];
 
   microvm = {
@@ -23,7 +25,7 @@
   services.kavita = {
     enable = true;
     tokenKeyFile = config.sops.secrets."kavita-token-key".path;
-    settings.IpAddresses = "10.28.34.17";
+    settings.IpAddresses = net.ip.kavita;
   };
   networking.firewall.extraInputRules = ''
     ip saddr 10.28.34.1 tcp dport 5000 accept

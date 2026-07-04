@@ -1,4 +1,6 @@
-{config, ...}: {
+{config, ...}: let
+  net = import ../../vm-net.nix;
+in {
   imports = [./sops.nix];
 
   microvm = {
@@ -17,7 +19,7 @@
 
   sops.templates."vaultwarden.env".content = ''
     ADMIN_TOKEN=${config.sops.placeholder."vaultwarden-admin-token"}
-    DATABASE_URL=postgresql://vaultwarden:${config.sops.placeholder."vaultwarden-db-password"}@10.28.34.10/vaultwarden
+    DATABASE_URL=postgresql://vaultwarden:${config.sops.placeholder."vaultwarden-db-password"}@${net.ip.postgres}/vaultwarden
     SMTP_HOST=smtp.protonmail.ch
     SMTP_PORT=587
     SMTP_SECURITY=starttls
@@ -33,7 +35,7 @@
     environmentFile = config.sops.templates."vaultwarden.env".path;
     config = {
       DOMAIN = "https://vw.lunaire.moe";
-      ROCKET_ADDRESS = "10.28.34.16";
+      ROCKET_ADDRESS = net.ip.vaultwarden;
       ROCKET_PORT = 8222;
       SIGNUPS_ALLOWED = false;
     };

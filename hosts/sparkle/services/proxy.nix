@@ -13,54 +13,56 @@
   '';
   # Source-IP base allowlist applied to every vhost: both LANs and both WireGuard subnets (see trusted-subnets.nix).
   baseAllow = import ../trusted-subnets.nix;
+  net = import ../microvms/vm-net.nix;
+  # uptimeKuma in extraAllow is uptime-kuma probing each service through the proxy.
+  uptimeKuma = net.ip."uptime-kuma";
   # Each entry becomes <name>.lunaire.moe behind the wildcard cert. extraAllow lists callers beyond baseAllow; body is the service-specific Caddy config.
-  # 10.28.34.18 in extraAllow is uptime-kuma probing each service through the proxy.
   vhosts = {
     gf = {
-      extraAllow = ["10.28.34.18"];
-      body = "reverse_proxy 10.28.34.19:3000";
+      extraAllow = [uptimeKuma];
+      body = "reverse_proxy ${net.ip.monitoring}:3000";
     };
     # auth: forgejo (OIDC backchannel) + pgadmin (OIDC backchannel) + uptime-kuma (health check).
     auth = {
-      extraAllow = ["10.28.34.12" "10.28.34.20" "10.28.34.18"];
-      body = "reverse_proxy 10.28.34.11:9091";
+      extraAllow = [net.ip.forgejo net.ip.pgadmin uptimeKuma];
+      body = "reverse_proxy ${net.ip.authelia}:9091";
     };
     # git: infra subnet (clones from other LAN hosts) + ci-runner + uptime-kuma.
     git = {
-      extraAllow = ["10.28.32.0/23" "10.28.34.13" "10.28.34.18"];
-      body = "reverse_proxy 10.28.34.12:3000";
+      extraAllow = ["10.28.32.0/23" net.ip.ci-runner uptimeKuma];
+      body = "reverse_proxy ${net.ip.forgejo}:3000";
     };
     ha = {
-      extraAllow = ["10.28.34.18"];
-      body = "reverse_proxy 10.28.34.14:8123";
+      extraAllow = [uptimeKuma];
+      body = "reverse_proxy ${net.ip.homeassistant}:8123";
     };
     pga = {
-      extraAllow = ["10.28.34.18"];
-      body = "reverse_proxy 10.28.34.20:5000";
+      extraAllow = [uptimeKuma];
+      body = "reverse_proxy ${net.ip.pgadmin}:5000";
     };
     qbt = {
-      extraAllow = ["10.28.34.18"];
-      body = "reverse_proxy 10.28.34.15:4000";
+      extraAllow = [uptimeKuma];
+      body = "reverse_proxy ${net.ip.qbittorrent}:4000";
     };
     up = {
       extraAllow = [];
-      body = "reverse_proxy 10.28.34.18:3001";
+      body = "reverse_proxy ${uptimeKuma}:3001";
     };
     misc = {
-      extraAllow = ["10.28.34.18"];
+      extraAllow = [uptimeKuma];
       body = ''
         root * /mnt/samba/misc
         file_server browse
       '';
     };
     kv = {
-      extraAllow = ["10.28.34.18"];
-      body = "reverse_proxy 10.28.34.17:5000";
+      extraAllow = [uptimeKuma];
+      body = "reverse_proxy ${net.ip.kavita}:5000";
     };
     vw = {
-      extraAllow = ["10.28.34.18"];
+      extraAllow = [uptimeKuma];
       body = ''
-        reverse_proxy 10.28.34.16:8222 {
+        reverse_proxy ${net.ip.vaultwarden}:8222 {
           header_up X-Real-IP {remote_host}
         }
       '';
