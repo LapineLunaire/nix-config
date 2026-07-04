@@ -1,5 +1,5 @@
 {...}: {
-  additions = final: _prev: import ../pkgs final.pkgs;
+  additions = final: _prev: import ./pkgs final.pkgs;
 
   modifications = final: prev: {
     winbox4 = prev.winbox4.overrideAttrs (old: {

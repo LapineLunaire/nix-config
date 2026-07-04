@@ -12,7 +12,7 @@ in {
     ./packages.nix
     ./security.nix
     ./services.nix
-    ../secureboot
+    ../secureboot.nix
   ];
 
   boot = {

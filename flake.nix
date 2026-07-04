@@ -94,7 +94,7 @@
       "aarch64-linux"
       "aarch64-darwin"
     ];
-    overlays = import ./overlays {inherit inputs;};
+    overlays = import ./overlays.nix {inherit inputs;};
     mkPkgs = np: system:
       import np {
         inherit system;
@@ -223,7 +223,7 @@
     darwinConfigurations = {
       silverwolf = mkDarwinSystem {
         system = "aarch64-darwin";
-        modules = [./hosts/silverwolf ./users/carmilla];
+        modules = [./hosts/silverwolf.nix ./users/carmilla];
       };
     };
   };

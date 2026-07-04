@@ -16,14 +16,14 @@ Linux hosts use impermanence with tmpfs `/` - state persists only through explic
 ```
 hosts/          Per-host hardware, services, secrets, persistence declarations
 modules/
-  darwin/       macOS system defaults, firewall, privacy settings
+  darwin.nix    macOS system defaults, firewall, privacy settings
   nixos/
     generic/    Base NixOS: kernel hardening, SSH, ZFS, zram, chrony
     desktop/    KDE Plasma 6, Plasma Login Manager, PipeWire, fonts, Steam
-    secureboot/ Lanzaboote secure boot
+    secureboot.nix Lanzaboote secure boot
 users/carmilla/ home-manager: shell, git, neovim, SSH, desktop environment
 pkgs/           Custom derivations
-overlays/       package overrides (ffmpeg unfree codecs, mpv/yt-dlp ffmpeg, discord, winbox4)
+overlays.nix    package overrides (ffmpeg unfree codecs, mpv/yt-dlp ffmpeg, discord, winbox4)
 ```
 
 ## Implementation notes
