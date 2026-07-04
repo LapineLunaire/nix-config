@@ -10,7 +10,7 @@
     ./persistence.nix
     ./tmpfiles.nix
     ./sops.nix
-    ./services/pipewire.nix
+    ./pipewire.nix
   ];
 
   secureboot.enable = true;
