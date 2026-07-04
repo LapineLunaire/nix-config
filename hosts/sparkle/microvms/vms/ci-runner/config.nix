@@ -1,6 +1,6 @@
 {
   config,
-  inputs,
+  pkgs,
   ...
 }: {
   imports = [./sops.nix ../docker-common.nix];
@@ -33,7 +33,7 @@
   '';
 
   services.gitea-actions-runner = {
-    package = inputs.nixpkgs-unstable.legacyPackages.x86_64-linux.forgejo-runner;
+    package = pkgs.forgejo-runner;
     instances.sparkle = {
       enable = true;
       name = "sparkle";
