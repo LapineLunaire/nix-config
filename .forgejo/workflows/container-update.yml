@@ -19,11 +19,13 @@ jobs:
         run: |
           pgadmin=$(skopeo inspect --format '{{.Digest}}' docker://dpage/pgadmin4:latest)
           ha=$(skopeo inspect --format '{{.Digest}}' docker://ghcr.io/home-assistant/home-assistant:stable)
-          node=$(skopeo inspect --format '{{.Digest}}' docker://docker.io/library/node:25)
+          # Read the pinned node tag from the runner config so bumping it there doesn't silently break this update.
+          node_tag=$(grep -o 'node:[0-9]*' hosts/sparkle/microvms/vms/ci-runner/config.nix | head -1)
+          node=$(skopeo inspect --format '{{.Digest}}' "docker://docker.io/library/${node_tag}")
 
           sed -i "s|dpage/pgadmin4@sha256:[a-f0-9]*|dpage/pgadmin4@${pgadmin}|" hosts/sparkle/microvms/vms/pgadmin/config.nix
           sed -i "s|home-assistant/home-assistant@sha256:[a-f0-9]*|home-assistant/home-assistant@${ha}|" hosts/sparkle/microvms/vms/homeassistant/config.nix
-          sed -i "s|node:25@sha256:[a-f0-9]*|node:25@${node}|" hosts/sparkle/microvms/vms/ci-runner/config.nix
+          sed -i "s|node:[0-9]*@sha256:[a-f0-9]*|${node_tag}@${node}|" hosts/sparkle/microvms/vms/ci-runner/config.nix
 
       - name: Check for changes
         id: check
