@@ -64,13 +64,6 @@
     };
   };
 
-  assertions = [
-    {
-      assertion = config.systemd.services ? qbittorrent;
-      message = "systemd service 'qbittorrent' not found; the service name may have changed upstream";
-    }
-  ];
-
   systemd.services.qbittorrent.vpnConfinement = {
     enable = true;
     vpnNamespace = "qbtvpn";
