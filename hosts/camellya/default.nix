@@ -42,10 +42,6 @@
     wooting-udev-rules
   ];
 
-  services.udev.extraRules = ''
-    ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="046d", ATTR{idProduct}=="0ab7", ATTR{power/autosuspend}="-1"
-  '';
-
   services.xserver.videoDrivers = ["nvidia"];
 
   system.stateVersion = "26.11";
