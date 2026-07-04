@@ -42,7 +42,7 @@
 
   # udev rule to ensure the Zigbee stick is accessible by the container runtime.
   services.udev.extraRules = ''
-    SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666"
+    SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", GROUP="dialout", MODE="0660"
   '';
 
   networking.firewall.extraInputRules = ''
