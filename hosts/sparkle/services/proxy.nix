@@ -1,16 +1,5 @@
-{
-  config,
-  lib,
-  ...
-}: let
-  securityHeaders = ''
-    header {
-      Strict-Transport-Security "max-age=31536000; includeSubDomains"
-      X-Content-Type-Options "nosniff"
-      Referrer-Policy "strict-origin-when-cross-origin"
-      -Server
-    }
-  '';
+{lib, ...}: let
+  securityHeaders = import ../../../modules/nixos/caddy-security-headers.nix;
   # Source-IP base allowlist applied to every vhost: both LANs and both WireGuard subnets (see trusted-subnets.nix).
   baseAllow = import ../trusted-subnets.nix;
   net = import ../microvms/vm-net.nix;
@@ -79,42 +68,20 @@
     '';
   };
 in {
-  networking.firewall.allowedTCPPorts = [
-    80
-    443
-  ];
-
-  # All certs use DNS-01 challenge via Cloudflare.
   security.acme = {
-    acceptTerms = true;
-    defaults = {
-      email = "certs@lunaire.eu";
-      keyType = "ec384";
-      dnsProvider = "cloudflare";
-      environmentFile = config.sops.templates."cloudflare-dns-api-token.env".path;
-      # Port-53 DNS from this host resolves through the local split-horizon CoreDNS, which never holds the public _acme-challenge record, so lego's propagation check can never pass. Wait a fixed time for Cloudflare to publish the record before the ACME server validates.
-      extraLegoFlags = ["--dns.propagation-wait" "60s"];
-      # Caddy reads cert files off disk rather than managing ACME itself, so reload it after each renewal to pick up the new cert.
-      reloadServices = ["caddy.service"];
-    };
     # One wildcard cert for all proxied services, so CT logs only expose the apex instead of the per-service hostnames.
     certs."lunaire.moe" = {extraDomainNames = ["*.lunaire.moe"];};
     # unifi-core (served directly, no proxy) only accepts an RSA cert via its unifi-core.crt/.key files.
     certs."unifi.lunaire.moe" = {keyType = "rsa4096";};
   };
 
-  users.users.caddy.extraGroups = ["acme"];
-
-  services.caddy = {
-    enable = true;
-    virtualHosts =
-      lib.mapAttrs' mkVhost vhosts
-      // {
-        # Public file server, accessible only via sparxie over WireGuard.
-        "http://10.73.212.2:9000".extraConfig = ''
-          root * /mnt/samba/misc
-          file_server browse
-        '';
-      };
-  };
+  services.caddy.virtualHosts =
+    lib.mapAttrs' mkVhost vhosts
+    // {
+      # Public file server, accessible only via sparxie over WireGuard.
+      "http://10.73.212.2:9000".extraConfig = ''
+        root * /mnt/samba/misc
+        file_server browse
+      '';
+    };
 }

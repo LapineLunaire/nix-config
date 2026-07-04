@@ -5,6 +5,7 @@
       startAt = "03:00";
     })
     ../../../modules/nixos/zfs-maintenance.nix
+    ../../../modules/nixos/caddy.nix
     ./database.nix
     ./ejabberd.nix
     ./fail2ban.nix

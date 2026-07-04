@@ -12,55 +12,33 @@
     };
   };
 
-  securityHeaders = ''
-    header {
-      Strict-Transport-Security "max-age=31536000; includeSubDomains"
-      X-Content-Type-Options "nosniff"
-      Referrer-Policy "strict-origin-when-cross-origin"
-      -Server
-    }
-  '';
+  securityHeaders = import ../../../modules/nixos/caddy-security-headers.nix;
 in {
   # 8448: Matrix federation port for server-to-server traffic.
-  networking.firewall.allowedTCPPorts = [
-    80
-    443
-    8448
-  ];
+  networking.firewall.allowedTCPPorts = [8448];
 
   security.acme = {
-    acceptTerms = true;
-    defaults = {
-      email = "certs@lunaire.eu";
-      keyType = "ec384";
-      dnsProvider = "cloudflare";
-      environmentFile = config.sops.templates."cloudflare-dns-api-token.env".path;
-      # Wait a fixed time for Cloudflare to publish the _acme-challenge record before the ACME server validates, instead of lego's resolver-based propagation check.
-      extraLegoFlags = ["--dns.propagation-wait" "60s"];
-      # Caddy reads cert files off disk rather than managing ACME itself, so reload it after each renewal to pick up the new cert.
-      reloadServices = ["caddy.service"];
+    certs."bunny.enterprises" = {
+      # Single SAN cert covering all ejabberd component subdomains:
+      # conference (MUC), proxy (SOCKS5 file transfer), pubsub, upload (HTTP upload).
+      extraDomainNames = [
+        "xmpp.bunny.enterprises"
+        "conference.bunny.enterprises"
+        "proxy.bunny.enterprises"
+        "pubsub.bunny.enterprises"
+        "upload.bunny.enterprises"
+      ];
+      # ejabberd loads these cert files at startup and only re-reads them on restart, so reload it (alongside caddy) when this cert renews.
+      reloadServices = config.security.acme.defaults.reloadServices ++ ["ejabberd.service"];
     };
-    # Single SAN cert covering all ejabberd component subdomains:
-    # conference (MUC), proxy (SOCKS5 file transfer), pubsub, upload (HTTP upload).
-    certs."bunny.enterprises".extraDomainNames = [
-      "xmpp.bunny.enterprises"
-      "conference.bunny.enterprises"
-      "proxy.bunny.enterprises"
-      "pubsub.bunny.enterprises"
-      "upload.bunny.enterprises"
-    ];
-    # ejabberd loads these cert files at startup and only re-reads them on restart, so reload it (alongside caddy) when this cert renews.
-    certs."bunny.enterprises".reloadServices = config.security.acme.defaults.reloadServices ++ ["ejabberd.service"];
     certs."chat.bunny.enterprises" = {};
     certs."matrix.bunny.enterprises" = {};
     certs."pub.bunny.enterprises" = {};
   };
 
-  users.users.caddy.extraGroups = ["acme"];
   users.users.ejabberd.extraGroups = ["acme"];
 
   services.caddy = {
-    enable = true;
     virtualHosts."bunny.enterprises".extraConfig = ''
       tls /var/lib/acme/bunny.enterprises/cert.pem /var/lib/acme/bunny.enterprises/key.pem
       ${securityHeaders}

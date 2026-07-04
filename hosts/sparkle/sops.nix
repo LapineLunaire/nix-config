@@ -6,7 +6,6 @@
     secrets = {
       "carmilla-password-hash".neededForUsers = true;
 
-      "cloudflare-dns-api-token" = {};
       "smtp-password" = {};
       "wireguard-private-key" = {};
       "network/ipmi0-mac" = {};
@@ -40,12 +39,6 @@
       [Link]
       Name=sfp1
     '';
-    templates."cloudflare-dns-api-token.env" = {
-      content = ''
-        CF_DNS_API_TOKEN=${config.sops.placeholder."cloudflare-dns-api-token"}
-      '';
-      owner = "acme";
-    };
   };
 
   environment.etc = {

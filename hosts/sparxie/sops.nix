@@ -5,7 +5,6 @@
 
     secrets = {
       "carmilla-password-hash".neededForUsers = true;
-      "cloudflare-dns-api-token" = {};
       "ejabberd-sql-password" = {};
       "redis-password".owner = "redis";
       "tuwunel-registration-token" = {};
@@ -15,13 +14,6 @@
       "borg-ssh-key" = {};
       "borg-repo" = {};
       "borg-known-hosts" = {};
-    };
-
-    templates."cloudflare-dns-api-token.env" = {
-      content = ''
-        CF_DNS_API_TOKEN=${config.sops.placeholder."cloudflare-dns-api-token"}
-      '';
-      owner = "acme";
     };
 
     templates."ejabberd.yml" = {
