@@ -289,10 +289,6 @@
       TUWUNEL_REGISTRATION_TOKEN=${config.sops.placeholder."tuwunel-registration-token"}
     '';
 
-    templates."borg-known-hosts".content = ''
-      ${config.sops.placeholder."borg-known-hosts"}
-    '';
-
     templates."caddy-pub-bnnuy-basicauth" = {
       owner = "caddy";
       content = ''
