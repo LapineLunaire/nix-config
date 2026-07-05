@@ -1,7 +1,7 @@
 {lib, ...}: let
   securityHeaders = import ../../../modules/nixos/caddy-security-headers.nix;
   # Source-IP base allowlist applied to every vhost: both LANs and both WireGuard subnets (see trusted-subnets.nix).
-  baseAllow = import ../trusted-subnets.nix;
+  baseAllow = (import ../trusted-subnets.nix).subnets;
   net = import ../microvms/vm-net.nix;
   # uptimeKuma in extraAllow is uptime-kuma probing each service through the proxy.
   uptimeKuma = net.ip."uptime-kuma";

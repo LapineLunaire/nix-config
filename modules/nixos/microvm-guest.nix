@@ -69,7 +69,7 @@ in {
     networking.firewall.extraInputRules = lib.mkMerge [
       (lib.mkBefore ''
         ip saddr ${net.ip.monitoring} tcp dport 9100 accept
-        ip saddr { ${lib.concatStringsSep ", " (import ../../hosts/sparkle/trusted-subnets.nix)} } tcp dport 22 accept
+        ip saddr { ${(import ../../hosts/sparkle/trusted-subnets.nix).nftSet} } tcp dport 22 accept
       '')
       (lib.concatMapStrings (port: "ip saddr ${net.host} tcp dport ${toString port} accept\n") config.microvmGuest.hostIngressTCPPorts)
     ];

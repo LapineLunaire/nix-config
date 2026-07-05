@@ -1,6 +1,6 @@
 {lib, ...}: let
   # Both LANs and both WireGuard subnets (see trusted-subnets.nix), shared with the Caddy vhost ACLs and VM SSH ingress.
-  trusted = lib.concatStringsSep ", " (import ../trusted-subnets.nix);
+  trusted = (import ../trusted-subnets.nix).nftSet;
   net = import ./vm-net.nix;
   postgresClients = lib.concatStringsSep ", " (map (name: net.ip.${name}) net.postgresClients);
 in {
