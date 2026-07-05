@@ -3,7 +3,6 @@ keys:
   - &camellya_host age1kt66h37ezqaryvef402f0665aavu3mpj2l7trdkqctpjl6zeeveswgc50j
   - &sparxie_host age1tddj97txq5mckvzrs8czekp5lc530rc35yw0mtd3w9qxjjwf4vpsn7s8yl
   # VM SSH host keys: ssh-to-age converted from /persist/vms/<name>/etc/ssh/ssh_host_ed25519_key.pub
-  - &vm_uptime_kuma age1q2z9hm4yrfpg6f0pa2vsxz45dp7vxz9r46gkda3u9fm5f4c9rs9qugdckk
   - &vm_monitoring age1np3n40swg3wj74jx7v54fjellr4ynxgtdhg05u4denmqu24n8dnsykdupd
   - &vm_kavita age14vvw895gyxwkqx63kra9kcserxrf8e98gf2dadl6qr4xc0l3efyqz7ukwk
   - &vm_ci_runner age1gx2wj0fed39sevrpnmxs6e24apdcw53mdv8pjpu5zeah7nhaad7snzrawu
@@ -27,11 +26,6 @@ creation_rules:
     key_groups:
       - age:
           - *sparxie_host
-  - path_regex: hosts/sparkle/microvms/vms/uptime-kuma/secrets\.yaml$
-    key_groups:
-      - age:
-          - *vm_uptime_kuma
-          - *sparkle_host
   - path_regex: hosts/sparkle/microvms/vms/kavita/secrets\.yaml$
     key_groups:
       - age:
