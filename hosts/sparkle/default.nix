@@ -23,16 +23,13 @@ in {
   networking = {
     hostName = "sparkle";
     hostId = "d38a0d1c";
-    # systemd-resolved intercepts DNS and breaks CoreDNS. Disable it and point
-    # resolv.conf directly at the local CoreDNS instance instead.
+    # systemd-resolved intercepts DNS and breaks CoreDNS. Disable it and point resolv.conf directly at the local CoreDNS instance instead.
     nameservers = [dmz.hostAddress];
   };
 
   services.resolved.enable = false;
 
-  # Interface names (sfp0, sfp1, ipmi0) are assigned by sops-rendered .link files
-  # in /etc/systemd/network/ based on MAC addresses. sfp0 is the primary uplink
-  # with a static IP; sfp1 and ipmi0 are left unmanaged.
+  # Interface names (sfp0, sfp1, ipmi0) are assigned by sops-rendered .link files in /etc/systemd/network/ based on MAC addresses. sfp0 is the primary uplink with a static IP; sfp1 and ipmi0 are left unmanaged.
   systemd.network.networks = {
     "10-sfp0" = {
       matchConfig.Name = "sfp0";

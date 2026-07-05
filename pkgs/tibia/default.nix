@@ -66,8 +66,7 @@
     categories = ["Game"];
   };
 
-  # Change into the tibia directory before launching so qt.conf (Prefix=.) resolves
-  # plugins and bundled Qt libs correctly relative to the binary.
+  # Change into the tibia directory before launching so qt.conf (Prefix=.) resolves plugins and bundled Qt libs correctly relative to the binary.
   startScript = writeShellScript "tibia-start" ''
     export LD_LIBRARY_PATH="${tibia-unwrapped}/opt/tibia/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
     cd ${tibia-unwrapped}/opt/tibia

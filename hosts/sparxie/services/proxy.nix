@@ -20,8 +20,7 @@ in {
 
   security.acme = {
     certs."bunny.enterprises" = {
-      # Single SAN cert covering all ejabberd component subdomains:
-      # conference (MUC), proxy (SOCKS5 file transfer), pubsub, upload (HTTP upload).
+      # Single SAN cert covering all ejabberd component subdomains: conference (MUC), proxy (SOCKS5 file transfer), pubsub, upload (HTTP upload).
       extraDomainNames = [
         "xmpp.bunny.enterprises"
         "conference.bunny.enterprises"

@@ -36,7 +36,7 @@ in {
   # Default-drop on the forward chain. VMs can reach the internet via sfp0 and each other only through the explicit allowlist below.
   networking.firewall.filterForward = true;
 
-  # Caddy→VM traffic hits the OUTPUT chain (Caddy runs on the host), not FORWARD. These rules cover VM-to-VM and VM→internet flows. Per-VM ingress allowlists live alongside each VM definition; the terminal drop is mkAfter'd so they always land before it.
+  # Caddy-to-VM traffic hits the OUTPUT chain (Caddy runs on the host), not FORWARD. These rules cover VM-to-VM and VM-to-internet flows. Per-VM ingress allowlists live alongside each VM definition; the terminal drop is mkAfter'd so they always land before it.
   networking.firewall.extraForwardRules = lib.mkMerge [
     ''
       ct state established,related accept
@@ -44,7 +44,7 @@ in {
       iifname "vm-br0" oifname "sfp0" ip daddr != { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } accept
       # UniFi controller reaches the APs on the management network for adoption, provisioning, and firmware pushes.
       iifname "vm-br0" oifname "sfp0" ip saddr ${net.vmAddress.unifi} ip daddr ${management} accept
-      # LAN/VPN → VMs: SSH and ICMP only.
+      # LAN/VPN to VMs: SSH and ICMP only.
       iifname "sfp0" oifname "vm-br0" ip saddr { ${trusted} } tcp dport 22 accept
       iifname "sfp0" oifname "vm-br0" ip saddr { ${trusted} } icmp type echo-request accept
 

@@ -21,9 +21,7 @@ in {
   sops.templates."rodecaster-duo.conf".mode = "0444";
   sops.templates."rodecaster-duo.conf".content = ''
     context.modules = [
-        # +++++++++++++++++++++++++++++++++++++++++++++++++++++
-        # Audio Sinks / Output Devices
-        # +++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # Audio sinks / output devices
 
         # System (aka. Main)
         {   name = libpipewire-module-loopback
@@ -137,9 +135,9 @@ in {
         }
     ]
 
-    # assign correct names to physical devices
+    # Assign correct names to physical devices.
     node.rules = [
-        # output
+        # Output
         {
             matches = [
                 {
@@ -166,7 +164,7 @@ in {
                 }
             }
         },
-        # input
+        # Input
         {
             matches = [
                 {
