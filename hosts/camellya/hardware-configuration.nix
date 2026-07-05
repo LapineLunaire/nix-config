@@ -82,7 +82,7 @@
   };
 
   fileSystems."/home/carmilla/vault" = {
-    device = "//10.28.32.25/carmilla";
+    device = "//sparkle.lunaire.moe/carmilla";
     fsType = "cifs";
     options = [
       "credentials=${config.sops.templates."samba-credentials".path}"
@@ -97,7 +97,7 @@
   };
 
   fileSystems."/home/carmilla/torrents" = {
-    device = "//10.28.32.25/torrents";
+    device = "//sparkle.lunaire.moe/torrents";
     fsType = "cifs";
     options = [
       "credentials=${config.sops.templates."samba-credentials".path}"
