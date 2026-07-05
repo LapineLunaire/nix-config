@@ -1,15 +1,16 @@
-{config, ...}: {
-  networking.firewall.allowedUDPPorts = [47329];
+{config, ...}: let
+  wg = import ../../../modules/nixos/sparkle-sparxie-wireguard.nix;
+in {
+  networking.firewall.allowedUDPPorts = [wg.listenPort];
 
   networking.wg-quick.interfaces.wg0 = {
-    address = ["10.73.212.1/24"];
-    listenPort = 47329;
+    address = ["${wg.sparxie.ip}/${wg.prefixLength}"];
+    listenPort = wg.listenPort;
     privateKeyFile = config.sops.secrets."wireguard-private-key".path;
     peers = [
       {
-        # sparkle
-        publicKey = "fU36EC/ymy4d1XwJCfqAXKEX8dRK/WuMFBbh6OtKBRM=";
-        allowedIPs = ["10.73.212.2/32"];
+        publicKey = wg.sparkle.publicKey;
+        allowedIPs = ["${wg.sparkle.ip}/32"];
       }
     ];
   };

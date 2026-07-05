@@ -1,5 +1,6 @@
 {lib, ...}: let
   securityHeaders = import ../../../modules/nixos/caddy-security-headers.nix;
+  wg = import ../../../modules/nixos/sparkle-sparxie-wireguard.nix;
   # Source-IP base allowlist applied to every vhost: both LANs and both WireGuard subnets (see trusted-subnets.nix).
   baseAllow = (import ../trusted-subnets.nix).subnets;
   net = import ../microvms/vm-net.nix;
@@ -79,7 +80,7 @@ in {
     lib.mapAttrs' mkVhost vhosts
     // {
       # Public file server, accessible only via sparxie over WireGuard.
-      "http://10.73.212.2:9000".extraConfig = ''
+      "http://${wg.sparkle.ip}:9000".extraConfig = ''
         root * /mnt/samba/misc
         file_server browse
       '';
