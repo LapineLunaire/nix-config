@@ -7,6 +7,10 @@
   dmz = import ../dmz-net.nix;
   # One CNAME to sparkle per proxied <name>.lunaire.moe Caddy vhost (see services/proxy.nix). Adding or removing a vhost changes the zone: bump the serial.
   cnames = lib.concatMapStrings (name: "${name} IN CNAME sparkle.lunaire.moe.\n") (map (lib.removeSuffix ".lunaire.moe") (builtins.filter (lib.hasSuffix ".lunaire.moe") (builtins.attrNames config.services.caddy.virtualHosts)));
+  # 10.28.x.y to its "y.x" owner label in the 28.10.in-addr.arpa zone.
+  ptrLabel = ip: let
+    octets = lib.splitString "." ip;
+  in "${lib.elemAt octets 3}.${lib.elemAt octets 2}";
 in {
   networking.firewall.interfaces.sfp0 = {
     allowedUDPPorts = [53];
@@ -40,7 +44,7 @@ in {
     $TTL 3600
 
     @       IN SOA  sparkle.lunaire.moe. hostmaster.lunaire.moe. (
-                    2026040301 ; serial: format YYYYMMDDnn, bump on every zone change
+                    2026070501 ; serial: format YYYYMMDDnn, bump on every zone change
                     3600       ; refresh
                     900        ; retry
                     604800     ; expire
@@ -49,8 +53,10 @@ in {
 
     @       IN NS   sparkle.lunaire.moe.
 
-    25.32   IN PTR  sparkle.lunaire.moe.
+    ${ptrLabel dmz.hostAddress}   IN PTR  sparkle.lunaire.moe.
     96.64   IN PTR  camellya.lunaire.moe.
+    ${ptrLabel net.vmAddress.forgejo}   IN PTR  git-ssh.lunaire.moe.
+    ${ptrLabel net.vmAddress.unifi}   IN PTR  unifi.lunaire.moe.
   '';
 
   services.coredns = {
