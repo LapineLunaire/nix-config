@@ -104,8 +104,9 @@
     pkgsFor = mkPkgs nixpkgs;
     pkgsUnstableFor = mkPkgs nixpkgs-unstable;
 
-    mkHmModules = hm: [
-      hm.nixosModules.home-manager
+    # hmModule is the platform's home-manager module: nixosModules.home-manager or darwinModules.home-manager.
+    mkHmModules = hmModule: [
+      hmModule
       {
         home-manager = {
           useGlobalPkgs = true;
@@ -128,7 +129,7 @@
             lanzaboote.nixosModules.lanzaboote
             sops-nix.nixosModules.sops
           ]
-          ++ (mkHmModules home-manager) ++ modules;
+          ++ (mkHmModules home-manager.nixosModules.home-manager) ++ modules;
       };
 
     mkDesktopSystem = {
@@ -145,7 +146,7 @@
             sops-nix.nixosModules.sops
             aagl.nixosModules.default
           ]
-          ++ (mkHmModules home-manager-unstable) ++ modules;
+          ++ (mkHmModules home-manager-unstable.nixosModules.home-manager) ++ modules;
       };
 
     mkMicrovm = name: extraModules:
@@ -181,17 +182,8 @@
       nix-darwin.lib.darwinSystem {
         specialArgs = commonArgs;
         modules =
-          [
-            {nixpkgs.pkgs = pkgsUnstableFor system;}
-            home-manager-unstable.darwinModules.home-manager
-            {
-              home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                extraSpecialArgs = commonArgs;
-              };
-            }
-          ]
+          [{nixpkgs.pkgs = pkgsUnstableFor system;}]
+          ++ (mkHmModules home-manager-unstable.darwinModules.home-manager)
           ++ modules;
       };
   in {
