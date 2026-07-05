@@ -110,7 +110,7 @@ lib.mkMerge [
           # Derive the sops age key on the fly from the SSH host key. Requires elevated privileges to read /etc/ssh/ssh_host_ed25519_key.
           sops = "SOPS_AGE_KEY_FILE=<(doas cat /etc/ssh/ssh_host_ed25519_key | ssh-to-age -private-key) sops";
         }
-        // lib.optionalAttrs (config.userConfig.desktop.enable || pkgs.stdenv.hostPlatform.isDarwin) {
+        // lib.optionalAttrs config.userConfig.gui {
           cat = "bat";
           ls = "eza";
           ll = "eza -l";
@@ -120,7 +120,7 @@ lib.mkMerge [
     };
   }
 
-  (lib.mkIf (config.userConfig.desktop.enable || pkgs.stdenv.hostPlatform.isDarwin) {
+  (lib.mkIf config.userConfig.gui {
     programs.fastfetch = {
       enable = true;
       settings = {

@@ -23,7 +23,7 @@
       xh
       yubikey-manager
     ])
-    ++ lib.optionals (config.userConfig.desktop.enable || pkgs.stdenv.hostPlatform.isDarwin) (
+    ++ lib.optionals config.userConfig.gui (
       with pkgs; [
         alejandra
         azahar

@@ -40,14 +40,23 @@
       ./programs.nix
     ];
 
-    options.userConfig.desktop.enable = lib.mkEnableOption "desktop environment configuration";
+    options.userConfig = {
+      desktop.enable = lib.mkEnableOption "desktop environment configuration";
+      # GUI machines: Linux desktops plus all darwin hosts. Derived from the two flags above, do not set directly.
+      gui = lib.mkOption {
+        type = lib.types.bool;
+        readOnly = true;
+        default = config.userConfig.desktop.enable || pkgs.stdenv.hostPlatform.isDarwin;
+      };
+    };
 
     config = {
       home = {
         username = "carmilla";
         homeDirectory = osConfig.users.users.carmilla.home;
+        # The gui hosts run nixpkgs-unstable (26.11) and the servers run stable (26.05); the split following the gui flag is a coincidence of which hosts run which channel, not a property of the flag.
         stateVersion =
-          if config.userConfig.desktop.enable || pkgs.stdenv.hostPlatform.isDarwin
+          if config.userConfig.gui
           then "26.11"
           else "26.05";
       };
