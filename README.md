@@ -42,13 +42,13 @@ overlays.nix    package overrides (ffmpeg unfree codecs, mpv/yt-dlp ffmpeg, disc
 | Subnet | Role |
 |--------|------|
 | 10.28.16.0/24 | Management network (UniFi devices) |
-| 10.28.32.0/23 | Infrastructure (sparkle at 10.28.32.25, CoreDNS) |
+| 10.28.32.0/23 | DMZ (sparkle at 10.28.32.25, CoreDNS) |
 | 10.28.34.0/24 | sparkle VM bridge `vm-br0`; last octet is the vm-registry index, `.1` is the host |
 | 10.28.64.0/24 | LAN clients |
 | 10.28.96.0/24 | WireGuard VPN clients |
 | 10.100.0.0/24 | Nox's LAN |
 | 10.1.0.0/24 | Nox's WireGuard VPN clients |
-| 10.73.212.0/24 | sparkle (`.2`) <-> sparxie (`.1`) WireGuard tunnel |
+| 10.73.212.0/31 | sparkle (`.0`) <-> sparxie (`.1`) WireGuard tunnel |
 
 The four client subnets trusted to reach admin surfaces (both LANs and both WireGuard subnets) are defined once in `hosts/sparkle/trusted-subnets.nix` and reused by the Caddy vhost ACLs, the VM bridge forward policy, VM SSH ingress, and iperf3.
 
@@ -248,7 +248,7 @@ Convert the guest key (`ssh-to-age < /persist/vms/<name>/etc/ssh/ssh_host_ed2551
 
 - Extra flake-input modules (if needed): add to `extraModules` in `flake.nix`.
 - Reverse proxy: add a vhost to `hosts/sparkle/services/proxy.nix`.
-- DNS: add a CNAME in `hosts/sparkle/services/coredns.nix` and bump the zone serial.
+- DNS: the CNAME is generated from the Caddy vhost; bump the zone serial in `hosts/sparkle/services/coredns.nix`.
 - Firewall: the VM's own ingress allowlist lives in its `config.nix`; VM-to-VM or VM-to-LAN flows need forward-chain rules in `hosts/sparkle/microvms/network.nix`.
 
 Monitoring picks up the VM's node_exporter automatically from the registry; uptime-kuma probes are added manually in its UI.
