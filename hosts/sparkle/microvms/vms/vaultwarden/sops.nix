@@ -4,6 +4,5 @@
     secrets."vaultwarden-db-password" = {};
     secrets."vaultwarden-admin-token" = {};
     secrets."vaultwarden-smtp-password" = {};
-    templates."vaultwarden.env" = {};
   };
 }
