@@ -29,8 +29,8 @@ in {
 
     sparkle  IN A    ${dmz.hostAddress}
     camellya IN A    10.28.64.96
-    git-ssh  IN A    ${net.ip.forgejo}
-    unifi    IN A    ${net.ip.unifi}
+    git-ssh  IN A    ${net.vmAddress.forgejo}
+    unifi    IN A    ${net.vmAddress.unifi}
     ${cnames}
   '';
 

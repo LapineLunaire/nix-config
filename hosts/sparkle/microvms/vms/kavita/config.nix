@@ -19,7 +19,7 @@ in {
   services.kavita = {
     enable = true;
     tokenKeyFile = config.sops.secrets."kavita-token-key".path;
-    settings.IpAddresses = net.ip.kavita;
+    settings.IpAddresses = net.vmAddress.kavita;
   };
   microvmGuest.hostIngressTCPPorts = [5000];
 }

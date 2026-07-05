@@ -18,7 +18,7 @@ in {
     enable = true;
     package = pkgs.postgresql_18;
     settings = {
-      listen_addresses = lib.mkForce "127.0.0.1,${net.ip.postgres}";
+      listen_addresses = lib.mkForce "127.0.0.1,${net.vmAddress.postgres}";
       shared_buffers = "512MB";
       effective_cache_size = "1536MB";
       max_connections = 50;
@@ -48,10 +48,10 @@ in {
     ];
     authentication = ''
       local all             postgres                        peer
-      host  authelia        authelia    ${net.ip.authelia}/32 scram-sha-256
-      host  forgejo         forgejo     ${net.ip.forgejo}/32 scram-sha-256
-      host  vaultwarden     vaultwarden ${net.ip.vaultwarden}/32 scram-sha-256
-      host  all             carmilla    ${net.ip.pgadmin}/32 scram-sha-256
+      host  authelia        authelia    ${net.vmAddress.authelia}/32 scram-sha-256
+      host  forgejo         forgejo     ${net.vmAddress.forgejo}/32 scram-sha-256
+      host  vaultwarden     vaultwarden ${net.vmAddress.vaultwarden}/32 scram-sha-256
+      host  all             carmilla    ${net.vmAddress.pgadmin}/32 scram-sha-256
     '';
   };
 
@@ -62,6 +62,6 @@ in {
   '';
 
   networking.firewall.extraInputRules = ''
-    ip saddr { ${lib.concatStringsSep ", " (map (name: net.ip.${name}) net.postgresClients)} } tcp dport 5432 accept
+    ip saddr { ${lib.concatStringsSep ", " (map (name: net.vmAddress.${name}) net.postgresClients)} } tcp dport 5432 accept
   '';
 }

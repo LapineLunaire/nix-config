@@ -9,7 +9,7 @@ in {
   services.uptime-kuma = {
     enable = true;
     settings = {
-      HOST = net.ip.uptime-kuma;
+      HOST = net.vmAddress.uptime-kuma;
       PORT = "3001";
     };
   };

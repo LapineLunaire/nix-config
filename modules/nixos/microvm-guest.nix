@@ -68,19 +68,19 @@ in {
     users.users.root.openssh.authorizedKeys.keys = import ../../users/carmilla/ssh-keys.nix;
     networking.firewall.extraInputRules = lib.mkMerge [
       (lib.mkBefore ''
-        ip saddr ${net.ip.monitoring} tcp dport 9100 accept
+        ip saddr ${net.vmAddress.monitoring} tcp dport 9100 accept
         ip saddr { ${(import ../../hosts/sparkle/trusted-subnets.nix).nftSet} } tcp dport 22 accept
       '')
-      (lib.concatMapStrings (port: "ip saddr ${net.host} tcp dport ${toString port} accept\n") config.microvmGuest.hostIngressTCPPorts)
+      (lib.concatMapStrings (port: "ip saddr ${net.hostAddress} tcp dport ${toString port} accept\n") config.microvmGuest.hostIngressTCPPorts)
     ];
     networking.nftables.enable = true;
     networking.firewall.enable = true;
     networking.useDHCP = false;
     # Force eth0 naming; all VM configs reference eth0.
     networking.usePredictableInterfaceNames = false;
-    networking.nameservers = [net.host];
+    networking.nameservers = [net.hostAddress];
     networking.defaultGateway = {
-      address = net.host;
+      address = net.hostAddress;
       interface = "eth0";
     };
 

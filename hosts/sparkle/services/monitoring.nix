@@ -11,11 +11,11 @@ in {
   # node_exporter on sparkle, bound to vm-br0 so the monitoring VM can scrape it.
   services.prometheus.exporters.node = {
     enable = true;
-    listenAddress = net.host;
+    listenAddress = net.hostAddress;
     port = 9100;
   };
 
   networking.firewall.extraInputRules = ''
-    ip saddr ${net.ip.monitoring} tcp dport 9100 accept
+    ip saddr ${net.vmAddress.monitoring} tcp dport 9100 accept
   '';
 }

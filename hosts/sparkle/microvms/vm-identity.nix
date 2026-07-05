@@ -32,7 +32,7 @@ in
     networking.hostName = name;
     networking.interfaces.eth0.ipv4.addresses = [
       {
-        address = net.ip.${name};
+        address = net.vmAddress.${name};
         prefixLength = 24;
       }
     ];

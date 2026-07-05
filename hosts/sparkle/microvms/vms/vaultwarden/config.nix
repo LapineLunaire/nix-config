@@ -12,7 +12,7 @@ in {
 
   sops.templates."vaultwarden.env".content = ''
     ADMIN_TOKEN=${config.sops.placeholder."vaultwarden-admin-token"}
-    DATABASE_URL=postgresql://vaultwarden:${config.sops.placeholder."vaultwarden-db-password"}@${net.ip.postgres}/vaultwarden
+    DATABASE_URL=postgresql://vaultwarden:${config.sops.placeholder."vaultwarden-db-password"}@${net.vmAddress.postgres}/vaultwarden
     SMTP_HOST=${smtp.host}
     SMTP_PORT=${smtp.port}
     SMTP_SECURITY=starttls
@@ -28,7 +28,7 @@ in {
     environmentFile = config.sops.templates."vaultwarden.env".path;
     config = {
       DOMAIN = "https://vw.lunaire.moe";
-      ROCKET_ADDRESS = net.ip.vaultwarden;
+      ROCKET_ADDRESS = net.vmAddress.vaultwarden;
       ROCKET_PORT = 8222;
       SIGNUPS_ALLOWED = false;
     };

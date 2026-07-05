@@ -30,7 +30,7 @@ in {
   services.unifi-os-server = {
     enable = true;
     # Advertised to UniFi devices as the inform address; vm-br0 is routed (no NAT), so devices reach the VM directly.
-    uosSystemIP = net.ip.unifi;
+    uosSystemIP = net.vmAddress.unifi;
     # No reverse proxy; serve the UI straight on 443 with the real cert installed into unifi-core (see unifi-core-cert below).
     ports.ui = 443;
     # The host forward chain source-scopes ingress (see microvms/network.nix), so the module's firewall openers stay off.

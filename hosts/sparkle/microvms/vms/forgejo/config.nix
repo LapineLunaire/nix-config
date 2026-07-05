@@ -19,14 +19,14 @@ in {
     enable = true;
     database = {
       type = "postgres";
-      host = net.ip.postgres;
+      host = net.vmAddress.postgres;
       passwordFile = config.sops.secrets."forgejo-db-password".path;
       createDatabase = false;
     };
     settings = {
       security = {
         REVERSE_PROXY_LIMIT = 1;
-        REVERSE_PROXY_TRUSTED_PROXIES = net.host;
+        REVERSE_PROXY_TRUSTED_PROXIES = net.hostAddress;
       };
       server = {
         DOMAIN = "git.lunaire.moe";

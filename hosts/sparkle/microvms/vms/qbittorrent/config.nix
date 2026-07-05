@@ -20,7 +20,7 @@ in {
   vpnNamespaces.qbtvpn = {
     enable = true;
     wireguardConfigFile = config.sops.secrets."protonvpn-qbittorrent-conf".path;
-    accessibleFrom = ["${net.host}/32"];
+    accessibleFrom = ["${net.hostAddress}/32"];
     portMappings = [
       {
         from = 4000;

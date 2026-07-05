@@ -78,7 +78,7 @@ in {
     settings = {
       theme = "dark";
       log.level = "info";
-      server.address = "tcp://${net.ip.authelia}:9091/";
+      server.address = "tcp://${net.vmAddress.authelia}:9091/";
       session = {
         redis = {
           host = "127.0.0.1";
@@ -92,7 +92,7 @@ in {
         ];
       };
       storage.postgres = {
-        address = "tcp://${net.ip.postgres}:5432";
+        address = "tcp://${net.vmAddress.postgres}:5432";
         database = "authelia";
         username = "authelia";
       };

@@ -5,34 +5,34 @@
   baseAllow = (import ../trusted-subnets.nix).subnets;
   net = import ../microvms/vm-net.nix;
   # uptimeKuma in extraAllow is uptime-kuma probing each service through the proxy.
-  uptimeKuma = net.ip."uptime-kuma";
+  uptimeKuma = net.vmAddress.uptime-kuma;
   # Each entry becomes <name>.lunaire.moe behind the wildcard cert, and coredns.nix generates a zone CNAME per entry (bump the zone serial when this set changes). extraAllow lists callers beyond baseAllow; body is the service-specific Caddy config.
   vhosts = {
     gf = {
       extraAllow = [uptimeKuma];
-      body = "reverse_proxy ${net.ip.monitoring}:3000";
+      body = "reverse_proxy ${net.vmAddress.monitoring}:3000";
     };
     # auth: forgejo (OIDC backchannel) + pgadmin (OIDC backchannel) + uptime-kuma (health check).
     auth = {
-      extraAllow = [net.ip.forgejo net.ip.pgadmin uptimeKuma];
-      body = "reverse_proxy ${net.ip.authelia}:9091";
+      extraAllow = [net.vmAddress.forgejo net.vmAddress.pgadmin uptimeKuma];
+      body = "reverse_proxy ${net.vmAddress.authelia}:9091";
     };
     # git: DMZ subnet (clones from other server hosts) + ci-runner + uptime-kuma.
     git = {
-      extraAllow = [(import ../dmz-net.nix).subnet net.ip.ci-runner uptimeKuma];
-      body = "reverse_proxy ${net.ip.forgejo}:3000";
+      extraAllow = [(import ../dmz-net.nix).subnet net.vmAddress.ci-runner uptimeKuma];
+      body = "reverse_proxy ${net.vmAddress.forgejo}:3000";
     };
     ha = {
       extraAllow = [uptimeKuma];
-      body = "reverse_proxy ${net.ip.homeassistant}:8123";
+      body = "reverse_proxy ${net.vmAddress.homeassistant}:8123";
     };
     pga = {
       extraAllow = [uptimeKuma];
-      body = "reverse_proxy ${net.ip.pgadmin}:5000";
+      body = "reverse_proxy ${net.vmAddress.pgadmin}:5000";
     };
     qbt = {
       extraAllow = [uptimeKuma];
-      body = "reverse_proxy ${net.ip.qbittorrent}:4000";
+      body = "reverse_proxy ${net.vmAddress.qbittorrent}:4000";
     };
     up = {
       extraAllow = [];
@@ -47,12 +47,12 @@
     };
     kv = {
       extraAllow = [uptimeKuma];
-      body = "reverse_proxy ${net.ip.kavita}:5000";
+      body = "reverse_proxy ${net.vmAddress.kavita}:5000";
     };
     vw = {
       extraAllow = [uptimeKuma];
       body = ''
-        reverse_proxy ${net.ip.vaultwarden}:8222 {
+        reverse_proxy ${net.vmAddress.vaultwarden}:8222 {
           header_up X-Real-IP {remote_host}
         }
       '';

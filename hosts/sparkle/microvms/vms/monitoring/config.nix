@@ -20,7 +20,7 @@ in {
         static_configs = [
           {
             # node_exporter on the host bridge IP plus every VM in the registry.
-            targets = ["${net.host}:9100"] ++ lib.mapAttrsToList (_: ip: "${ip}:9100") net.ip;
+            targets = ["${net.hostAddress}:9100"] ++ lib.mapAttrsToList (_: ip: "${ip}:9100") net.vmAddress;
           }
         ];
       }
@@ -30,7 +30,7 @@ in {
   services.grafana = {
     enable = true;
     settings.server = {
-      http_addr = net.ip.monitoring;
+      http_addr = net.vmAddress.monitoring;
       http_port = 3000;
       domain = "gf.lunaire.moe";
       root_url = "https://gf.lunaire.moe/";

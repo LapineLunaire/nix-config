@@ -33,7 +33,7 @@ in {
     };
     environmentFiles = [config.sops.templates."pgadmin.env".path];
     volumes = ["/persist/var/lib/pgadmin:/var/lib/pgadmin"];
-    ports = ["${net.ip.pgadmin}:5000:5000"];
+    ports = ["${net.vmAddress.pgadmin}:5000:5000"];
   };
 
   microvmGuest.hostIngressTCPPorts = [5000];
