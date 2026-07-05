@@ -67,6 +67,8 @@ in {
         }
       ];
     };
+    # "!" locks the root account; no password login is possible.
+    users.users.root.hashedPassword = "!";
     # carmilla is the only ssh login and escalates with doas; noPass because the guests carry no user password.
     users.users.carmilla = {
       isNormalUser = true;
