@@ -20,6 +20,7 @@ hosts/          Per-host hardware, services, secrets, persistence declarations
   sparkle/microvms/
     vm-registry.nix   Central registry: name -> index (vsock CID, MAC/IP octet) and startup deps
     vm-identity.nix   Guest identity (hostname, MAC, static IP) derived from the registry
+    vm-net.nix        Host and per-VM addresses on vm-br0, imported wherever a VM IP is needed
     network.nix       vm-br0 bridge and the default-drop forward chain with per-flow allowlists
     guest.nix         Shared VM guest baseline: virtiofs persistence, sops, sshd, node_exporter
     docker-common.nix Journald logging and weekly image prune for the container-based VMs
@@ -302,7 +303,7 @@ nh darwin switch ~/projects/nix-config
 
 - Export FIDO2 resident SSH keys from YubiKey: `ssh-keygen -K` in `~/.ssh/`
 - Create `~/Pictures/Screenshots` on macOS
-- Grant App Management permission to the terminal emulator (System Settings → Privacy & Security → App Management)
+- Grant App Management permission to the terminal emulator (System Settings > Privacy & Security > App Management)
 
 ## Usage
 
