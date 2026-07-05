@@ -23,14 +23,21 @@ hosts/          Per-host hardware, services, secrets, persistence declarations
     network.nix       vm-br0 bridge and the default-drop forward chain with per-flow allowlists
     vms/<name>/       Per-VM config.nix (+ sops.nix/secrets.yaml where needed)
   sparkle/trusted-subnets.nix  Client subnets trusted to reach admin surfaces, shared by proxy/firewall rules
+  sparkle/dmz-net.nix          sparkle's addressing on the DMZ subnet, shared by the sfp0 config, DNS zones, and the git vhost ACL
 modules/
   darwin.nix    macOS system defaults, firewall, privacy settings
+  nix-settings.nix  Nix registry and nixPath pinning shared by NixOS and nix-darwin
   nixos/
-    generic/    Base NixOS: kernel hardening, SSH, ZFS, zram, chrony
+    generic/    Base NixOS: kernel hardening, SSH, impermanence baseline, zram, chrony
     desktop/    KDE Plasma 6, Plasma Login Manager, PipeWire, fonts, Steam
     borg-backup.nix     Parameterised Borg job to Hetzner from a ZFS snapshot of <pool>/persist
+    caddy.nix           Caddy with ACME via Cloudflare DNS-01, shared by sparkle and sparxie
+    caddy-security-headers.nix    Security header snippet spliced into every Caddy vhost
     microvm-guest.nix   Shared VM guest baseline: virtiofs persistence, sops, sshd, node_exporter
+    postgres-passwords.nix        Applies the sops-templated role passwords after postgres starts
+    protonmail-smtp.nix           SMTP relay account shared by msmtp, smartd, and the mail-sending VMs
     secureboot.nix Lanzaboote secure boot
+    sparkle-sparxie-wireguard.nix The /31 WireGuard link endpoints between sparkle and sparxie
     zfs-maintenance.nix Scrub, TRIM, auto-snapshot retention
 users/carmilla/ home-manager: shell, git, neovim, SSH, desktop environment
 pkgs/           Custom derivations
