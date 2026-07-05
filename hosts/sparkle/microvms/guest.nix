@@ -57,7 +57,7 @@ in {
     services.openssh = {
       enable = true;
       settings = {
-        PermitRootLogin = "prohibit-password";
+        PermitRootLogin = "no";
         PasswordAuthentication = false;
       };
       hostKeys = [
@@ -67,7 +67,23 @@ in {
         }
       ];
     };
-    users.users.root.openssh.authorizedKeys.keys = import ../../../users/carmilla/ssh-keys.nix;
+    # carmilla is the only ssh login and escalates with doas; noPass because the guests carry no user password.
+    users.users.carmilla = {
+      isNormalUser = true;
+      uid = 1000;
+      extraGroups = ["wheel"];
+      openssh.authorizedKeys.keys = import ../../../users/carmilla/ssh-keys.nix;
+    };
+    security.doas = {
+      enable = true;
+      extraRules = [
+        {
+          groups = ["wheel"];
+          keepEnv = true;
+          noPass = true;
+        }
+      ];
+    };
     networking.firewall.extraInputRules = lib.mkMerge [
       (lib.mkBefore ''
         ip saddr ${net.vmAddress.monitoring} tcp dport 9100 accept
