@@ -197,7 +197,7 @@ lib.mkMerge [
 
     programs.ssh = {
       enable = true;
-      enableDefaultConfig = false; # deprecated by home-manager
+      enableDefaultConfig = false; # home-manager deprecated the implicit default config block; declare everything explicitly instead
       # Rebuild OpenSSH with FIDO2 support for sk-ssh-ed25519 resident keys stored on the YubiKey.
       package = pkgs.openssh.override {withFIDO = true;};
       settings."*" = {
