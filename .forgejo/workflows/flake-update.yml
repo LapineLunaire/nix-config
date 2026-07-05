@@ -30,13 +30,14 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # Evaluating the three host toplevels (sparkle transitively evaluates every microvm) catches breakage from updated inputs before a host pulls the new lock.
+      # Evaluating every host toplevel (sparkle transitively evaluates every microvm; silverwolf evaluates fine cross-platform) catches breakage from updated inputs before a host pulls the new lock.
       - name: Eval host toplevels
         if: steps.check.outputs.changed == 'true'
         run: |
           for host in camellya sparkle sparxie; do
             nix eval ".#nixosConfigurations.${host}.config.system.build.toplevel.drvPath"
           done
+          nix eval ".#darwinConfigurations.silverwolf.config.system.build.toplevel.drvPath"
 
       - name: Commit and push
         if: steps.check.outputs.changed == 'true'
