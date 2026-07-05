@@ -1,44 +1,40 @@
-{config, ...}: {
+{
+  config,
+  lib,
+  ...
+}: let
+  # Interfaces pinned to stable names by MAC-matched .link files (see the networks in default.nix). Each gets a network/<name>-mac secret, a sops-rendered 10-<name>.link template, and an /etc/systemd/network symlink to it.
+  interfaces = ["ipmi0" "sfp0" "sfp1"];
+in {
   sops = {
     defaultSopsFile = ./secrets.yaml;
     age.sshKeyPaths = ["/persist/etc/ssh/ssh_host_ed25519_key"];
 
-    secrets = {
-      "carmilla-password-hash".neededForUsers = true;
+    secrets =
+      {
+        "carmilla-password-hash".neededForUsers = true;
 
-      "smtp-password" = {};
-      "wireguard-private-key" = {};
-      "network/ipmi0-mac" = {};
-      "network/sfp0-mac" = {};
-      "network/sfp1-mac" = {};
-    };
+        "smtp-password" = {};
+        "wireguard-private-key" = {};
+      }
+      // lib.genAttrs (map (name: "network/${name}-mac") interfaces) (_: {});
 
-    templates."10-ipmi0.link".content = ''
-      [Match]
-      MACAddress=${config.sops.placeholder."network/ipmi0-mac"}
+    templates = lib.listToAttrs (map (name:
+      lib.nameValuePair "10-${name}.link" {
+        content = ''
+          [Match]
+          MACAddress=${config.sops.placeholder."network/${name}-mac"}
 
-      [Link]
-      Name=ipmi0
-    '';
-    templates."10-sfp0.link".content = ''
-      [Match]
-      MACAddress=${config.sops.placeholder."network/sfp0-mac"}
-
-      [Link]
-      Name=sfp0
-    '';
-    templates."10-sfp1.link".content = ''
-      [Match]
-      MACAddress=${config.sops.placeholder."network/sfp1-mac"}
-
-      [Link]
-      Name=sfp1
-    '';
+          [Link]
+          Name=${name}
+        '';
+      })
+    interfaces);
   };
 
-  environment.etc = {
-    "systemd/network/10-ipmi0.link".source = config.sops.templates."10-ipmi0.link".path;
-    "systemd/network/10-sfp0.link".source = config.sops.templates."10-sfp0.link".path;
-    "systemd/network/10-sfp1.link".source = config.sops.templates."10-sfp1.link".path;
-  };
+  environment.etc = lib.listToAttrs (map (name:
+    lib.nameValuePair "systemd/network/10-${name}.link" {
+      source = config.sops.templates."10-${name}.link".path;
+    })
+  interfaces);
 }
