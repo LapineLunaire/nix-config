@@ -1,18 +1,8 @@
+# Host directories on top of the impermanence baseline in modules/nixos/generic/persistence.nix.
 {...}: {
-  environment.persistence."/persist" = {
-    hideMounts = true;
-    directories = [
-      "/var/lib/acme"
-      "/var/lib/nixos"
-      "/var/lib/samba"
-      "/var/lib/sbctl"
-      "/var/lib/systemd"
-      "/var/log"
-    ];
-    files = [
-      "/etc/machine-id"
-      "/etc/ssh/ssh_host_ed25519_key"
-      "/etc/ssh/ssh_host_ed25519_key.pub"
-    ];
-  };
+  environment.persistence."/persist".directories = [
+    "/var/lib/acme"
+    "/var/lib/samba"
+    "/var/lib/sbctl"
+  ];
 }

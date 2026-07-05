@@ -1,19 +1,9 @@
+# Host directories on top of the impermanence baseline in modules/nixos/generic/persistence.nix.
 {...}: {
-  environment.persistence."/persist" = {
-    hideMounts = true;
-    directories = [
-      "/etc/NetworkManager/system-connections"
-      "/var/lib/NetworkManager"
-      "/var/lib/nixos"
-      "/var/lib/sbctl"
-      "/var/lib/systemd"
-      "/var/lib/waydroid"
-      "/var/log"
-    ];
-    files = [
-      "/etc/machine-id"
-      "/etc/ssh/ssh_host_ed25519_key"
-      "/etc/ssh/ssh_host_ed25519_key.pub"
-    ];
-  };
+  environment.persistence."/persist".directories = [
+    "/etc/NetworkManager/system-connections"
+    "/var/lib/NetworkManager"
+    "/var/lib/sbctl"
+    "/var/lib/waydroid"
+  ];
 }

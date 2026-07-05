@@ -6,6 +6,7 @@
   imports = [
     ../../nix-settings.nix
     ./packages.nix
+    ./persistence.nix
     ./security.nix
     ./services.nix
     ../secureboot.nix
