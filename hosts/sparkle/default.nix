@@ -3,7 +3,9 @@
   lib,
   pkgs,
   ...
-}: {
+}: let
+  zigbee = import ./zigbee-stick.nix;
+in {
   imports = [
     ../../modules/nixos/generic
     ./hardware-configuration.nix
@@ -67,7 +69,7 @@
   # Prevent host from claiming the Zigbee stick; passed through to the HA VM.
   boot.blacklistedKernelModules = ["cp210x"];
   services.udev.extraRules = ''
-    SUBSYSTEM=="usb", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0660", GROUP="kvm"
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="${zigbee.vendorId}", ATTRS{idProduct}=="${zigbee.productId}", MODE="0660", GROUP="kvm"
   '';
 
   boot = {

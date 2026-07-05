@@ -1,4 +1,6 @@
-{lib, ...}: {
+{lib, ...}: let
+  zigbee = import ../../../zigbee-stick.nix;
+in {
   imports = [../docker-common.nix];
 
   microvm = {
@@ -17,7 +19,7 @@
     devices = [
       {
         bus = "usb";
-        path = "vendorid=0x10c4,productid=0xea60";
+        path = "vendorid=0x${zigbee.vendorId},productid=0x${zigbee.productId}";
       }
     ];
   };
@@ -35,7 +37,7 @@
 
   # udev rule to ensure the Zigbee stick is accessible by the container runtime.
   services.udev.extraRules = ''
-    SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", GROUP="dialout", MODE="0660"
+    SUBSYSTEM=="tty", ATTRS{idVendor}=="${zigbee.vendorId}", ATTRS{idProduct}=="${zigbee.productId}", GROUP="dialout", MODE="0660"
   '';
 
   microvmGuest.hostIngressTCPPorts = [8123];
