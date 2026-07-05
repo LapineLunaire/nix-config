@@ -6,6 +6,8 @@
 }: let
   net = import ./vm-net.nix;
 in {
+  imports = [../../../modules/nix-settings.nix];
+
   # TCP ports the host may reach on this VM; each becomes an input-chain accept from the bridge address (Caddy and other host services).
   options.microvmGuest.hostIngressTCPPorts = lib.mkOption {
     type = lib.types.listOf lib.types.port;
