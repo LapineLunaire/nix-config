@@ -5,6 +5,7 @@
   ...
 }: let
   zigbee = import ./zigbee-stick.nix;
+  smtp = import ../../modules/nixos/protonmail-smtp.nix;
 in {
   imports = [
     ../../modules/nixos/generic
@@ -56,12 +57,10 @@ in {
     enable = true;
     setSendmail = true;
     accounts.default = {
-      host = "smtp.protonmail.ch";
-      port = 587;
+      inherit (smtp) host port user;
       auth = true;
       tls = true;
-      from = "noreply@lunaire.eu";
-      user = "noreply@lunaire.eu";
+      from = smtp.user;
       passwordeval = "cat ${config.sops.secrets."smtp-password".path}";
     };
   };

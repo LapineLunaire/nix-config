@@ -3,7 +3,7 @@
 in {
   services.smartd.notifications.mail = {
     enable = true;
-    sender = "noreply@lunaire.eu";
+    sender = (import ../../../modules/nixos/protonmail-smtp.nix).user;
     recipient = "lapine@lunaire.eu";
   };
 

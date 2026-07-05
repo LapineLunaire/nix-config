@@ -1,5 +1,6 @@
 {config, ...}: let
   net = import ../../vm-net.nix;
+  smtp = import ../../../../../modules/nixos/protonmail-smtp.nix;
 in {
   imports = [./sops.nix];
 
@@ -12,12 +13,12 @@ in {
   sops.templates."vaultwarden.env".content = ''
     ADMIN_TOKEN=${config.sops.placeholder."vaultwarden-admin-token"}
     DATABASE_URL=postgresql://vaultwarden:${config.sops.placeholder."vaultwarden-db-password"}@${net.ip.postgres}/vaultwarden
-    SMTP_HOST=smtp.protonmail.ch
-    SMTP_PORT=587
+    SMTP_HOST=${smtp.host}
+    SMTP_PORT=${smtp.port}
     SMTP_SECURITY=starttls
-    SMTP_FROM=noreply@lunaire.eu
+    SMTP_FROM=${smtp.user}
     SMTP_FROM_NAME=Vaultwarden
-    SMTP_USERNAME=noreply@lunaire.eu
+    SMTP_USERNAME=${smtp.user}
     SMTP_PASSWORD=${config.sops.placeholder."vaultwarden-smtp-password"}
   '';
 

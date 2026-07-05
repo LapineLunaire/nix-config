@@ -1,5 +1,6 @@
 {config, ...}: let
   net = import ../../vm-net.nix;
+  smtp = import ../../../../../modules/nixos/protonmail-smtp.nix;
 in {
   imports = [./sops.nix];
 
@@ -105,9 +106,9 @@ in {
       };
       access_control.default_policy = "two_factor";
       notifier.smtp = {
-        address = "smtp://smtp.protonmail.ch:587";
-        username = "noreply@lunaire.eu";
-        sender = "Authelia <noreply@lunaire.eu>";
+        address = "smtp://${smtp.host}:${smtp.port}";
+        username = smtp.user;
+        sender = "Authelia <${smtp.user}>";
       };
     };
   };

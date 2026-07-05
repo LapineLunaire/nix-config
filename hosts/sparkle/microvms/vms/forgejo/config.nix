@@ -1,5 +1,6 @@
 {config, ...}: let
   net = import ../../vm-net.nix;
+  smtp = import ../../../../../modules/nixos/protonmail-smtp.nix;
 in {
   imports = [./sops.nix];
 
@@ -35,10 +36,10 @@ in {
       };
       mailer = {
         ENABLED = true;
-        SMTP_ADDR = "smtp.protonmail.ch";
-        SMTP_PORT = 587;
-        FROM = "Forgejo <noreply@lunaire.eu>";
-        USER = "noreply@lunaire.eu";
+        SMTP_ADDR = smtp.host;
+        SMTP_PORT = smtp.port;
+        FROM = "Forgejo <${smtp.user}>";
+        USER = smtp.user;
       };
       service = {
         DISABLE_REGISTRATION = true;
