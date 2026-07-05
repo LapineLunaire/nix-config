@@ -1,5 +1,5 @@
 {pkgs, ...}: let
-  public = import ./public-addresses.nix;
+  public = import ../../modules/nixos/sparxie-public-addresses.nix;
 in {
   imports = [
     ../../modules/nixos/generic

@@ -1,6 +1,6 @@
 # Shared Docker config for the microVMs that run containers (homeassistant, ci-runner, pgadmin).
 # Container stdout/stderr goes to the journal instead of unbounded json-file logs on the small docker.img volume.
-# /var/log is persisted to the host ZFS pool (see microvm-guest.nix), so logs survive reboots and stay off the volume; `journalctl CONTAINER_NAME=<name>` and `docker logs` both read them back.
+# /var/log is persisted to the host ZFS pool (see guest.nix), so logs survive reboots and stay off the volume; `journalctl CONTAINER_NAME=<name>` and `docker logs` both read them back.
 {...}: {
   virtualisation.docker = {
     enable = true;

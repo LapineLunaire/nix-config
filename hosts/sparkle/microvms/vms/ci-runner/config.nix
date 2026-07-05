@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: {
-  imports = [./sops.nix ../docker-common.nix];
+  imports = [./sops.nix ../../docker-common.nix];
 
   microvm = {
     vcpu = 8;

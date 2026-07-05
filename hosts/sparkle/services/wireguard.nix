@@ -14,7 +14,7 @@ in {
       {
         publicKey = wg.sparxie.publicKey;
         allowedIPs = ["${wg.sparxie.ip}/32"];
-        endpoint = "${(import ../../sparxie/public-addresses.nix).ipv4}:${toString wg.listenPort}";
+        endpoint = "${(import ../../../modules/nixos/sparxie-public-addresses.nix).ipv4}:${toString wg.listenPort}";
         persistentKeepalive = 25;
       }
     ];

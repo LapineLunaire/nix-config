@@ -1,7 +1,7 @@
 {lib, ...}: let
   zigbee = import ../../../zigbee-stick.nix;
 in {
-  imports = [../docker-common.nix];
+  imports = [../../docker-common.nix];
 
   microvm = {
     # qemu instead of the cloud-hypervisor default: the Zigbee stick USB passthrough (devices below) needs it. This is the only VM not on cloud-hypervisor.

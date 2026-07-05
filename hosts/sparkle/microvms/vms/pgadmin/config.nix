@@ -1,7 +1,7 @@
 {config, ...}: let
   net = import ../../vm-net.nix;
 in {
-  imports = [./sops.nix ../docker-common.nix];
+  imports = [./sops.nix ../../docker-common.nix];
 
   microvm = {
     vcpu = 1;

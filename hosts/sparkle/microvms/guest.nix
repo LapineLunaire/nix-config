@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  net = import ../../hosts/sparkle/microvms/vm-net.nix;
+  net = import ./vm-net.nix;
 in {
   # TCP ports the host may reach on this VM; each becomes an input-chain accept from the bridge address (Caddy and other host services).
   options.microvmGuest.hostIngressTCPPorts = lib.mkOption {
@@ -65,11 +65,11 @@ in {
         }
       ];
     };
-    users.users.root.openssh.authorizedKeys.keys = import ../../users/carmilla/ssh-keys.nix;
+    users.users.root.openssh.authorizedKeys.keys = import ../../../users/carmilla/ssh-keys.nix;
     networking.firewall.extraInputRules = lib.mkMerge [
       (lib.mkBefore ''
         ip saddr ${net.vmAddress.monitoring} tcp dport 9100 accept
-        ip saddr { ${(import ../../hosts/sparkle/trusted-subnets.nix).nftSet} } tcp dport 22 accept
+        ip saddr { ${(import ../trusted-subnets.nix).nftSet} } tcp dport 22 accept
       '')
       (lib.concatMapStrings (port: "ip saddr ${net.hostAddress} tcp dport ${toString port} accept\n") config.microvmGuest.hostIngressTCPPorts)
     ];

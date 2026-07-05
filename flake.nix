@@ -158,7 +158,7 @@
             sops-nix.nixosModules.sops
             microvm.nixosModules.microvm
             impermanence.nixosModules.impermanence
-            ./modules/nixos/microvm-guest.nix
+            ./hosts/sparkle/microvms/guest.nix
             (import ./hosts/sparkle/microvms/vm-identity.nix name)
             ./hosts/sparkle/microvms/vms/${name}/config.nix
           ]

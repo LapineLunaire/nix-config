@@ -53,6 +53,6 @@ in {
     };
   };
 
-  # Git-over-SSH on port 22 rides the system sshd, which microvm-guest.nix already opens to the trusted subnets.
+  # Git-over-SSH on port 22 rides the system sshd, which guest.nix already opens to the trusted subnets.
   microvmGuest.hostIngressTCPPorts = [3000];
 }

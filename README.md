@@ -21,6 +21,8 @@ hosts/          Per-host hardware, services, secrets, persistence declarations
     vm-registry.nix   Central registry: name -> index (vsock CID, MAC/IP octet) and startup deps
     vm-identity.nix   Guest identity (hostname, MAC, static IP) derived from the registry
     network.nix       vm-br0 bridge and the default-drop forward chain with per-flow allowlists
+    guest.nix         Shared VM guest baseline: virtiofs persistence, sops, sshd, node_exporter
+    docker-common.nix Journald logging and weekly image prune for the container-based VMs
     vms/<name>/       Per-VM config.nix (+ sops.nix/secrets.yaml where needed)
   sparkle/trusted-subnets.nix  Client subnets trusted to reach admin surfaces, shared by proxy/firewall rules
   sparkle/dmz-net.nix          sparkle's addressing on the DMZ subnet, shared by the sfp0 config, DNS zones, and the git vhost ACL
@@ -33,11 +35,11 @@ modules/
     borg-backup.nix     Parameterised Borg job to Hetzner from a ZFS snapshot of <pool>/persist
     caddy.nix           Caddy with ACME via Cloudflare DNS-01, shared by sparkle and sparxie
     caddy-security-headers.nix    Security header snippet spliced into every Caddy vhost
-    microvm-guest.nix   Shared VM guest baseline: virtiofs persistence, sops, sshd, node_exporter
     postgres-passwords.nix        Applies the sops-templated role passwords after postgres starts
     protonmail-smtp.nix           SMTP relay account shared by msmtp, smartd, and the mail-sending VMs
     secureboot.nix Lanzaboote secure boot
     sparkle-sparxie-wireguard.nix The /31 WireGuard link endpoints between sparkle and sparxie
+    sparxie-public-addresses.nix  sparxie's static Hetzner VPS addresses, shared by its WAN config and sparkle's WireGuard peer endpoint
     zfs-maintenance.nix Scrub, TRIM, auto-snapshot retention
 users/carmilla/ home-manager: shell, git, neovim, SSH, desktop environment
 pkgs/           Custom derivations
@@ -238,7 +240,7 @@ Pick a free index (10-99) and add the VM to `hosts/sparkle/microvms/vm-registry.
 
 **2. Write the config**
 
-Create `hosts/sparkle/microvms/vms/<name>/config.nix` with the VM's `microvm` resources; the virtiofs state share mapping `/persist/vms/<name>` to `/persist` comes from `vm-identity.nix`. If the host proxies the VM's web UI, list the port in `microvmGuest.hostIngressTCPPorts` (and add the Caddy vhost). Container-based VMs also need a dedicated XFS volume for `/var/lib/docker` (overlayfs cannot run on virtiofs) and an import of `vms/docker-common.nix`.
+Create `hosts/sparkle/microvms/vms/<name>/config.nix` with the VM's `microvm` resources; the virtiofs state share mapping `/persist/vms/<name>` to `/persist` comes from `vm-identity.nix`. If the host proxies the VM's web UI, list the port in `microvmGuest.hostIngressTCPPorts` (and add the Caddy vhost). Container-based VMs also need a dedicated XFS volume for `/var/lib/docker` (overlayfs cannot run on virtiofs) and an import of `docker-common.nix`.
 
 **3. Create state and the guest host key on sparkle**
 

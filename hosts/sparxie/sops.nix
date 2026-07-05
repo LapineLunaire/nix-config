@@ -1,5 +1,5 @@
 {config, ...}: let
-  public = import ./public-addresses.nix;
+  public = import ../../modules/nixos/sparxie-public-addresses.nix;
 in {
   sops = {
     defaultSopsFile = ./secrets.yaml;
