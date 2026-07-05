@@ -1,4 +1,6 @@
-{config, ...}: {
+{config, ...}: let
+  public = import ./public-addresses.nix;
+in {
   sops = {
     defaultSopsFile = ./secrets.yaml;
     age.sshKeyPaths = ["/persist/etc/ssh/ssh_host_ed25519_key"];
@@ -105,8 +107,8 @@
             transport: udp
             module: ejabberd_stun
             use_turn: true
-            turn_ipv4_address: "46.225.108.230"
-            turn_ipv6_address: "2a01:4f8:1c19:a249::1"
+            turn_ipv4_address: "${public.ipv4}"
+            turn_ipv6_address: "${public.ipv6}"
             # Relay allocation range, matching allowedUDPPortRanges in ejabberd.nix.
             turn_min_port: 49152
             turn_max_port: 49500

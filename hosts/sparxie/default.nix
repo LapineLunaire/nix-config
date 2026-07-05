@@ -1,4 +1,6 @@
-{pkgs, ...}: {
+{pkgs, ...}: let
+  public = import ./public-addresses.nix;
+in {
   imports = [
     ../../modules/nixos/generic
     ./hardware-configuration.nix
@@ -20,8 +22,8 @@
     matchConfig.Name = "enp1s0";
     networkConfig.DHCP = "no";
     address = [
-      "46.225.108.230/32"
-      "2a01:4f8:1c19:a249::1/64"
+      "${public.ipv4}/32"
+      "${public.ipv6}/64"
     ];
     routes = [
       {

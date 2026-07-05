@@ -13,7 +13,7 @@
         # sparxie
         publicKey = "VjVuhnnTEHuGssQOp0iM1yU0BLT34VWm3k00e8tDkSg=";
         allowedIPs = ["10.73.212.1/32"];
-        endpoint = "46.225.108.230:47329";
+        endpoint = "${(import ../../sparxie/public-addresses.nix).ipv4}:47329";
         persistentKeepalive = 25;
       }
     ];
