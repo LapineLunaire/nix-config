@@ -6,6 +6,7 @@
 }: let
   zigbee = import ./zigbee-stick.nix;
   smtp = import ../../modules/nixos/protonmail-smtp.nix;
+  dmz = import ./dmz-net.nix;
 in {
   imports = [
     ../../modules/nixos/generic
@@ -24,7 +25,7 @@ in {
     hostId = "d38a0d1c";
     # systemd-resolved intercepts DNS and breaks CoreDNS. Disable it and point
     # resolv.conf directly at the local CoreDNS instance instead.
-    nameservers = ["10.28.32.25"];
+    nameservers = [dmz.hostAddress];
   };
 
   services.resolved.enable = false;
@@ -37,8 +38,8 @@ in {
       matchConfig.Name = "sfp0";
       networkConfig = {
         DHCP = "no";
-        Address = "10.28.32.25/23";
-        Gateway = "10.28.32.1";
+        Address = "${dmz.hostAddress}/${dmz.prefixLength}";
+        Gateway = dmz.gateway;
       };
     };
     "10-sfp1" = {

@@ -4,6 +4,7 @@
   ...
 }: let
   net = import ../microvms/vm-net.nix;
+  dmz = import ../dmz-net.nix;
   # One CNAME to sparkle per proxied <name>.lunaire.moe Caddy vhost (see services/proxy.nix). Adding or removing a vhost changes the zone: bump the serial.
   cnames = lib.concatMapStrings (name: "${name} IN CNAME sparkle.lunaire.moe.\n") (map (lib.removeSuffix ".lunaire.moe") (builtins.filter (lib.hasSuffix ".lunaire.moe") (builtins.attrNames config.services.caddy.virtualHosts)));
 in {
@@ -26,7 +27,7 @@ in {
 
     @       IN NS   sparkle.lunaire.moe.
 
-    sparkle  IN A    10.28.32.25
+    sparkle  IN A    ${dmz.hostAddress}
     camellya IN A    10.28.64.96
     git-ssh  IN A    ${net.ip.forgejo}
     unifi    IN A    ${net.ip.unifi}

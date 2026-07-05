@@ -17,9 +17,9 @@
       extraAllow = [net.ip.forgejo net.ip.pgadmin uptimeKuma];
       body = "reverse_proxy ${net.ip.authelia}:9091";
     };
-    # git: infra subnet (clones from other LAN hosts) + ci-runner + uptime-kuma.
+    # git: DMZ subnet (clones from other server hosts) + ci-runner + uptime-kuma.
     git = {
-      extraAllow = ["10.28.32.0/23" net.ip.ci-runner uptimeKuma];
+      extraAllow = [(import ../dmz-net.nix).subnet net.ip.ci-runner uptimeKuma];
       body = "reverse_proxy ${net.ip.forgejo}:3000";
     };
     ha = {
