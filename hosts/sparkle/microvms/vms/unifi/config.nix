@@ -39,8 +39,8 @@ in {
   };
 
   # The host obtains the unifi.lunaire.moe cert via DNS-01 and shares its acme dir read-only at /run/acme-cert.
-  # unifi-core reads unifi-core.crt/.key on start and rewrites them to a self-signed cert on an in-container restart, so the swap runs while the container is stopped.
-  # unifi-core rewrites the on-disk cert, so change detection hashes the source cert.
+  # unifi-core reads unifi-core.crt/.key on container start, so installing the cert and restarting the container picks it up.
+  # Change detection hashes the source cert to skip restarting the container when nothing changed.
   # The timer reimports on renewal.
   systemd.services.unifi-core-cert = {
     description = "Install ACME cert into unifi-core";
@@ -54,10 +54,9 @@ in {
       [ -f "$src/fullchain.pem" ] || exit 0
       sum=$(sha256sum "$src/fullchain.pem" | cut -d' ' -f1)
       [ "$sum" = "$(cat "$stamp" 2>/dev/null)" ] && exit 0
-      systemctl stop podman-unifi-os-server.service
       install -Dm640 "$src/fullchain.pem" "$dst/unifi-core.crt"
       install -Dm640 "$src/key.pem" "$dst/unifi-core.key"
-      systemctl start podman-unifi-os-server.service
+      systemctl restart podman-unifi-os-server.service
       echo "$sum" > "$stamp"
     '';
   };
