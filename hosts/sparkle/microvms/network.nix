@@ -3,6 +3,8 @@
   trusted = (import ../trusted-subnets.nix).nftSet;
   net = import ./vm-net.nix;
   postgresClients = lib.concatStringsSep ", " (map (name: net.ip.${name}) net.postgresClients);
+  # Management network behind sfp0 where all management surfaces live: routers, switches, IPMI, and the UniFi APs.
+  management = "10.28.16.0/24";
 in {
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
 
@@ -40,8 +42,8 @@ in {
       ct state established,related accept
       # VMs reach the internet but not RFC1918 space; LAN flows VMs initiate need explicit rules below.
       iifname "vm-br0" oifname "sfp0" ip daddr != { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } accept
-      # UniFi controller reaches devices on the management network for adoption, provisioning, and firmware pushes.
-      iifname "vm-br0" oifname "sfp0" ip saddr ${net.ip.unifi} ip daddr 10.28.16.0/24 accept
+      # UniFi controller reaches the APs on the management network for adoption, provisioning, and firmware pushes.
+      iifname "vm-br0" oifname "sfp0" ip saddr ${net.ip.unifi} ip daddr ${management} accept
       # LAN/VPN → VMs: SSH and ICMP only.
       iifname "sfp0" oifname "vm-br0" ip saddr { ${trusted} } tcp dport 22 accept
       iifname "sfp0" oifname "vm-br0" ip saddr { ${trusted} } icmp type echo-request accept
@@ -52,9 +54,9 @@ in {
       # PostgreSQL, from the client VMs listed in vm-net.nix.
       iifname "vm-br0" oifname "vm-br0" ip daddr ${net.ip.postgres} tcp dport 5432 ip saddr { ${postgresClients} } accept
 
-      # UniFi devices reach the controller VM for L3 inform/adoption and service traffic.
-      iifname "sfp0" oifname "vm-br0" ip daddr ${net.ip.unifi} ip saddr 10.28.16.0/24 tcp dport { 8080, 8443, 6789, 8880, 8843 } accept
-      iifname "sfp0" oifname "vm-br0" ip daddr ${net.ip.unifi} ip saddr 10.28.16.0/24 udp dport { 3478, 10001 } accept
+      # UniFi APs reach the controller VM for L3 inform/adoption and service traffic.
+      iifname "sfp0" oifname "vm-br0" ip daddr ${net.ip.unifi} ip saddr ${management} tcp dport { 8080, 8443, 6789, 8880, 8843 } accept
+      iifname "sfp0" oifname "vm-br0" ip daddr ${net.ip.unifi} ip saddr ${management} udp dport { 3478, 10001 } accept
       # Admins reach the controller web UI directly (no reverse proxy).
       iifname "sfp0" oifname "vm-br0" ip daddr ${net.ip.unifi} ip saddr { ${trusted} } tcp dport 443 accept
     ''
