@@ -39,6 +39,9 @@
 
   powerManagement.cpuFreqGovernor = "powersave";
 
+  # SMART monitoring without mail notifications: camellya has no mail relay, so alerts land in the journal only.
+  services.smartd.enable = true;
+
   services.udev.packages = with pkgs; [
     wooting-udev-rules
   ];

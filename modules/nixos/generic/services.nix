@@ -2,7 +2,6 @@
   services.dbus.implementation = "broker";
   services.fstrim.enable = true;
   services.fwupd.enable = true;
-  services.smartd.enable = true;
 
   # NTS (RFC 8915): TLS-authenticated NTP, prevents on-path attackers from spoofing time responses.
   services.chrony = {
