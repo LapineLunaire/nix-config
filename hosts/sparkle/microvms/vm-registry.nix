@@ -10,7 +10,10 @@
     index = 12;
     deps = ["postgres"];
   };
-  ci-runner = {index = 13;};
+  ci-runner = {
+    index = 13;
+    deps = ["forgejo"];
+  };
   homeassistant = {index = 14;};
   qbittorrent = {index = 15;};
   vaultwarden = {
