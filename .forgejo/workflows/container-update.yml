@@ -38,9 +38,7 @@ jobs:
 
       - name: Commit and push
         if: steps.check.outputs.changed == 'true'
-        run: |
-          git config user.name "Lapine"
-          git config user.email "lapine@lunaire.eu"
-          git add hosts/sparkle/microvms/vms/pgadmin/config.nix hosts/sparkle/microvms/vms/homeassistant/config.nix hosts/sparkle/microvms/vms/ci-runner/config.nix
-          git commit -m "sparkle: update container image digests $(date +%Y-%m-%d)"
-          git push
+        uses: ./.forgejo/actions/commit-push
+        with:
+          paths: hosts/sparkle/microvms/vms/pgadmin/config.nix hosts/sparkle/microvms/vms/homeassistant/config.nix hosts/sparkle/microvms/vms/ci-runner/config.nix
+          message: "sparkle: update container image digests $(date +%Y-%m-%d)"

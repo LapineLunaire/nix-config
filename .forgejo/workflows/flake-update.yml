@@ -40,9 +40,7 @@ jobs:
 
       - name: Commit and push
         if: steps.check.outputs.changed == 'true'
-        run: |
-          git config user.name "Lapine"
-          git config user.email "lapine@lunaire.eu"
-          git add flake.lock
-          git commit -m "flake: update inputs $(date +%Y-%m-%d)"
-          git push
+        uses: ./.forgejo/actions/commit-push
+        with:
+          paths: flake.lock
+          message: "flake: update inputs $(date +%Y-%m-%d)"
