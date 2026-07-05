@@ -11,6 +11,7 @@
     ./tmpfiles.nix
     ./sops.nix
     ./pipewire.nix
+    ./samba-mounts.nix
   ];
 
   secureboot.enable = true;

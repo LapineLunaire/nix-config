@@ -81,36 +81,6 @@
     options = ["noatime"];
   };
 
-  fileSystems."/home/carmilla/vault" = {
-    device = "//sparkle.lunaire.moe/carmilla";
-    fsType = "cifs";
-    options = [
-      "credentials=${config.sops.templates."samba-credentials".path}"
-      "uid=1000"
-      "gid=100"
-      "x-systemd.automount"
-      "noauto"
-      "x-systemd.idle-timeout=60"
-      "x-systemd.device-timeout=5s"
-      "x-systemd.mount-timeout=5s"
-    ];
-  };
-
-  fileSystems."/home/carmilla/torrents" = {
-    device = "//sparkle.lunaire.moe/torrents";
-    fsType = "cifs";
-    options = [
-      "credentials=${config.sops.templates."samba-credentials".path}"
-      "uid=1000"
-      "gid=100"
-      "x-systemd.automount"
-      "noauto"
-      "x-systemd.idle-timeout=60"
-      "x-systemd.device-timeout=5s"
-      "x-systemd.mount-timeout=5s"
-    ];
-  };
-
   fileSystems."/boot" = {
     device = "/dev/disk/by-uuid/15B1-29E4";
     fsType = "vfat";
