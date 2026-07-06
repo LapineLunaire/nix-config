@@ -23,11 +23,15 @@ lib.mkMerge [
         user = {
           name = "Lapine";
           email = "lapine@lunaire.eu";
+          signingkey = "${config.home.homeDirectory}/.ssh/id_ed25519_sk_rk_lapine";
         };
         core = {
           editor = "nvim";
           pager = "nvimpager";
         };
+        gpg.format = "ssh";
+        commit.gpgsign = true;
+        tag.gpgsign = true;
         pull.rebase = true;
         init.defaultBranch = "main";
         color.ui = "auto";
