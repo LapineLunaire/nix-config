@@ -47,7 +47,7 @@
       home = {
         username = "carmilla";
         homeDirectory = osConfig.users.users.carmilla.home;
-        # The gui hosts run nixpkgs-unstable (26.11) and the servers run stable (26.05); the split following the gui flag is a coincidence of which hosts run which channel, not a property of the flag.
+        # home-manager stateVersion: 26.11 on gui hosts, 26.05 on servers.
         stateVersion =
           if config.userConfig.gui
           then "26.11"

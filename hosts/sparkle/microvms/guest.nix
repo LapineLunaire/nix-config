@@ -70,7 +70,7 @@ in {
         }
       ];
     };
-    # carmilla (from ./users/carmilla/account.nix) is the only ssh login and escalates with doas; noPass because the guests carry no user password.
+    # doas noPass for wheel: carmilla (the only ssh login, from ./users/carmilla/account.nix) has no user password on guests.
     security.doas.extraRules = [
       {
         groups = ["wheel"];
