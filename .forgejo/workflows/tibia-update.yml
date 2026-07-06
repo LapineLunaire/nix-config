@@ -43,3 +43,4 @@ jobs:
         with:
           paths: pkgs/tibia/default.nix
           message: "tibia: update client hash $(date +%Y-%m-%d)"
+          ssh-signing-key: ${{ secrets.CI_SIGNING_KEY }}

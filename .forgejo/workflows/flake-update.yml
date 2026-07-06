@@ -45,3 +45,4 @@ jobs:
         with:
           paths: flake.lock
           message: "flake: update inputs $(date +%Y-%m-%d)"
+          ssh-signing-key: ${{ secrets.CI_SIGNING_KEY }}

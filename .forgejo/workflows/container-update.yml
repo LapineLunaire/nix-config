@@ -42,3 +42,4 @@ jobs:
         with:
           paths: hosts/sparkle/microvms/vms/pgadmin/config.nix hosts/sparkle/microvms/vms/homeassistant/config.nix hosts/sparkle/microvms/vms/ci-runner/config.nix
           message: "sparkle: update container image digests $(date +%Y-%m-%d)"
+          ssh-signing-key: ${{ secrets.CI_SIGNING_KEY }}

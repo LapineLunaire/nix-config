@@ -1,5 +1,5 @@
 name: Commit and push
-description: Stage the given paths, commit with the repo git identity, and push
+description: Stage the given paths, commit signed with the repo git identity, and push
 inputs:
   paths:
     description: Space-separated paths to stage
@@ -7,14 +7,25 @@ inputs:
   message:
     description: Commit message, expanded by the shell so $(date ...) works
     required: true
+  ssh-signing-key:
+    description: Private SSH key used to sign the commit
+    required: true
 runs:
   using: composite
   steps:
     - name: Commit and push
       shell: bash
+      env:
+        SSH_SIGNING_KEY: ${{ inputs.ssh-signing-key }}
       run: |
+        umask 077
+        key="$RUNNER_TEMP/commit-signing-key"
+        printf '%s\n' "$SSH_SIGNING_KEY" > "$key"
         git config user.name "Lapine"
         git config user.email "lapine@lunaire.eu"
+        git config gpg.format ssh
+        git config user.signingkey "$key"
+        git config commit.gpgsign true
         git add ${{ inputs.paths }}
         git commit -m "${{ inputs.message }}"
         git push
