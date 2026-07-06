@@ -9,7 +9,7 @@
   allowedSigners = ./git-allowed-signers;
   verifyOriginMain = pkgs.writeShellScript "verify-origin-main" ''
     set -euo pipefail
-    git() { ${pkgs.gitMinimal}/bin/git -C ${repo} -c safe.directory=${repo} "$@"; }
+    git() { ${pkgs.gitMinimal}/bin/git -C ${repo} "$@"; }
 
     git fetch --prune origin ${branch}
     if ! git -c gpg.format=ssh -c gpg.ssh.allowedSignersFile=${allowedSigners} verify-commit origin/${branch}; then
@@ -31,4 +31,10 @@ in {
   };
 
   systemd.services.nixos-upgrade.serviceConfig.ExecStartPre = verifyOriginMain;
+
+  # The upgrade runs git and nix's flake fetcher as root against this user-owned checkout; trust the path so neither refuses it.
+  environment.etc."gitconfig".text = ''
+    [safe]
+    directory = ${repo}
+  '';
 }
