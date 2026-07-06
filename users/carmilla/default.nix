@@ -4,25 +4,18 @@
   pkgs,
   ...
 }: {
+  imports = [./account.nix];
+
+  # Full workstation/server user: extends the minimal account with an interactive shell, the login password, desktop-only groups, and home-manager.
   users.users.carmilla =
     {
-      name = "carmilla";
-      home =
-        if pkgs.stdenv.hostPlatform.isDarwin
-        then "/Users/carmilla"
-        else "/home/carmilla";
       shell = pkgs.zsh;
     }
     // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
-      isNormalUser = true;
-      description = "Carmilla";
-      uid = 1000;
       hashedPasswordFile = config.sops.secrets."carmilla-password-hash".path;
       extraGroups =
-        ["wheel"]
-        ++ lib.optionals config.networking.networkmanager.enable ["networkmanager"]
+        lib.optionals config.networking.networkmanager.enable ["networkmanager"]
         ++ lib.optionals config.home-manager.users.carmilla.userConfig.desktop.enable ["video" "audio" "input"];
-      openssh.authorizedKeys.keys = import ./ssh-keys.nix;
     };
 
   home-manager.backupFileExtension = "bak";
