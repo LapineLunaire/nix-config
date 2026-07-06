@@ -1,5 +1,6 @@
-# Daily auto-update on top of system.autoUpgrade: an ExecStartPre verifies origin/main against the trusted signers before the module builds and switches, rebooting itself if the kernel changed.
+# Daily auto-update on top of system.autoUpgrade: an ExecStartPre verifies origin/main against the trusted signers before the module builds and switches. allowReboot defaults on to reboot on kernel changes, and hosts can override it.
 {
+  lib,
   pkgs,
   ...
 }: let
@@ -22,7 +23,7 @@ in {
     enable = true;
     # nix builds only tracked files, which the reset above pins to origin/main.
     flake = repo;
-    allowReboot = true;
+    allowReboot = lib.mkDefault true;
     upgrade = false;
     dates = "03:00";
     randomizedDelaySec = "15min";

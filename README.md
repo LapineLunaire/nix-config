@@ -33,7 +33,7 @@ modules/
   nixos/
     generic/    Base NixOS: SSH, impermanence baseline, zram, chrony, polkit, the doas wheel rule; imports security.nix
     desktop/    KDE Plasma 6, Plasma Login Manager, PipeWire, fonts, Steam
-    auto-update.nix     Daily system.autoUpgrade that verifies origin/main's signature before it builds and switches
+    auto-update.nix     Daily signature-verified system.autoUpgrade, shared by sparkle and sparxie; sparxie reboots on kernel changes, sparkle overrides that off and restarts its microVM guests after switching
     git-allowed-signers SSH public keys trusted to sign updates, read by auto-update.nix's verify-commit
     borg-backup.nix     Parameterised Borg job to Hetzner from a ZFS snapshot of <pool>/persist
     caddy.nix           Caddy with ACME via Cloudflare DNS-01, shared by sparkle and sparxie
@@ -101,7 +101,7 @@ Threat model is device theft, remote compromise of internet-facing services, and
 
 **Update integrity**
 - Commits are SSH-signed: interactively by a YubiKey resident key, and in CI by a dedicated Forgejo Actions key held as a repo secret
-- sparxie auto-upgrades daily at 03:00, refusing to build unless `origin/main` verifies against `modules/nixos/git-allowed-signers`; it then hard-resets the repo to that commit, which is what nix builds
+- sparkle and sparxie auto-upgrade daily at 03:00, refusing to build unless `origin/main` verifies against `modules/nixos/git-allowed-signers`; each then hard-resets its repo to that commit, which is what nix builds. sparxie reboots on kernel changes; sparkle skips reboot (its disk unlock is interactive) and restarts its microVM guests after the switch, since a host switch leaves them running their old config
 
 **Backups**
 - Borg (repokey-blake2 + zstd) to Hetzner Storage Box, preceded by a ZFS snapshot of `*/persist`
@@ -110,7 +110,7 @@ Threat model is device theft, remote compromise of internet-facing services, and
 **Known limitations**
 - sparxie has no disk encryption and the hypervisor is out of trust scope; its host key and on-disk sops content are readable by anyone with hypervisor-level access
 - doas keeps environment; full hosts add a short auth-cookie persistence, while microVM guests are passwordless (login is SSH-key-only, so wheel escalates without a prompt)
-- The Forgejo CI runner holds a signing key trusted by `git-allowed-signers` and can push to `main` for scheduled `flake.lock`, container-digest, and tibia-hash updates, which sparxie then auto-deploys
+- The Forgejo CI runner holds a signing key trusted by `git-allowed-signers` and can push to `main` for scheduled `flake.lock`, container-digest, and tibia-hash updates, which sparkle and sparxie then auto-deploy
 
 ## Bootstrapping a new host
 

@@ -16,6 +16,7 @@ in {
     ./sops.nix
     ./services
     ./microvms
+    ./auto-update.nix
   ];
 
   secureboot.enable = true;
