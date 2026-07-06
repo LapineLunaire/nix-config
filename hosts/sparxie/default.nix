@@ -3,6 +3,7 @@
 in {
   imports = [
     ../../modules/nixos/generic
+    ../../modules/nixos/auto-update.nix
     ./hardware-configuration.nix
     ./persistence.nix
     ./tmpfiles.nix

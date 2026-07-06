@@ -33,6 +33,8 @@ modules/
   nixos/
     generic/    Base NixOS: SSH, impermanence baseline, zram, chrony, polkit, the doas wheel rule; imports security.nix
     desktop/    KDE Plasma 6, Plasma Login Manager, PipeWire, fonts, Steam
+    auto-update.nix     Daily system.autoUpgrade that verifies origin/main's signature before it builds and switches
+    git-allowed-signers SSH public keys trusted to sign updates, read by auto-update.nix's verify-commit
     borg-backup.nix     Parameterised Borg job to Hetzner from a ZFS snapshot of <pool>/persist
     caddy.nix           Caddy with ACME via Cloudflare DNS-01, shared by sparkle and sparxie
     caddy-security-headers.nix    Security header snippet spliced into every Caddy vhost
@@ -97,6 +99,10 @@ Threat model is device theft, remote compromise of internet-facing services, and
 - Kernel hardening: KPTI, `slab_nomerge`, `page_alloc.shuffle`, `kptr_restrict=2`, `dmesg_restrict`, syncookies, strict rp_filter, ICMP redirects rejected
 - AppArmor enabled, killing any unconfined confinables
 
+**Update integrity**
+- Commits are SSH-signed: interactively by a YubiKey resident key, and in CI by a dedicated Forgejo Actions key held as a repo secret
+- sparxie auto-upgrades daily at 03:00, refusing to build unless `origin/main` verifies against `modules/nixos/git-allowed-signers`; it then hard-resets the repo to that commit, which is what nix builds
+
 **Backups**
 - Borg (repokey-blake2 + zstd) to Hetzner Storage Box, preceded by a ZFS snapshot of `*/persist`
 - Borg passphrase, SSH key, repo URL, and known_hosts all in sops
@@ -105,7 +111,7 @@ Threat model is device theft, remote compromise of internet-facing services, and
 - sparxie has no disk encryption and the hypervisor is out of trust scope; its host key and on-disk sops content are readable by anyone with hypervisor-level access
 - Cloudflare Universal SSL precludes CAA pinning to Let's Encrypt
 - doas keeps environment; full hosts add a short auth-cookie persistence, while microVM guests are passwordless (login is SSH-key-only, so wheel escalates without a prompt)
-- The Forgejo CI runner can push to `main` for scheduled `flake.lock`, container-digest, and tibia-hash updates
+- The Forgejo CI runner holds a signing key trusted by `git-allowed-signers` and can push to `main` for scheduled `flake.lock`, container-digest, and tibia-hash updates, which sparxie then auto-deploys
 
 ## Bootstrapping a new host
 
