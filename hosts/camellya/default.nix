@@ -21,7 +21,7 @@
   };
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_7_0.extend (
+    kernelPackages = pkgs.linuxPackages_7_1.extend (
       self: super: {
         kernel = super.kernel.override {
           structuredExtraConfig = with lib.kernel; {
