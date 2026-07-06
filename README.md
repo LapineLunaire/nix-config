@@ -109,7 +109,6 @@ Threat model is device theft, remote compromise of internet-facing services, and
 
 **Known limitations**
 - sparxie has no disk encryption and the hypervisor is out of trust scope; its host key and on-disk sops content are readable by anyone with hypervisor-level access
-- Cloudflare Universal SSL precludes CAA pinning to Let's Encrypt
 - doas keeps environment; full hosts add a short auth-cookie persistence, while microVM guests are passwordless (login is SSH-key-only, so wheel escalates without a prompt)
 - The Forgejo CI runner holds a signing key trusted by `git-allowed-signers` and can push to `main` for scheduled `flake.lock`, container-digest, and tibia-hash updates, which sparxie then auto-deploys
 
