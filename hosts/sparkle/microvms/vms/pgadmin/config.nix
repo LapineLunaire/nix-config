@@ -29,11 +29,13 @@ in {
     autoStart = true;
     environment = {
       PGADMIN_DEFAULT_EMAIL = "lapine@lunaire.eu";
+      PGADMIN_LISTEN_ADDRESS = net.vmAddress.pgadmin;
       PGADMIN_LISTEN_PORT = "5000";
     };
     environmentFiles = [config.sops.templates."pgadmin.env".path];
     volumes = ["/persist/var/lib/pgadmin:/var/lib/pgadmin"];
-    ports = ["${net.vmAddress.pgadmin}:5000:5000"];
+    # Host networking so pgadmin binds the VM address directly, gated by the guest input firewall (hostIngressTCPPorts below); a Docker port publish is DNAT'd and bypasses the input chain.
+    extraOptions = ["--network=host"];
   };
 
   microvmGuest.hostIngressTCPPorts = [5000];
