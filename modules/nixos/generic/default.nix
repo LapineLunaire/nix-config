@@ -7,7 +7,8 @@
     ../../nix-settings.nix
     ./packages.nix
     ./persistence.nix
-    ./security.nix
+    ../security.nix
+    ./polkit.nix
     ./services.nix
     ../secureboot.nix
   ];
@@ -20,10 +21,16 @@
     };
   };
 
-  nix.settings = {
-    auto-optimise-store = true;
-    allowed-users = ["@users"];
-  };
+  nix.settings.auto-optimise-store = true;
+
+  # doas rule for full hosts: wheel escalates with a password, cached per session. Guests define their own noPass rule in hosts/sparkle/microvms/guest.nix.
+  security.doas.extraRules = [
+    {
+      groups = ["wheel"];
+      keepEnv = true;
+      persist = true;
+    }
+  ];
 
   # vm.swappiness=100 is correct with zram: since zram compresses pages in RAM, swapping is cheap.
   # High swappiness lets the kernel aggressively move anonymous pages into zram rather than holding them uncompressed in RAM.

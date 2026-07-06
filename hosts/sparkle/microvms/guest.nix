@@ -6,7 +6,10 @@
 }: let
   net = import ./vm-net.nix;
 in {
-  imports = [../../../modules/nix-settings.nix];
+  imports = [
+    ../../../modules/nix-settings.nix
+    ../../../modules/nixos/security.nix
+  ];
 
   # TCP ports the host may reach on this VM; each becomes an input-chain accept from the bridge address (Caddy and other host services).
   options.microvmGuest.hostIngressTCPPorts = lib.mkOption {
@@ -67,19 +70,14 @@ in {
         }
       ];
     };
-    # "!" locks the root account; no password login is possible.
-    users.users.root.hashedPassword = "!";
     # carmilla (from ./users/carmilla/account.nix) is the only ssh login and escalates with doas; noPass because the guests carry no user password.
-    security.doas = {
-      enable = true;
-      extraRules = [
-        {
-          groups = ["wheel"];
-          keepEnv = true;
-          noPass = true;
-        }
-      ];
-    };
+    security.doas.extraRules = [
+      {
+        groups = ["wheel"];
+        keepEnv = true;
+        noPass = true;
+      }
+    ];
     networking.firewall.extraInputRules = lib.mkMerge [
       (lib.mkBefore ''
         ip saddr ${net.vmAddress.monitoring} tcp dport 9100 accept
