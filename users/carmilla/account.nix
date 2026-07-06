@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: {
-  # Minimal shared account: identity only, no shell or password assumptions, so it is safe on full hosts and stripped-down microvm guests alike. The full user (default.nix) and the guest baseline (guest.nix) both build on this.
+  # Minimal shared account: identity only (name, uid, ssh keys, wheel), no shell or password. default.nix extends it for full hosts; flake.nix imports it directly into every microvm guest.
   users.users.carmilla =
     {
       name = "carmilla";
