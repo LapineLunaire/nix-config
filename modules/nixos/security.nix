@@ -1,5 +1,5 @@
-# Kernel, network, and user-account hardening shared by full hosts (via modules/nixos/generic) and the sparkle microvm guests (hosts/sparkle/microvms/guest.nix). Host-only pieces (polkit, the doas wheel rule) live with their consumers.
-{pkgs, ...}: {
+# Kernel, network, and user-account hardening shared by full hosts (via modules/nixos/generic) and the sparkle microvm guests (hosts/sparkle/microvms/guest.nix). Host-only pieces (polkit, doas) live with their consumers.
+{...}: {
   # "!" locks the root account; no password login is possible.
   users.users.root.hashedPassword = "!";
   users.mutableUsers = false;
@@ -46,9 +46,6 @@
   security.apparmor.killUnconfinedConfinables = true;
 
   security.sudo.enable = false;
-  # doas is enabled everywhere; each consumer adds its own wheel rule (persist on full hosts, noPass on guests).
-  security.doas.enable = true;
-  environment.systemPackages = [pkgs.doas-sudo-shim];
 
   # Restrict nix-daemon access to the users group.
   nix.settings.allowed-users = ["@users"];

@@ -4,17 +4,25 @@
   pkgs,
   ...
 }: {
-  imports = [./account.nix];
-
-  # Full workstation/server user: extends the minimal account with an interactive shell, the login password, desktop-only groups, and home-manager.
+  # carmilla: the interactive user on hosts carmilla logs into (full hosts and darwin). microVM guests have no carmilla user.
   users.users.carmilla =
     {
+      name = "carmilla";
+      home =
+        if pkgs.stdenv.hostPlatform.isDarwin
+        then "/Users/carmilla"
+        else "/home/carmilla";
       shell = pkgs.zsh;
+      openssh.authorizedKeys.keys = import ./ssh-keys.nix;
     }
     // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+      isNormalUser = true;
+      description = "Carmilla";
+      uid = 1000;
       hashedPasswordFile = config.sops.secrets."carmilla-password-hash".path;
       extraGroups =
-        lib.optionals config.networking.networkmanager.enable ["networkmanager"]
+        ["wheel"]
+        ++ lib.optionals config.networking.networkmanager.enable ["networkmanager"]
         ++ lib.optionals config.home-manager.users.carmilla.userConfig.desktop.enable ["video" "audio" "input"];
     };
 

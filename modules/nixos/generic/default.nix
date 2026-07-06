@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }: {
   imports = [
@@ -23,7 +24,9 @@
 
   nix.settings.auto-optimise-store = true;
 
-  # doas rule for full hosts: wheel escalates with a password, cached per session. Guests define their own noPass rule in hosts/sparkle/microvms/guest.nix.
+  # doas for full hosts: wheel escalates with a password, cached per session.
+  security.doas.enable = true;
+  environment.systemPackages = [pkgs.doas-sudo-shim];
   security.doas.extraRules = [
     {
       groups = ["wheel"];

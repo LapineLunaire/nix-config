@@ -159,8 +159,6 @@
             microvm.nixosModules.microvm
             impermanence.nixosModules.impermanence
             ./hosts/sparkle/microvms/guest.nix
-            # Minimal carmilla admin account, present on every guest.
-            ./users/carmilla/account.nix
             (import ./hosts/sparkle/microvms/vm-identity.nix name)
             ./hosts/sparkle/microvms/vms/${name}/config.nix
           ]

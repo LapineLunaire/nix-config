@@ -7,6 +7,13 @@
 in {
   imports = [./network.nix];
 
+  # Offer sparkle's host key when microvm -s connects to a guest as root over VSOCK; guests authorize it for root (see guest.nix).
+  programs.ssh.extraConfig = ''
+    Host vsock/* vsock-mux/*
+      IdentityFile /etc/ssh/ssh_host_ed25519_key
+      IdentitiesOnly yes
+  '';
+
   microvm.vms =
     lib.mapAttrs (name: _: {
       autostart = true;

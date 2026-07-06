@@ -5,6 +5,8 @@
   ...
 }: let
   net = import ./vm-net.nix;
+  # sparkle's SSH host public key, authorized for root below for the microvm -s VSOCK console.
+  hostConsoleKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMJ+Zb08V2BIx3TnFgha04A55Vo9d0ftNpNvnRgfO3Gk";
 in {
   imports = [
     ../../../modules/nix-settings.nix
@@ -57,10 +59,12 @@ in {
     # node_exporter on every VM, scraped by the monitoring VM only.
     services.prometheus.exporters.node.enable = true;
 
+    # sshd serves the root VSOCK console (microvm -s) and, on git-ssh VMs, the service's git user.
     services.openssh = {
       enable = true;
       settings = {
-        PermitRootLogin = "no";
+        # Key-only root login.
+        PermitRootLogin = "prohibit-password";
         PasswordAuthentication = false;
       };
       hostKeys = [
@@ -70,18 +74,13 @@ in {
         }
       ];
     };
-    # doas noPass for wheel: carmilla (the only ssh login, from ./users/carmilla/account.nix) has no user password on guests.
-    security.doas.extraRules = [
-      {
-        groups = ["wheel"];
-        keepEnv = true;
-        noPass = true;
-      }
-    ];
+    # Serve sshd on VSOCK for the microvm -s console.
+    microvm.vsock.ssh.enable = true;
+    users.users.root.openssh.authorizedKeys.keys = [hostConsoleKey];
+
     networking.firewall.extraInputRules = lib.mkMerge [
       (lib.mkBefore ''
         ip saddr ${net.vmAddress.monitoring} tcp dport 9100 accept
-        ip saddr { ${(import ../trusted-subnets.nix).nftSet} } tcp dport 22 accept
       '')
       (lib.concatMapStrings (port: "ip saddr ${net.hostAddress} tcp dport ${toString port} accept\n") config.microvmGuest.hostIngressTCPPorts)
     ];
