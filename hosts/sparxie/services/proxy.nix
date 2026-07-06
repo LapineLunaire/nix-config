@@ -3,8 +3,6 @@
   pkgs,
   ...
 }: let
-  bunny-web = pkgs.callPackage ../../../pkgs/bunny-web {};
-
   element-web = pkgs.element-web.override {
     conf.default_server_config."m.homeserver" = {
       base_url = "https://matrix.bunny.enterprises";
@@ -42,7 +40,7 @@ in {
     virtualHosts."bunny.enterprises".extraConfig = ''
       tls /var/lib/acme/bunny.enterprises/cert.pem /var/lib/acme/bunny.enterprises/key.pem
       ${securityHeaders}
-      root * ${bunny-web}
+      root * ${pkgs.bunny-web}
 
       @hostMeta path /.well-known/host-meta
       header @hostMeta Content-Type "application/xrd+xml"
