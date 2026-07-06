@@ -22,7 +22,7 @@ hosts/          Per-host hardware, services, secrets, persistence declarations
     vm-identity.nix   Guest identity (hostname, MAC, static IP) derived from the registry
     vm-net.nix        Host and per-VM addresses on vm-br0, imported wherever a VM IP is needed
     network.nix       vm-br0 bridge and the default-drop forward chain with per-flow allowlists
-    guest.nix         Shared VM guest baseline: virtiofs persistence, sops, sshd, node_exporter
+    guest.nix         Shared VM guest baseline: security.nix hardening, virtiofs persistence, sops, sshd, node_exporter, passwordless doas
     docker-common.nix Journald logging and weekly image prune for the container-based VMs
     vms/<name>/       Per-VM config.nix (+ sops.nix/secrets.yaml where needed)
   sparkle/trusted-subnets.nix  Client subnets trusted to reach admin surfaces, shared by proxy/firewall rules
@@ -31,7 +31,7 @@ modules/
   darwin.nix    macOS system defaults, firewall, privacy settings
   nix-settings.nix  Nix registry and nixPath pinning shared by NixOS and nix-darwin
   nixos/
-    generic/    Base NixOS: kernel hardening, SSH, impermanence baseline, zram, chrony
+    generic/    Base NixOS: SSH, impermanence baseline, zram, chrony, polkit, the doas wheel rule; imports security.nix
     desktop/    KDE Plasma 6, Plasma Login Manager, PipeWire, fonts, Steam
     borg-backup.nix     Parameterised Borg job to Hetzner from a ZFS snapshot of <pool>/persist
     caddy.nix           Caddy with ACME via Cloudflare DNS-01, shared by sparkle and sparxie
@@ -39,10 +39,11 @@ modules/
     postgres-passwords.nix        Applies the sops-templated role passwords after postgres starts
     protonmail-smtp.nix           SMTP relay account shared by msmtp, smartd, and the mail-sending VMs
     secureboot.nix Lanzaboote secure boot
+    security.nix   Kernel, network, and account hardening shared by full hosts (via generic) and the microVM guests
     sparkle-sparxie-wireguard.nix The /31 WireGuard link endpoints between sparkle and sparxie
     sparxie-public-addresses.nix  sparxie's static Hetzner VPS addresses, shared by its WAN config and sparkle's WireGuard peer endpoint
     zfs-maintenance.nix Scrub, TRIM, auto-snapshot retention
-users/carmilla/ home-manager: shell, git, neovim, SSH, desktop environment
+users/carmilla/ account.nix is the minimal system account (identity, ssh keys, wheel) shared with every microVM guest; default.nix extends it for full hosts with home-manager (shell, git, neovim, SSH, desktop)
 pkgs/           Custom derivations
 overlays.nix    package overrides (ffmpeg unfree codecs, mpv/yt-dlp ffmpeg, discord, winbox4)
 ```
@@ -103,7 +104,7 @@ Threat model is device theft, remote compromise of internet-facing services, and
 **Known limitations**
 - sparxie has no disk encryption and the hypervisor is out of trust scope; its host key and on-disk sops content are readable by anyone with hypervisor-level access
 - Cloudflare Universal SSL precludes CAA pinning to Let's Encrypt
-- doas currently keeps environment and a short auth-cookie persistence
+- doas keeps environment; full hosts add a short auth-cookie persistence, while microVM guests are passwordless (login is SSH-key-only, so wheel escalates without a prompt)
 - The Forgejo CI runner can push to `main` for scheduled `flake.lock`, container-digest, and tibia-hash updates
 
 ## Bootstrapping a new host
