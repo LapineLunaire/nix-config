@@ -62,6 +62,7 @@ in {
     # sshd serves the root VSOCK console (microvm -s) and, on git-ssh VMs, the service's git user.
     services.openssh = {
       enable = true;
+      openFirewall = false;
       settings = {
         # Key-only root login.
         PermitRootLogin = "prohibit-password";
