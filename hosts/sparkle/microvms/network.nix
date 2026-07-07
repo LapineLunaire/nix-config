@@ -44,8 +44,8 @@ in {
       iifname "vm-br0" oifname "sfp0" ip daddr != { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, 169.254.0.0/16 } accept
       # UniFi controller reaches the APs on the management network for adoption, provisioning, and firmware pushes.
       iifname "vm-br0" oifname "sfp0" ip saddr ${net.vmAddress.unifi} ip daddr ${management} accept
-      # LAN/VPN to VMs: SSH and ICMP only.
-      iifname "sfp0" oifname "vm-br0" ip saddr { ${trusted} } tcp dport 22 accept
+      # LAN/VPN: git-over-ssh to forgejo and ICMP to any VM.
+      iifname "sfp0" oifname "vm-br0" ip saddr { ${trusted} } ip daddr ${net.vmAddress.forgejo} tcp dport 22 accept
       iifname "sfp0" oifname "vm-br0" ip saddr { ${trusted} } icmp type echo-request accept
 
       # monitoring: scrape node_exporter on all VMs.
