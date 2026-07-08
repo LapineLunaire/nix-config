@@ -18,7 +18,7 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@616559265b40713947b9c190a8ff4b507b5df49b # v31
 
-      # The download URL is unversioned; nix-prefetch-url uses Nix's own HTTP client, which bypasses Cloudflare's TLS fingerprint detection like the builtins.fetchurl in the package.
+      # The download URL is unversioned; static.tibia.com is behind Cloudflare, which challenges requests that omit an Accept-Encoding header. nix-prefetch-url's libcurl always sends one, so it passes like the builtins.fetchurl in the package.
       - name: Update hash
         run: |
           hash=$(nix-prefetch-url https://static.tibia.com/download/tibia.x64.tar.gz)
