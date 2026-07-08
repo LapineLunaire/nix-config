@@ -166,13 +166,12 @@ in
     CLANGCC = "${clang}/bin/clang";
     CLANGCXX = "${clang}/bin/clang++";
 
-    # skia-bindings 0.87.0 blocklists "std::_Rb_tree.*" for GCC/LLVM9 C++17, but GCC 15 renamed those internals to __rb_tree_node_base.
-    # The missing pattern causes std__Rb_tree_color to be referenced but never defined in the generated bindings.
-    # Patch the vendored crate to add the new names. This was fixed upstream in a later skia-bindings release.
+    # skia-bindings 0.87.0 blocklists "std::_Rb_tree.*" but not the "std::__rb_tree" namespace that GCC 15's libstdc++ added (bits/stl_tree.h). bindgen then generates those new node types, which reference the still-blocklisted std::_Rb_tree_color enum, leaving std__Rb_tree_color referenced but never defined in the generated bindings.
+    # Blocklist the new namespace too; upstream did the same in skia-bindings 0.88.0.
     preBuild = ''
       skia_bindgen=$(find /build -name "skia_bindgen.rs" -path "*/skia-bindings*" | head -1)
       substituteInPlace "$skia_bindgen" \
-        --replace-fail '"std::_Rb_tree.*",' '"std::_Rb_tree.*", "std::__rb_tree.*", "std::_rb_tree.*",'
+        --replace-fail '"std::_Rb_tree.*",' '"std::_Rb_tree.*", "std::__rb_tree.*",'
     '';
 
     cargoBuildFlags = [
