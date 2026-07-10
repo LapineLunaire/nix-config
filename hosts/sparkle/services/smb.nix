@@ -1,4 +1,4 @@
-{...}: {
+{lib, ...}: {
   services.avahi = {
     enable = true;
     nssmdns4 = true;
@@ -34,8 +34,8 @@
         "server string" = "sparkle";
         "netbios name" = "sparkle";
         "security" = "user";
-        # Allow 10.0.0.0/8 and loopback. Deny everything else.
-        "hosts allow" = "10.0.0.0/8 127.0.0.0/8 ::1";
+        # Allow the trusted client subnets (see trusted-subnets.nix) and loopback. Deny everything else.
+        "hosts allow" = "${lib.concatStringsSep " " (import ../trusted-subnets.nix).subnets} 127.0.0.0/8 ::1";
         "hosts deny" = "0.0.0.0/0";
         "guest account" = "nobody";
         "map to guest" = "never";

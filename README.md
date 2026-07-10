@@ -63,7 +63,7 @@ overlays.nix    package overrides (ffmpeg unfree codecs, mpv/yt-dlp ffmpeg, disc
 | 10.1.0.0/24 | Nox's WireGuard VPN clients |
 | 10.73.212.0/31 | sparkle (`.0`) <-> sparxie (`.1`) WireGuard tunnel |
 
-The four client subnets trusted to reach admin surfaces (both LANs and both WireGuard subnets) are defined once in `hosts/sparkle/trusted-subnets.nix` and reused by the Caddy vhost ACLs, the VM bridge forward policy, VM SSH ingress, and iperf3.
+The four client subnets trusted to reach admin surfaces (both LANs and both WireGuard subnets) are defined once in `hosts/sparkle/trusted-subnets.nix` and reused by the Caddy vhost ACLs, the VM bridge forward policy, forgejo's git-ssh ingress, Samba, and iperf3.
 
 ## Implementation notes
 
