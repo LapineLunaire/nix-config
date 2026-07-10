@@ -26,6 +26,8 @@ in {
         "pubsub.bunny.enterprises"
         "upload.bunny.enterprises"
       ];
+      # Dedicated group for this cert's files: ejabberd reads only this cert through it, without acme membership exposing the other certs' keys.
+      group = "bunny-cert";
       # ejabberd loads these cert files at startup and only re-reads them on restart, so reload it (alongside caddy) when this cert renews.
       reloadServices = config.security.acme.defaults.reloadServices ++ ["ejabberd.service"];
     };
@@ -34,7 +36,10 @@ in {
     certs."pub.bunny.enterprises" = {};
   };
 
-  users.users.ejabberd.extraGroups = ["acme"];
+  users.groups.bunny-cert = {};
+  users.users.ejabberd.extraGroups = ["bunny-cert"];
+  # caddy stays in acme (see modules/nixos/caddy.nix) for the remaining certs; the bunny.enterprises vhost below reads this cert too.
+  users.users.caddy.extraGroups = ["bunny-cert"];
 
   services.caddy = {
     virtualHosts."bunny.enterprises".extraConfig = ''
