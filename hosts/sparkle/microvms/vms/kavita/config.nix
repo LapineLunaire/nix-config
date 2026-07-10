@@ -13,6 +13,8 @@ in {
         source = "/mnt/samba/misc";
         mountPoint = "/media/library";
         proto = "virtiofs";
+        # Host-side enforced (virtiofsd --readonly); kavita only reads the library.
+        readOnly = true;
       }
     ];
   };

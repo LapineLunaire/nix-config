@@ -11,6 +11,8 @@ in {
         source = "/persist/var/lib/acme/unifi.lunaire.moe";
         mountPoint = "/run/acme-cert";
         proto = "virtiofs";
+        # Host-side enforced (virtiofsd --readonly); the guest only reads the cert files.
+        readOnly = true;
       }
     ];
     # Dedicated XFS volume for podman; overlayfs can't run on virtiofs.
