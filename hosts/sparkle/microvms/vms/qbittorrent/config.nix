@@ -1,4 +1,9 @@
-{config, ...}: let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
   net = import ../../vm-net.nix;
 in {
   imports = [./sops.nix];
@@ -46,7 +51,8 @@ in {
       Core.AutoDeleteAddedTorrentFile = "Never";
       Preferences.WebUI = {
         LocalHostAuth = true;
-        Password_PBKDF2 = "@ByteArray(+WZc5S80KMQiHJ/0L/Ogsg==:4ohJt9PRpMsRMSbLwoNnGz8lUQM0zjyVnHOFFjZH3JxpEKnh274Cq2xT32ATsIFh2QJJEmm8ZMqp4P7HnHt90w==)";
+        # Placeholder in the store-rendered config; the ExecStartPre below swaps it for the sops-held hash after the module installs the file.
+        Password_PBKDF2 = "@WEBUI_PASSWORD_PBKDF2@";
       };
       BitTorrent.Session = {
         DefaultSavePath = "/mnt/samba/torrents";
@@ -65,6 +71,11 @@ in {
     enable = true;
     vpnNamespace = "qbtvpn";
   };
+
+  # Runs after the module's ExecStartPre installs the rendered config (mkAfter), as the qbittorrent user like the rest of the unit.
+  systemd.services.qbittorrent.serviceConfig.ExecStartPre = lib.mkAfter [
+    "${pkgs.replace-secret}/bin/replace-secret '@WEBUI_PASSWORD_PBKDF2@' ${config.sops.secrets."qbittorrent-webui-password-hash".path} /var/lib/qBittorrent/qBittorrent/config/qBittorrent.conf"
+  ];
 
   microvmGuest.hostIngressTCPPorts = [4000];
 }
