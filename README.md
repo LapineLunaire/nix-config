@@ -22,7 +22,7 @@ hosts/          Per-host hardware, services, secrets, persistence declarations
     vm-identity.nix   Guest identity (hostname, MAC, static IP) derived from the registry
     vm-net.nix        Host and per-VM addresses on vm-br0, imported wherever a VM IP is needed
     network.nix       vm-br0 bridge and the default-drop forward chain with per-flow allowlists
-    guest.nix         Shared VM guest baseline: security.nix hardening, virtiofs persistence, sops, sshd, node_exporter, passwordless doas
+    guest.nix         Shared VM guest baseline: security.nix hardening, virtiofs persistence, sops, node_exporter, sshd serving the root vsock console
     docker-common.nix Journald logging and weekly image prune for the container-based VMs
     vms/<name>/       Per-VM config.nix (+ sops.nix/secrets.yaml where needed)
   sparkle/trusted-subnets.nix  Client subnets trusted to reach admin surfaces, shared by proxy/firewall rules
@@ -33,7 +33,7 @@ modules/
   nixos/
     generic/    Base NixOS: SSH, impermanence baseline, zram, chrony, polkit, the doas wheel rule; imports security.nix
     desktop/    KDE Plasma 6, Plasma Login Manager, PipeWire, fonts, Steam
-    auto-update.nix     Daily signature-verified system.autoUpgrade, shared by sparkle and sparxie; sparxie reboots on kernel changes, sparkle overrides that off and restarts its microVM guests after switching
+    auto-update.nix     Daily signature-verified system.autoUpgrade, shared by sparkle and sparxie; sparxie reboots on kernel changes, sparkle overrides that off and restarts the microVM guests the switch changed
     git-allowed-signers SSH public keys trusted to sign updates, read by auto-update.nix's verify-commit
     borg-backup.nix     Parameterised Borg job to Hetzner from a ZFS snapshot of <pool>/persist
     caddy.nix           Caddy with ACME via Cloudflare DNS-01, shared by sparkle and sparxie
@@ -45,7 +45,7 @@ modules/
     sparkle-sparxie-wireguard.nix The /31 WireGuard link endpoints between sparkle and sparxie
     sparxie-public-addresses.nix  sparxie's static Hetzner VPS addresses, shared by its WAN config and sparkle's WireGuard peer endpoint
     zfs-maintenance.nix Scrub, TRIM, auto-snapshot retention
-users/carmilla/ account.nix is the minimal system account (identity, ssh keys, wheel) shared with every microVM guest; default.nix extends it for full hosts with home-manager (shell, git, neovim, SSH, desktop)
+users/carmilla/ The carmilla user (identity, ssh keys, wheel) plus its home-manager config (shell, git, neovim, SSH, desktop), imported by full hosts and darwin; microVM guests have no carmilla user
 pkgs/           Custom derivations
 overlays.nix    package overrides (ffmpeg unfree codecs, mpv/yt-dlp ffmpeg, discord, winbox4)
 ```
@@ -77,7 +77,7 @@ The four client subnets trusted to reach admin surfaces (both LANs and both Wire
 Threat model is device theft, remote compromise of internet-facing services, and accidental key exposure - not insider attacks or multi-tenant isolation.
 
 **Authentication**
-- SSH: FIDO2 resident keys (`ed25519-sk`) only, no passwords, root login disabled
+- SSH: FIDO2 resident keys (`ed25519-sk`) only, no passwords, root login disabled; microVM guests instead permit key-only root login, authorized for sparkle's host key and reached over the vsock console
 - Privilege escalation: `doas` (sudo disabled), wheel-only
 - macOS uses Touch ID for sudo
 
@@ -101,7 +101,7 @@ Threat model is device theft, remote compromise of internet-facing services, and
 
 **Update integrity**
 - Commits are SSH-signed: interactively by a YubiKey resident key, and in CI by a dedicated Forgejo Actions key held as a repo secret
-- sparkle and sparxie auto-upgrade daily at 03:00, refusing to build unless `origin/main` verifies against `modules/nixos/git-allowed-signers`; each then hard-resets its repo to that commit, which is what nix builds. sparxie reboots on kernel changes; sparkle skips reboot (its disk unlock is interactive) and restarts its microVM guests after the switch, since a host switch leaves them running their old config
+- sparkle and sparxie auto-upgrade daily at 03:00, refusing to build unless `origin/main` verifies against `modules/nixos/git-allowed-signers`; each then hard-resets its repo to that commit, which is what nix builds. sparxie reboots on kernel changes; sparkle skips reboot (its disk unlock is interactive) and restarts the microVM guests whose config the switch changed, since a host switch leaves them running their old one
 
 **Backups**
 - Borg (repokey-blake2 + zstd) to Hetzner Storage Box, preceded by a ZFS snapshot of `*/persist`
@@ -109,7 +109,7 @@ Threat model is device theft, remote compromise of internet-facing services, and
 
 **Known limitations**
 - sparxie has no disk encryption and the hypervisor is out of trust scope; its host key and on-disk sops content are readable by anyone with hypervisor-level access
-- doas keeps environment; full hosts add a short auth-cookie persistence, while microVM guests are passwordless (login is SSH-key-only, so wheel escalates without a prompt)
+- doas keeps environment, with a short auth-cookie persistence after the first prompt
 - The Forgejo CI runner holds a signing key trusted by `git-allowed-signers` and can push to `main` for scheduled `flake.lock`, container-digest, and tibia-hash updates, which sparkle and sparxie then auto-deploy
 
 ## Bootstrapping a new host

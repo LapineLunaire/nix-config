@@ -43,7 +43,7 @@
 
     options.userConfig = {
       desktop.enable = lib.mkEnableOption "desktop environment configuration";
-      # GUI machines: Linux desktops plus all darwin hosts. Derived from the two flags above, do not set directly.
+      # GUI machines: Linux desktops plus all darwin hosts. Derived from desktop.enable and the platform, do not set directly.
       gui = lib.mkOption {
         type = lib.types.bool;
         readOnly = true;
