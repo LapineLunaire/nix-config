@@ -34,7 +34,6 @@ in {
 
         disable_sasl_mechanisms: ["DIGEST-MD5", "PLAIN"]
 
-        c2s_ciphers: ["TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384:TLS_AES_128_GCM_SHA256"]
         c2s_tls_compression: false
         c2s_protocol_options:
           - no_sslv2
@@ -46,7 +45,6 @@ in {
           - no_compression
 
         s2s_use_starttls: required
-        s2s_ciphers: ["TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384:TLS_AES_128_GCM_SHA256"]
         s2s_tls_compression: false
         s2s_protocol_options:
           - no_sslv2
@@ -96,7 +94,6 @@ in {
             tls: true
             request_handlers:
               /bosh: mod_bosh
-              /captcha: ejabberd_captcha
               /upload: mod_http_upload
               /ws: ejabberd_http_ws
           -
@@ -245,7 +242,6 @@ in {
             default_room_options:
               mam: true
           mod_muc_admin: {}
-          mod_muc_occupantid: {}
           mod_offline:
             access_max_user_messages: max_user_offline_messages
           mod_ping: {}

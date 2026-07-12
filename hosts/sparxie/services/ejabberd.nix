@@ -27,12 +27,13 @@
   };
 
   networking.firewall = {
-    # 5222: XMPP c2s STARTTLS, 5223: XMPP c2s Direct TLS, 5269: XMPP s2s, 5443: HTTPS (BOSH/upload), 3478 UDP: STUN/TURN. The web admin listens on 5280 loopback only.
+    # 5222: XMPP c2s STARTTLS, 5223: XMPP c2s Direct TLS, 5269: XMPP s2s, 5443: HTTPS (BOSH/upload), 7777: SOCKS5 file transfer proxy (mod_proxy65), 3478 UDP: STUN/TURN. The web admin listens on 5280 loopback only.
     allowedTCPPorts = [
       5222
       5223
       5269
       5443
+      7777
     ];
     allowedUDPPorts = [3478];
     # TURN relay allocations, matching turn_min_port/turn_max_port in the ejabberd listener.
