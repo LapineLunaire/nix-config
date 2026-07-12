@@ -11,7 +11,7 @@
           theme = "Bibata-Modern-Ice";
           size = 22;
         };
-        iconTheme = "Breeze Chameleon Dark";
+        iconTheme = "breeze-dark";
         # Reference the persistent repo path directly so the large image isn't copied into the nix store.
         wallpaper = "/persist/nix-config/wallpapers/__camellya_wuthering_waves_drawn_by_lemontea_ekvr5838__1ba4f9536e85b04a5d04733db7eee4e9.png";
       };
