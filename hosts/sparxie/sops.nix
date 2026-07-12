@@ -95,12 +95,18 @@ in {
             module: ejabberd_http
             tls: true
             request_handlers:
-              /admin: ejabberd_web_admin
-              /api: mod_http_api
               /bosh: mod_bosh
               /captcha: ejabberd_captcha
               /upload: mod_http_upload
               /ws: ejabberd_http_ws
+          -
+            # Web admin and HTTP API on loopback only, reach them with ssh -L 5280:127.0.0.1:5280 sparxie.
+            port: 5280
+            ip: 127.0.0.1
+            module: ejabberd_http
+            request_handlers:
+              /admin: ejabberd_web_admin
+              /api: mod_http_api
           -
             port: 3478
             ip: "::"
