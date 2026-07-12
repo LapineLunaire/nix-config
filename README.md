@@ -64,7 +64,7 @@ overlays.nix    package overrides (ffmpeg unfree codecs, mpv/yt-dlp ffmpeg, disc
 | 10.1.0.0/24 | Nox's WireGuard VPN clients |
 | 10.73.212.0/31 | sparkle (`.0`) <-> sparxie (`.1`) WireGuard tunnel |
 
-The four client subnets trusted to reach admin surfaces (both LANs and both WireGuard subnets) are defined once in `hosts/sparkle/trusted-subnets.nix` and reused by the Caddy vhost ACLs, the VM bridge forward policy, forgejo's git-ssh ingress, Samba, and iperf3.
+The four client subnets trusted to reach admin surfaces (both LANs and both WireGuard subnets) are defined once in `hosts/sparkle/trusted-subnets.nix` and reused by the Caddy vhost ACLs, the VM bridge forward policy, sparkle's sshd ingress, forgejo's git-ssh ingress, Samba, and iperf3.
 
 ## Implementation notes
 
@@ -89,7 +89,7 @@ Threat model is device theft, remote compromise of internet-facing services, and
 - VM secrets are additionally encrypted to the sparkle host key so the host can rebuild any guest
 
 **Network**
-- Firewall enabled on every NixOS host; sparkle enforces a default-drop forward chain on the VM bridge with explicit per-flow allowlists
+- Firewall enabled on every NixOS host; sparkle enforces a default-drop forward chain on the VM bridge with explicit per-flow allowlists, and its sshd accepts only the trusted client subnets (not the VM bridge, DMZ, management network, or the sparxie tunnel)
 - HTTP services on sparkle gated by per-vhost source-IP ACLs in Caddy with app-layer auth
 - ACME runs as a separate lego unit (NixOS `security.acme`); Caddy reads issued certs off disk and never holds the Cloudflare DNS API token
 - sparxie (the only public-internet host) exposes XMPP federation, Matrix federation (HTTPS + 8448), STUN/TURN, and HTTPS via Caddy; SSH is FIDO2-only with fail2ban and reachable only from the external source IPs whitelisted in the ssh-allowed-ips sops secrets (ip-whitelist.nix); a stale whitelist is recovered through the Hetzner console
