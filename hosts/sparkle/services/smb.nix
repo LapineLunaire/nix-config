@@ -35,7 +35,7 @@
         "netbios name" = "sparkle";
         "security" = "user";
         # Allow the trusted client subnets (see trusted-subnets.nix) and loopback. Deny everything else.
-        "hosts allow" = "${lib.concatStringsSep " " (import ../trusted-subnets.nix).subnets} 127.0.0.0/8 ::1";
+        "hosts allow" = "${lib.concatStringsSep " " (import ../../../modules/nixos/trusted-subnets.nix).subnets} 127.0.0.0/8 ::1";
         "hosts deny" = "0.0.0.0/0";
         "guest account" = "nobody";
         "map to guest" = "never";

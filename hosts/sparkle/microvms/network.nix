@@ -1,6 +1,6 @@
 {lib, ...}: let
   # Both LANs and both WireGuard subnets (see trusted-subnets.nix), shared with the Caddy vhost ACLs and VM SSH ingress.
-  trusted = (import ../trusted-subnets.nix).nftSet;
+  trusted = (import ../../../modules/nixos/trusted-subnets.nix).nftSet;
   net = import ./vm-net.nix;
   postgresClients = lib.concatStringsSep ", " (map (name: net.vmAddress.${name}) net.postgresClients);
   # Management network behind sfp0 where all management surfaces live: routers, switches, IPMI, and the UniFi APs.

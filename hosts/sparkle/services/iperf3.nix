@@ -5,6 +5,6 @@
   };
 
   networking.firewall.extraInputRules = ''
-    ip saddr { ${(import ../trusted-subnets.nix).nftSet} } tcp dport 5201 accept
+    ip saddr { ${(import ../../../modules/nixos/trusted-subnets.nix).nftSet} } tcp dport 5201 accept
   '';
 }

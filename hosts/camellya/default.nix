@@ -20,6 +20,12 @@
     hostName = "camellya";
   };
 
+  # sshd only accepts connections from the trusted client subnets.
+  services.openssh.openFirewall = false;
+  networking.firewall.extraInputRules = ''
+    ip saddr { ${(import ../../modules/nixos/trusted-subnets.nix).nftSet} } tcp dport 22 accept
+  '';
+
   boot = {
     kernelPackages = pkgs.linuxPackages_7_1.extend (
       self: super: {

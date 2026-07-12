@@ -33,7 +33,7 @@ in {
   # sshd only accepts connections from the trusted client subnets, keeping it unreachable from the VM bridge, the DMZ, the management network, and the sparxie tunnel.
   services.openssh.openFirewall = false;
   networking.firewall.extraInputRules = ''
-    ip saddr { ${(import ./trusted-subnets.nix).nftSet} } tcp dport 22 accept
+    ip saddr { ${(import ../../modules/nixos/trusted-subnets.nix).nftSet} } tcp dport 22 accept
   '';
 
   # Interface names (sfp0, sfp1, ipmi0) are assigned by sops-rendered .link files in /etc/systemd/network/ based on MAC addresses. sfp0 is the primary uplink with a static IP; sfp1 and ipmi0 are left unmanaged.
