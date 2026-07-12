@@ -1,9 +1,14 @@
-{pkgs, ...}: let
+{
+  config,
+  pkgs,
+  ...
+}: let
   public = import ../../modules/nixos/sparxie-public-addresses.nix;
 in {
   imports = [
     ../../modules/nixos/generic
     ../../modules/nixos/auto-update.nix
+    ../../modules/nixos/ip-whitelist.nix
     ./hardware-configuration.nix
     ./persistence.nix
     ./tmpfiles.nix
@@ -14,6 +19,13 @@ in {
   networking = {
     hostName = "sparxie";
     hostId = "33dd4911";
+  };
+
+  # SSH only accepts connections from the external addresses in these secrets, nothing else is exempt. A stale whitelist is recovered through the Hetzner console.
+  ip-whitelist.ssh = {
+    ports = [22];
+    ipv4File = config.sops.secrets."ssh-allowed-ips-v4".path;
+    ipv6File = config.sops.secrets."ssh-allowed-ips-v6".path;
   };
 
   # Static network config per Hetzner VPS requirements (https://docs.hetzner.com/cloud/servers/static-configuration/).

@@ -38,6 +38,7 @@ modules/
     borg-backup.nix     Parameterised Borg job to Hetzner from a ZFS snapshot of <pool>/persist
     caddy.nix           Caddy with ACME via Cloudflare DNS-01, shared by sparkle and sparxie
     caddy-security-headers.nix    Security header snippet spliced into every Caddy vhost
+    ip-whitelist.nix              nftables veto table dropping traffic to given ports unless the source IP is in whitelist files read at runtime (sops secrets, kept out of the store); used for sparxie's SSH
     postgres-passwords.nix        Applies the sops-templated role passwords after postgres starts
     protonmail-smtp.nix           SMTP relay account shared by msmtp, smartd, and the mail-sending VMs
     secureboot.nix Lanzaboote secure boot
@@ -91,7 +92,7 @@ Threat model is device theft, remote compromise of internet-facing services, and
 - Firewall enabled on every NixOS host; sparkle enforces a default-drop forward chain on the VM bridge with explicit per-flow allowlists
 - HTTP services on sparkle gated by per-vhost source-IP ACLs in Caddy with app-layer auth
 - ACME runs as a separate lego unit (NixOS `security.acme`); Caddy reads issued certs off disk and never holds the Cloudflare DNS API token
-- sparxie (the only public-internet host) exposes XMPP federation, Matrix federation (HTTPS + 8448), STUN/TURN, and HTTPS via Caddy; SSH is FIDO2-only with fail2ban
+- sparxie (the only public-internet host) exposes XMPP federation, Matrix federation (HTTPS + 8448), STUN/TURN, and HTTPS via Caddy; SSH is FIDO2-only with fail2ban and reachable only from the external source IPs whitelisted in the ssh-allowed-ips sops secrets (ip-whitelist.nix); a stale whitelist is recovered through the Hetzner console
 
 **Boot integrity**
 - Lanzaboote secure boot with sbctl-enrolled keys on camellya and sparkle

@@ -12,6 +12,8 @@ in {
       "tuwunel-registration-token" = {};
       "wireguard-private-key" = {};
       "pub-bnnuy-password-hash" = {};
+      "ssh-allowed-ips-v4".reloadUnits = ["nftables.service"];
+      "ssh-allowed-ips-v6".reloadUnits = ["nftables.service"];
     };
 
     templates."ejabberd.yml" = {
