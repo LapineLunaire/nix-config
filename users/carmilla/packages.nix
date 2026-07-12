@@ -40,7 +40,7 @@
         pandoc
         proton-vpn
         protonmail-desktop
-        texlive.combined.scheme-full
+        texliveFull
         winbox4
         yt-dlp
       ]
