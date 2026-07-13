@@ -89,7 +89,11 @@ in {
         };
       }
     );
-    kernelParams = ["intel_pstate=active"];
+    kernelParams = [
+      "intel_pstate=active"
+      "intel_iommu=on"
+      "iommu=pt"
+    ];
     # Explicit zfs major version pin, upgraded deliberately in lockstep with the kernel pin above.
     zfs.package = pkgs.zfs_2_4;
   };
