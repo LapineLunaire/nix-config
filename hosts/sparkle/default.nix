@@ -4,7 +4,6 @@
   pkgs,
   ...
 }: let
-  zigbee = import ./zigbee-stick.nix;
   smtp = import ../../modules/nixos/protonmail-smtp.nix;
   dmz = import ./dmz-net.nix;
 in {
@@ -70,11 +69,8 @@ in {
     };
   };
 
-  # Prevent host from claiming the Zigbee stick; passed through to the HA VM.
+  # Prevent host from claiming the Zigbee stick; its USB controller is passed through to the HA VM.
   boot.blacklistedKernelModules = ["cp210x"];
-  services.udev.extraRules = ''
-    SUBSYSTEM=="usb", ATTRS{idVendor}=="${zigbee.vendorId}", ATTRS{idProduct}=="${zigbee.productId}", MODE="0660", GROUP="kvm"
-  '';
 
   boot = {
     kernelPackages = pkgs.linuxPackages_6_18.extend (

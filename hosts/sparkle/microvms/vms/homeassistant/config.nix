@@ -1,13 +1,26 @@
-{lib, ...}: let
-  zigbee = import ../../../zigbee-stick.nix;
+{
+  config,
+  pkgs,
+  ...
+}: let
+  chPkg = config.microvm.vmHostPackages.cloud-hypervisor;
+  vcpu = toString config.microvm.vcpu;
+  # Rewrites the --cpus value to cap the guest physical address width at the VT-d aperture (39 bits on this platform). cloud-hypervisor otherwise sizes the guest address space from the host CPU's phys bits (capped at 46) and places the passed-through controller's 64-bit BAR above what the IOMMU can map, failing at boot with IommuDmaMap EINVAL. microvm.nix hardcodes --cpus and clap rejects passing it twice, so the flag cannot go through cloud-hypervisor.extraArgs.
+  chWrapper = pkgs.writeShellScriptBin "cloud-hypervisor" ''
+    exec ${chPkg}/bin/cloud-hypervisor "''${@/#boot=${vcpu}/boot=${vcpu},max_phys_bits=39}"
+  '';
 in {
   imports = [../../docker-common.nix];
 
   microvm = {
-    # qemu instead of the cloud-hypervisor default: the Zigbee stick USB passthrough (devices below) needs it. This is the only VM not on cloud-hypervisor.
-    hypervisor = lib.mkForce "qemu";
     vcpu = 2;
-    mem = 2560;
+    mem = 2048;
+    initialBalloonMem = 512;
+    cloud-hypervisor.package = pkgs.runCommand "cloud-hypervisor-max-phys-bits" {inherit (chPkg) version;} ''
+      mkdir -p $out/bin
+      ln -s ${chPkg}/bin/ch-remote $out/bin/ch-remote
+      ln -s ${chWrapper}/bin/cloud-hypervisor $out/bin/cloud-hypervisor
+    '';
     volumes = [
       {
         image = "/persist/vms/homeassistant/volumes/docker.img";
@@ -18,8 +31,9 @@ in {
     ];
     devices = [
       {
-        bus = "usb";
-        path = "vendorid=0x${zigbee.vendorId},productid=0x${zigbee.productId}";
+        bus = "pci";
+        # The PCH xHCI controller with the Zigbee stick, passed through via VFIO; the guest cp210x driver exposes the stick as ttyUSB0.
+        path = "0000:00:14.0";
       }
     ];
   };
@@ -34,11 +48,6 @@ in {
       "--network=host"
     ];
   };
-
-  # udev rule to ensure the Zigbee stick is accessible by the container runtime.
-  services.udev.extraRules = ''
-    SUBSYSTEM=="tty", ATTRS{idVendor}=="${zigbee.vendorId}", ATTRS{idProduct}=="${zigbee.productId}", GROUP="dialout", MODE="0660"
-  '';
 
   microvmGuest.hostIngressTCPPorts = [8123];
 }
