@@ -40,7 +40,7 @@
     # static.tibia.com sits behind Cloudflare, which challenges requests that omit an Accept-Encoding header. builtins.fetchurl's libcurl always sends one, so it passes; the plain fetchurl fetcher does not by default.
     src = builtins.fetchurl {
       url = "https://static.tibia.com/download/tibia.x64.tar.gz";
-      sha256 = "0i968z0jk156fij87cx1l7qfvjjrfkf98izf4yg3rs51bp0d34wl";
+      sha256 = "100q465m29g72lajph1za6awlpdwpa4al22bidan7q13i3cbfx7q";
     };
 
     dontBuild = true;
