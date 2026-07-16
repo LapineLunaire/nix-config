@@ -1,8 +1,9 @@
 name: Update Flake Inputs
 
+# Runs after tibia-update (00:00) and container-update (01:00 Mondays) so the eval step sees their pushed fixes; a stale tibia hash fails eval because the package fetches at eval time.
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 2 * * *"
   workflow_dispatch: {}
 
 jobs:
