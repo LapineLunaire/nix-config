@@ -46,7 +46,7 @@
     };
 
     microvm = {
-      url = "github:LapineLunaire/microvm.nix/cloud-hypervisor-cpus-extraargs";
+      url = "github:microvm-nix/microvm.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
