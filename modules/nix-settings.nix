@@ -1,4 +1,4 @@
-# Nix settings shared by NixOS (modules/nixos/generic), nix-darwin (modules/darwin.nix), and the sparkle microvm guests (hosts/sparkle/microvms/guest.nix).
+# Nix settings shared by NixOS (modules/nixos/generic), nix-darwin (modules/darwin.nix), and microvm guests.
 {
   inputs,
   lib,

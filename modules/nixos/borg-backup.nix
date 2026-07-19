@@ -1,4 +1,4 @@
-# Borg backup to the Hetzner Storage Box from a ZFS snapshot of <pool>/persist. Import as (import ./borg-backup.nix { pool = "sparkle"; startAt = "02:30"; }).
+# Borg backup to the Hetzner Storage Box from a ZFS snapshot of <pool>/persist. Import as (import ./borg-backup.nix { pool = "tank"; startAt = "02:30"; }).
 {
   pool,
   startAt,

@@ -1,4 +1,4 @@
-# Caddy snippet with baseline security headers, spliced into every vhost on sparkle and sparxie.
+# Caddy snippet with baseline security headers, spliced into every vhost.
 ''
   header {
     Strict-Transport-Security "max-age=31536000; includeSubDomains"

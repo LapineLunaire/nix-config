@@ -31,6 +31,9 @@ in {
     user = "noreply@lunaire.eu";
   };
 
+  # ACME account email for the Cloudflare DNS-01 certs (see modules/nixos/caddy.nix).
+  site.acmeEmail = "certs@lunaire.eu";
+
   # The WireGuard tunnel to sparxie: a /31 point-to-point pair. sparkle dials out to sparxie's static VPS address; the private key secret lives in this host's sops.
   site.wireguardTunnel = {
     prefixLength = "31";

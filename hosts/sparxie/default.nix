@@ -22,6 +22,23 @@ in {
     hostId = "33dd4911";
   };
 
+  # ACME account email for the Cloudflare DNS-01 certs (see modules/nixos/caddy.nix).
+  site.acmeEmail = "certs@lunaire.eu";
+
+  site.autoUpdate = {
+    repo = "/persist/nix-config";
+    owner = "carmilla";
+    branch = "main";
+    # Public keys trusted to sign updates.
+    allowedSigners = ''
+      # YubiKey resident keys
+      lapine@lunaire.eu sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIEes6fnuE4zIKuneekCyPzMYItOOgfnDo0Eiakvwf62mAAAACnNzaDpsYXBpbmU=
+      lapine@lunaire.eu sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIMqXDPM9z04YBOp2fVDox7sgPFNpad+9p8UA+od8V8nxAAAACnNzaDpsYXBpbmU=
+      # CI signing key (Forgejo Actions)
+      lapine@lunaire.eu ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINXWhax5JjCKOGESsX/udb2AKa833/9NQROV3fUUvZ9A
+    '';
+  };
+
   # The WireGuard tunnel to sparkle: a /31 point-to-point pair. sparxie listens on its static VPS address and sparkle dials in; the private key secret lives in this host's sops.
   site.wireguardTunnel = {
     prefixLength = "31";

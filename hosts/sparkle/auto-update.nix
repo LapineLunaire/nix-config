@@ -20,6 +20,20 @@
 in {
   imports = [../../modules/nixos/auto-update.nix];
 
+  site.autoUpdate = {
+    repo = "/persist/nix-config";
+    owner = "carmilla";
+    branch = "main";
+    # Public keys trusted to sign updates.
+    allowedSigners = ''
+      # YubiKey resident keys
+      lapine@lunaire.eu sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIEes6fnuE4zIKuneekCyPzMYItOOgfnDo0Eiakvwf62mAAAACnNzaDpsYXBpbmU=
+      lapine@lunaire.eu sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIMqXDPM9z04YBOp2fVDox7sgPFNpad+9p8UA+od8V8nxAAAACnNzaDpsYXBpbmU=
+      # CI signing key (Forgejo Actions)
+      lapine@lunaire.eu ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINXWhax5JjCKOGESsX/udb2AKa833/9NQROV3fUUvZ9A
+    '';
+  };
+
   system.autoUpgrade.allowReboot = false;
   systemd.services.nixos-upgrade.serviceConfig.ExecStartPost = restartGuests;
 }

@@ -34,6 +34,33 @@
       };
     };
 
+    acmeEmail = lib.mkOption {
+      type = lib.types.str;
+      description = "Account email for ACME certificate registration.";
+    };
+
+    autoUpdate = {
+      repo = lib.mkOption {
+        type = lib.types.str;
+        description = "Path of the flake checkout that system.autoUpgrade builds from.";
+      };
+
+      owner = lib.mkOption {
+        type = lib.types.str;
+        description = "User owning the checkout; git runs as this user.";
+      };
+
+      branch = lib.mkOption {
+        type = lib.types.str;
+        description = "Branch whose origin head is verified and reset to before each upgrade.";
+      };
+
+      allowedSigners = lib.mkOption {
+        type = lib.types.lines;
+        description = "gpg.ssh allowed-signers entries trusted to sign the update branch.";
+      };
+    };
+
     wireguardTunnel = {
       prefixLength = lib.mkOption {
         type = lib.types.str;

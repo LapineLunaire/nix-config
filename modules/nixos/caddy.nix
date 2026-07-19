@@ -1,4 +1,4 @@
-# Caddy with ACME via Cloudflare DNS-01, shared by sparkle and sparxie. Hosts define their certs and vhosts; the cloudflare-dns-api-token secret comes from each host's sops file.
+# Caddy with ACME via Cloudflare DNS-01. Hosts define their certs and vhosts; the cloudflare-dns-api-token secret comes from each host's sops file.
 {config, ...}: {
   networking.firewall.allowedTCPPorts = [
     80
@@ -16,11 +16,11 @@
   security.acme = {
     acceptTerms = true;
     defaults = {
-      email = "certs@lunaire.eu";
+      email = config.site.acmeEmail;
       keyType = "ec384";
       dnsProvider = "cloudflare";
       environmentFile = config.sops.templates."cloudflare-dns-api-token.env".path;
-      # Wait a fixed time for Cloudflare to publish the _acme-challenge record instead of lego's resolver-based propagation check, which on sparkle resolves through the local split-horizon CoreDNS that never holds the public record.
+      # Wait a fixed time for Cloudflare to publish the _acme-challenge record instead of lego's resolver-based propagation check, which breaks on hosts whose resolver is a split-horizon DNS that never holds the public record.
       extraLegoFlags = ["--dns.propagation-wait" "60s"];
       # Caddy reads cert files off disk rather than managing ACME itself, so reload it after each renewal to pick up the new cert.
       reloadServices = ["caddy.service"];

@@ -1,14 +1,13 @@
-# Daily auto-update on top of system.autoUpgrade: an ExecStartPre verifies origin/main against the trusted signers before the module builds and switches. allowReboot defaults on to reboot on kernel changes, and hosts can override it.
+# Daily auto-update on top of system.autoUpgrade: an ExecStartPre verifies the origin branch head against the trusted signers before the module builds and switches. allowReboot defaults on to reboot on kernel changes, and hosts can override it.
 {
+  config,
   lib,
   pkgs,
   ...
 }: let
-  repo = "/persist/nix-config";
-  owner = "carmilla";
-  branch = "main";
-  allowedSigners = ./git-allowed-signers;
-  verifyOriginMain = pkgs.writeShellScript "verify-origin-main" ''
+  inherit (config.site.autoUpdate) repo owner branch;
+  allowedSigners = pkgs.writeText "git-allowed-signers" config.site.autoUpdate.allowedSigners;
+  verifyOriginMain = pkgs.writeShellScript "verify-origin-${branch}" ''
     set -euo pipefail
     export HOME=/home/${owner}
     # Run git as the checkout's owner, not root.
@@ -25,7 +24,7 @@
 in {
   system.autoUpgrade = {
     enable = true;
-    # nix builds only tracked files, which the reset above pins to origin/main.
+    # nix builds only tracked files, which the reset above pins to the origin branch head.
     flake = repo;
     allowReboot = lib.mkDefault true;
     upgrade = false;

@@ -1,7 +1,7 @@
 {pkgs, ...}: {
   programs.zsh.enable = true;
 
-  # System-wide neovim so root shells have an editor; carmilla's configured neovim comes from home-manager (users/carmilla/programs.nix).
+  # System-wide neovim so root shells have an editor; the user's configured neovim comes from home-manager.
   programs.neovim = {
     enable = true;
     viAlias = true;

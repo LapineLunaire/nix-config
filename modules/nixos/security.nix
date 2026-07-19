@@ -1,4 +1,4 @@
-# Kernel, network, and user-account hardening shared by full hosts (via modules/nixos/generic) and the sparkle microvm guests (hosts/sparkle/microvms/guest.nix). Host-only pieces (polkit, doas) live with their consumers.
+# Kernel, network, and user-account hardening shared by full hosts (via modules/nixos/generic) and microvm guests. Host-only pieces (polkit, doas) live with their consumers.
 {...}: {
   # "!" locks the root account; no password login is possible.
   users.users.root.hashedPassword = "!";
