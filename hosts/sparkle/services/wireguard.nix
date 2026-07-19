@@ -1,5 +1,5 @@
 {config, ...}: let
-  wg = import ../../../modules/nixos/sparkle-sparxie-wireguard.nix;
+  wg = config.site.wireguardTunnel;
 in {
   networking.firewall.interfaces.wg0.allowedTCPPorts = [9000];
 
@@ -8,13 +8,13 @@ in {
   systemd.services.caddy.wants = ["wg-quick-wg0.service"];
 
   networking.wg-quick.interfaces.wg0 = {
-    address = ["${wg.sparkle.ip}/${wg.prefixLength}"];
+    address = ["${wg.local.ip}/${wg.prefixLength}"];
     privateKeyFile = config.sops.secrets."wireguard-private-key".path;
     peers = [
       {
-        publicKey = wg.sparxie.publicKey;
-        allowedIPs = ["${wg.sparxie.ip}/32"];
-        endpoint = "${(import ../../../modules/nixos/sparxie-public-addresses.nix).ipv4}:${toString wg.listenPort}";
+        publicKey = wg.peer.publicKey;
+        allowedIPs = ["${wg.peer.ip}/32"];
+        endpoint = wg.peer.endpoint;
         persistentKeepalive = 25;
       }
     ];

@@ -1,16 +1,16 @@
 {config, ...}: let
-  wg = import ../../../modules/nixos/sparkle-sparxie-wireguard.nix;
+  wg = config.site.wireguardTunnel;
 in {
   networking.firewall.allowedUDPPorts = [wg.listenPort];
 
   networking.wg-quick.interfaces.wg0 = {
-    address = ["${wg.sparxie.ip}/${wg.prefixLength}"];
+    address = ["${wg.local.ip}/${wg.prefixLength}"];
     listenPort = wg.listenPort;
     privateKeyFile = config.sops.secrets."wireguard-private-key".path;
     peers = [
       {
-        publicKey = wg.sparkle.publicKey;
-        allowedIPs = ["${wg.sparkle.ip}/32"];
+        publicKey = wg.peer.publicKey;
+        allowedIPs = ["${wg.peer.ip}/32"];
       }
     ];
   };

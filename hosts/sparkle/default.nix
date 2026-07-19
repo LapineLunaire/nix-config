@@ -31,6 +31,17 @@ in {
     user = "noreply@lunaire.eu";
   };
 
+  # The WireGuard tunnel to sparxie: a /31 point-to-point pair. sparkle dials out to sparxie's static VPS address; the private key secret lives in this host's sops.
+  site.wireguardTunnel = {
+    prefixLength = "31";
+    local.ip = "10.73.212.0";
+    peer = {
+      ip = "10.73.212.1";
+      publicKey = "VjVuhnnTEHuGssQOp0iM1yU0BLT34VWm3k00e8tDkSg=";
+      endpoint = "46.225.108.230:47329";
+    };
+  };
+
   networking = {
     hostName = "sparkle";
     hostId = "d38a0d1c";

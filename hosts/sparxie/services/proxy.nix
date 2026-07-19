@@ -11,7 +11,7 @@
   };
 
   securityHeaders = import ../../../modules/nixos/caddy-security-headers.nix;
-  wg = import ../../../modules/nixos/sparkle-sparxie-wireguard.nix;
+  wg = config.site.wireguardTunnel;
 in {
   # 8448: Matrix federation port for server-to-server traffic.
   networking.firewall.allowedTCPPorts = [8448];
@@ -82,7 +82,7 @@ in {
       tls /var/lib/acme/pub.bunny.enterprises/cert.pem /var/lib/acme/pub.bunny.enterprises/key.pem
       ${securityHeaders}
       import ${config.sops.templates."caddy-pub-bnnuy-basicauth".path}
-      reverse_proxy ${wg.sparkle.ip}:9000 {
+      reverse_proxy ${wg.peer.ip}:9000 {
         header_up Host {upstream_hostport}
       }
     '';

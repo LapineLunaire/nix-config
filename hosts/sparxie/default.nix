@@ -3,9 +3,10 @@
   pkgs,
   ...
 }: let
-  public = import ../../modules/nixos/sparxie-public-addresses.nix;
+  public = import ./wan-net.nix;
 in {
   imports = [
+    ../../modules/site.nix
     ../../modules/nixos/generic
     ../../modules/nixos/auto-update.nix
     ../../modules/nixos/ip-whitelist.nix
@@ -19,6 +20,17 @@ in {
   networking = {
     hostName = "sparxie";
     hostId = "33dd4911";
+  };
+
+  # The WireGuard tunnel to sparkle: a /31 point-to-point pair. sparxie listens on its static VPS address and sparkle dials in; the private key secret lives in this host's sops.
+  site.wireguardTunnel = {
+    prefixLength = "31";
+    listenPort = 47329;
+    local.ip = "10.73.212.1";
+    peer = {
+      ip = "10.73.212.0";
+      publicKey = "fU36EC/ymy4d1XwJCfqAXKEX8dRK/WuMFBbh6OtKBRM=";
+    };
   };
 
   # SSH only accepts connections from the external addresses in these secrets, nothing else is exempt. A stale whitelist is recovered through the Hetzner console.
