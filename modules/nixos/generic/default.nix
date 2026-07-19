@@ -6,7 +6,6 @@
 }: {
   imports = [
     ../../nix-settings.nix
-    ./packages.nix
     ./persistence.nix
     ../security.nix
     ./polkit.nix

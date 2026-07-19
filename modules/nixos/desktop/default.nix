@@ -4,7 +4,6 @@
   ...
 }: {
   imports = [
-    ./packages.nix
     ./plasma.nix
     ./services.nix
   ];

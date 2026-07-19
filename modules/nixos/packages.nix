@@ -1,3 +1,4 @@
+# Shared system program and package choices, imported by each host alongside the generic module.
 {pkgs, ...}: {
   programs.zsh.enable = true;
 

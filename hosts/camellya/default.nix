@@ -7,7 +7,9 @@
   imports = [
     ../../modules/site.nix
     ../../modules/nixos/generic
+    ../../modules/nixos/packages.nix
     ../../modules/nixos/desktop
+    ../../modules/nixos/desktop-packages.nix
     ./hardware-configuration.nix
     ./persistence.nix
     ./tmpfiles.nix

@@ -10,6 +10,7 @@ in {
   imports = [
     ../../modules/site.nix
     ../../modules/nixos/generic
+    ../../modules/nixos/packages.nix
     ./hardware-configuration.nix
     ./persistence.nix
     ./tmpfiles.nix

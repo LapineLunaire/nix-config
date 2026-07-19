@@ -8,6 +8,7 @@ in {
   imports = [
     ../../modules/site.nix
     ../../modules/nixos/generic
+    ../../modules/nixos/packages.nix
     ../../modules/nixos/auto-update.nix
     ../../modules/nixos/ip-whitelist.nix
     ./hardware-configuration.nix
