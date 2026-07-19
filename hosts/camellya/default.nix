@@ -20,6 +20,9 @@
 
   secureboot.enable = true;
 
+  # Desktop host: enable the user's desktop and plasma configuration.
+  home-manager.users.carmilla.userConfig.desktop.enable = true;
+
   networking = {
     hostName = "camellya";
   };

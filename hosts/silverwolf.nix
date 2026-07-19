@@ -10,6 +10,11 @@
   };
   system.primaryUser = "carmilla";
 
+  home-manager.users.carmilla.programs.nh = {
+    enable = true;
+    flake = "/Users/carmilla/projects/nix-config";
+  };
+
   homebrew = {
     enable = true;
     enableZshIntegration = true;

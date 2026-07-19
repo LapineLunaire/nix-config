@@ -91,11 +91,6 @@
     };
   };
 
-  home-manager.users.carmilla.programs.nh = {
-    enable = true;
-    flake = "/Users/carmilla/projects/nix-config";
-  };
-
   networking.applicationFirewall = {
     enable = true;
     allowSigned = true;

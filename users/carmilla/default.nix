@@ -30,14 +30,17 @@
 
   home-manager.users.carmilla = {
     config,
+    inputs,
     lib,
     osConfig,
     pkgs,
     ...
   }: {
     imports = [
+      inputs.plasma-manager.homeModules.plasma-manager
       ./desktop.nix
       ./packages.nix
+      ./plasma.nix
       ./programs.nix
     ];
 

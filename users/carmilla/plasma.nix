@@ -1,5 +1,11 @@
-{pkgs, ...}: {
-  home-manager.users.carmilla = {
+# Plasma desktop configuration via plasma-manager, applied on hosts that enable the desktop flag.
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
+  config = lib.mkIf config.userConfig.desktop.enable {
     home.packages = [pkgs.bibata-cursors];
 
     programs.plasma = {
