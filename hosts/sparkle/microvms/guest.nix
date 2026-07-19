@@ -9,6 +9,7 @@
   hostConsoleKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMJ+Zb08V2BIx3TnFgha04A55Vo9d0ftNpNvnRgfO3Gk";
 in {
   imports = [
+    ../../../modules/site.nix
     ../../../modules/nix-settings.nix
     ../../../modules/nixos/security.nix
   ];

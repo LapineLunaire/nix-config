@@ -1,8 +1,18 @@
 {config, ...}: let
   net = import ../../vm-net.nix;
-  smtp = import ../../../../../modules/nixos/protonmail-smtp.nix;
+  smtp = config.site.smtp;
 in {
   imports = [./sops.nix];
+
+  # Client subnets trusted to reach forgejo's git-ssh: LAN (10.28.64.0/24), WireGuard VPN (10.28.96.0/24), Nox's LAN (10.100.0.0/24), Nox's WireGuard (10.1.0.0/24).
+  site.trustedSubnets = ["10.28.64.0/24" "10.28.96.0/24" "10.100.0.0/24" "10.1.0.0/24"];
+
+  # The ProtonMail SMTP submission endpoint and the noreply relay account for forgejo's outgoing mail; the password secret lives in this VM's sops.
+  site.smtp = {
+    host = "smtp.protonmail.ch";
+    port = "587";
+    user = "noreply@lunaire.eu";
+  };
 
   microvm = {
     vcpu = 2;
@@ -55,7 +65,7 @@ in {
 
   # Git-over-SSH on port 22 uses the system sshd; open it to git clients on the trusted subnets.
   networking.firewall.extraInputRules = ''
-    ip saddr { ${(import ../../../../../modules/nixos/trusted-subnets.nix).nftSet} } tcp dport 22 accept
+    ip saddr { ${config.site.trustedSubnetsNft} } tcp dport 22 accept
   '';
   microvmGuest.hostIngressTCPPorts = [3000];
 }

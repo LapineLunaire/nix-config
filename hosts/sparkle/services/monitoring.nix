@@ -1,10 +1,10 @@
-{...}: let
+{config, ...}: let
   net = import ../microvms/vm-net.nix;
 in {
   services.smartd.enable = true;
   services.smartd.notifications.mail = {
     enable = true;
-    sender = (import ../../../modules/nixos/protonmail-smtp.nix).user;
+    sender = config.site.smtp.user;
     recipient = "lapine@lunaire.eu";
   };
 

@@ -1,8 +1,15 @@
 {config, ...}: let
   net = import ../../vm-net.nix;
-  smtp = import ../../../../../modules/nixos/protonmail-smtp.nix;
+  smtp = config.site.smtp;
 in {
   imports = [./sops.nix];
+
+  # The ProtonMail SMTP submission endpoint and the noreply relay account for authelia's outgoing mail; the password secret lives in this VM's sops.
+  site.smtp = {
+    host = "smtp.protonmail.ch";
+    port = "587";
+    user = "noreply@lunaire.eu";
+  };
 
   microvm = {
     vcpu = 1;

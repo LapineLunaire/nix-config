@@ -4,10 +4,11 @@
   pkgs,
   ...
 }: let
-  smtp = import ../../modules/nixos/protonmail-smtp.nix;
+  smtp = config.site.smtp;
   dmz = import ./dmz-net.nix;
 in {
   imports = [
+    ../../modules/site.nix
     ../../modules/nixos/generic
     ./hardware-configuration.nix
     ./persistence.nix
@@ -19,6 +20,16 @@ in {
   ];
 
   secureboot.enable = true;
+
+  # Client subnets trusted to reach sparkle's admin surfaces (sshd, Caddy vhosts, VM ICMP, Samba, iperf3): LAN (10.28.64.0/24), WireGuard VPN (10.28.96.0/24), Nox's LAN (10.100.0.0/24), Nox's WireGuard (10.1.0.0/24).
+  site.trustedSubnets = ["10.28.64.0/24" "10.28.96.0/24" "10.100.0.0/24" "10.1.0.0/24"];
+
+  # The ProtonMail SMTP submission endpoint and the noreply relay account, used by msmtp for smartd alerts. The password secret lives in this host's sops.
+  site.smtp = {
+    host = "smtp.protonmail.ch";
+    port = "587";
+    user = "noreply@lunaire.eu";
+  };
 
   networking = {
     hostName = "sparkle";
@@ -32,7 +43,7 @@ in {
   # sshd only accepts connections from the trusted client subnets, keeping it unreachable from the VM bridge, the DMZ, the management network, and the sparxie tunnel.
   services.openssh.openFirewall = false;
   networking.firewall.extraInputRules = ''
-    ip saddr { ${(import ../../modules/nixos/trusted-subnets.nix).nftSet} } tcp dport 22 accept
+    ip saddr { ${config.site.trustedSubnetsNft} } tcp dport 22 accept
   '';
 
   # Interface names (sfp0, sfp1, ipmi0) are assigned by sops-rendered .link files in /etc/systemd/network/ based on MAC addresses. sfp0 is the primary uplink with a static IP; sfp1 and ipmi0 are left unmanaged.
