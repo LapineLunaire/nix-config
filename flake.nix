@@ -74,90 +74,30 @@
   outputs = {
     self,
     nixpkgs,
-    nixpkgs-unstable,
-    home-manager,
-    home-manager-unstable,
-    nix-darwin,
-    impermanence,
-    lanzaboote,
-    sops-nix,
     microvm,
     vpn-confinement,
     unifi-os-server,
-    aagl,
     ...
   } @ inputs: let
     inherit (self) outputs;
-    commonArgs = {inherit inputs outputs;};
     forAllSystems = nixpkgs.lib.genAttrs [
       "x86_64-linux"
       "aarch64-linux"
       "aarch64-darwin"
     ];
     overlays = import ./overlays.nix {inherit inputs;};
-    mkPkgs = np: system:
-      import np {
-        inherit system;
-        overlays = [overlays.additions overlays.modifications];
-        config.allowUnfree = true;
-      };
-    pkgsFor = mkPkgs nixpkgs;
-    pkgsUnstableFor = mkPkgs nixpkgs-unstable;
 
-    # hmModule is the platform's home-manager module: nixosModules.home-manager or darwinModules.home-manager.
-    mkHmModules = hmModule: [
-      hmModule
-      {
-        home-manager = {
-          useGlobalPkgs = true;
-          useUserPackages = true;
-          extraSpecialArgs = commonArgs;
-        };
-      }
-    ];
+    builders = import ./lib/mk-systems.nix {
+      inherit inputs outputs;
+      pkgsOverlays = [overlays.additions overlays.modifications];
+    };
+    inherit (builders) mkServerSystem mkDesktopSystem mkDarwinSystem pkgsFor;
 
-    mkServerSystem = {
-      system,
-      modules,
-    }:
-      nixpkgs.lib.nixosSystem {
-        specialArgs = commonArgs;
-        modules =
-          [
-            {nixpkgs.pkgs = pkgsFor system;}
-            impermanence.nixosModules.impermanence
-            lanzaboote.nixosModules.lanzaboote
-            sops-nix.nixosModules.sops
-          ]
-          ++ (mkHmModules home-manager.nixosModules.home-manager) ++ modules;
-      };
-
-    mkDesktopSystem = {
-      system,
-      modules,
-    }:
-      nixpkgs-unstable.lib.nixosSystem {
-        specialArgs = commonArgs;
-        modules =
-          [
-            {nixpkgs.pkgs = pkgsUnstableFor system;}
-            impermanence.nixosModules.impermanence
-            lanzaboote.nixosModules.lanzaboote
-            sops-nix.nixosModules.sops
-            aagl.nixosModules.default
-          ]
-          ++ (mkHmModules home-manager-unstable.nixosModules.home-manager) ++ modules;
-      };
-
+    # A microvm guest: the shared guest base, the VM's identity, and its own config, on top of the generic microvm system.
     mkMicrovm = name: extraModules:
-      nixpkgs.lib.nixosSystem {
-        specialArgs = commonArgs;
+      builders.mkMicrovmSystem {
         modules =
           [
-            {nixpkgs.pkgs = pkgsFor "x86_64-linux";}
-            sops-nix.nixosModules.sops
-            microvm.nixosModules.microvm
-            impermanence.nixosModules.impermanence
             ./hosts/sparkle/microvms/guest.nix
             (import ./hosts/sparkle/microvms/vm-identity.nix name)
             ./hosts/sparkle/microvms/vms/${name}/config.nix
@@ -174,18 +114,6 @@
     in
       nixpkgs.lib.mapAttrs (name: _: mkMicrovm name (extraModules.${name} or []))
       (import ./hosts/sparkle/microvms/vm-registry.nix);
-
-    mkDarwinSystem = {
-      system,
-      modules,
-    }:
-      nix-darwin.lib.darwinSystem {
-        specialArgs = commonArgs;
-        modules =
-          [{nixpkgs.pkgs = pkgsUnstableFor system;}]
-          ++ (mkHmModules home-manager-unstable.darwinModules.home-manager)
-          ++ modules;
-      };
   in {
     inherit overlays;
 
