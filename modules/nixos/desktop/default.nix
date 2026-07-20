@@ -4,6 +4,7 @@
   ...
 }: {
   imports = [
+    inputs.aagl.nixosModules.default
     ./services.nix
   ];
 

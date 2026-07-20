@@ -5,7 +5,7 @@
   # Overlays applied to every nixpkgs instance the builders create.
   pkgsOverlays,
 }: let
-  inherit (inputs) nixpkgs nixpkgs-unstable home-manager home-manager-unstable nix-darwin impermanence lanzaboote sops-nix microvm aagl;
+  inherit (inputs) nixpkgs nixpkgs-unstable home-manager home-manager-unstable nix-darwin impermanence lanzaboote sops-nix microvm;
   commonArgs = {inherit inputs outputs;};
   mkPkgs = np: system:
     import np {
@@ -58,7 +58,6 @@ in {
           impermanence.nixosModules.impermanence
           lanzaboote.nixosModules.lanzaboote
           sops-nix.nixosModules.sops
-          aagl.nixosModules.default
         ]
         ++ (mkHmModules home-manager-unstable.nixosModules.home-manager) ++ modules;
     };
