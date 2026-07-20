@@ -11,6 +11,8 @@ in {
     ../../modules/site.nix
     ../../modules/nixos/generic
     ../../modules/nixos/packages.nix
+    # Keeps sshd unreachable from the VM bridge, the DMZ, the management network, and the sparxie tunnel.
+    ../../modules/nixos/trusted-ssh-ingress.nix
     ./hardware-configuration.nix
     ./persistence.nix
     ./tmpfiles.nix
@@ -54,12 +56,6 @@ in {
   };
 
   services.resolved.enable = false;
-
-  # sshd only accepts connections from the trusted client subnets, keeping it unreachable from the VM bridge, the DMZ, the management network, and the sparxie tunnel.
-  services.openssh.openFirewall = false;
-  networking.firewall.extraInputRules = ''
-    ip saddr { ${config.site.trustedSubnetsNft} } tcp dport 22 accept
-  '';
 
   # Interface names (sfp0, sfp1, ipmi0) are assigned by sops-rendered .link files in /etc/systemd/network/ based on MAC addresses. sfp0 is the primary uplink with a static IP; sfp1 and ipmi0 are left unmanaged.
   systemd.network.networks = {
