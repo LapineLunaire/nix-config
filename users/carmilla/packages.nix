@@ -60,7 +60,6 @@
       with pkgs; [
         alsa-ucm-conf
         discord
-        elysia
         fluffychat
         heroic
         high-tide
