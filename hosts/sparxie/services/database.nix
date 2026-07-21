@@ -1,9 +1,10 @@
 {
   config,
+  outputs,
   pkgs,
   ...
 }: {
-  imports = [../../../modules/nixos/postgres-passwords.nix];
+  imports = [outputs.nixosModules.postgres-passwords];
 
   services.postgresql = {
     enable = true;

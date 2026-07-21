@@ -1,12 +1,13 @@
 {
   config,
   lib,
+  outputs,
   pkgs,
   ...
 }: let
   net = import ../../vm-net.nix;
 in {
-  imports = [./sops.nix ../../../../../modules/nixos/postgres-passwords.nix];
+  imports = [./sops.nix outputs.nixosModules.postgres-passwords];
 
   microvm = {
     vcpu = 2;

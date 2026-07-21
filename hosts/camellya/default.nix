@@ -1,15 +1,16 @@
 {
   lib,
+  outputs,
   pkgs,
   ...
 }: {
   imports = [
-    ../../modules/site.nix
-    ../../modules/nixos/generic
-    ../../modules/nixos/packages.nix
-    ../../modules/nixos/desktop
-    ../../modules/nixos/desktop-packages.nix
-    ../../modules/nixos/trusted-ssh-ingress.nix
+    outputs.nixosModules.site
+    outputs.nixosModules.generic
+    outputs.nixosModules.packages
+    outputs.nixosModules.desktop
+    outputs.nixosModules.desktop-packages
+    outputs.nixosModules.trusted-ssh-ingress
     ./hardware-configuration.nix
     ./persistence.nix
     ./tmpfiles.nix

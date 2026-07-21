@@ -1,5 +1,5 @@
-{...}: {
-  imports = [../modules/darwin.nix];
+{outputs, ...}: {
+  imports = [outputs.darwinModules.darwin];
 
   nixpkgs.hostPlatform = "aarch64-darwin";
   system.stateVersion = 6;

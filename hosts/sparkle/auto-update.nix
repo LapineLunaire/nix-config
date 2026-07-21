@@ -1,6 +1,7 @@
 # sparkle's auto-update: the shared signed switch with no reboot, then restarts the guests whose config the switch changed.
 {
   config,
+  outputs,
   pkgs,
   ...
 }: let
@@ -18,7 +19,7 @@
     done
   '';
 in {
-  imports = [../../modules/nixos/auto-update.nix];
+  imports = [outputs.nixosModules.auto-update];
 
   site.autoUpdate = {
     repo = "/persist/nix-config";

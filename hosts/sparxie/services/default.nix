@@ -1,11 +1,15 @@
-{lib, ...}: {
+{
+  lib,
+  outputs,
+  ...
+}: {
   imports = [
-    (import ../../../modules/nixos/borg-backup.nix {
+    (import outputs.nixosModules.borg-backup {
       pool = "sparxie";
       startAt = "03:00";
     })
-    ../../../modules/nixos/zfs-maintenance.nix
-    ../../../modules/nixos/caddy.nix
+    outputs.nixosModules.zfs-maintenance
+    outputs.nixosModules.caddy
     ./database.nix
     ./ejabberd.nix
     ./fail2ban.nix

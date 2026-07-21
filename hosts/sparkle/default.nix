@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  outputs,
   pkgs,
   ...
 }: let
@@ -8,11 +9,11 @@
   dmz = import ./dmz-net.nix;
 in {
   imports = [
-    ../../modules/site.nix
-    ../../modules/nixos/generic
-    ../../modules/nixos/packages.nix
+    outputs.nixosModules.site
+    outputs.nixosModules.generic
+    outputs.nixosModules.packages
     # Keeps sshd unreachable from the VM bridge, the DMZ, the management network, and the sparxie tunnel.
-    ../../modules/nixos/trusted-ssh-ingress.nix
+    outputs.nixosModules.trusted-ssh-ingress
     ./hardware-configuration.nix
     ./persistence.nix
     ./tmpfiles.nix

@@ -3,7 +3,7 @@
   lib,
   ...
 }: let
-  securityHeaders = import ../../../modules/nixos/caddy-security-headers.nix;
+  securityHeaders = config.caddySecurityHeaders;
   wg = config.site.wireguardTunnel;
   # Source-IP base allowlist applied to every vhost: the trusted client subnets.
   baseAllow = config.site.trustedSubnets;

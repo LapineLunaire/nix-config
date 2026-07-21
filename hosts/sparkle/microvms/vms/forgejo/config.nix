@@ -1,11 +1,15 @@
-{config, ...}: let
+{
+  config,
+  outputs,
+  ...
+}: let
   net = import ../../vm-net.nix;
   smtp = config.site.smtp;
 in {
   imports = [
     ./sops.nix
     # Git-over-SSH on port 22 uses the system sshd; open it to git clients on the trusted subnets.
-    ../../../../../modules/nixos/trusted-ssh-ingress.nix
+    outputs.nixosModules.trusted-ssh-ingress
   ];
 
   # Client subnets trusted to reach forgejo's git-ssh: LAN (10.28.64.0/24), WireGuard VPN (10.28.96.0/24), Nox's LAN (10.100.0.0/24), Nox's WireGuard (10.1.0.0/24).

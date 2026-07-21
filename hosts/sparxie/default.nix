@@ -1,16 +1,17 @@
 {
   config,
+  outputs,
   pkgs,
   ...
 }: let
   public = import ./wan-net.nix;
 in {
   imports = [
-    ../../modules/site.nix
-    ../../modules/nixos/generic
-    ../../modules/nixos/packages.nix
-    ../../modules/nixos/auto-update.nix
-    ../../modules/nixos/ip-whitelist.nix
+    outputs.nixosModules.site
+    outputs.nixosModules.generic
+    outputs.nixosModules.packages
+    outputs.nixosModules.auto-update
+    outputs.nixosModules.ip-whitelist
     ./hardware-configuration.nix
     ./persistence.nix
     ./tmpfiles.nix

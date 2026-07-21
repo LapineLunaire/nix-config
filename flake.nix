@@ -117,6 +117,27 @@
   in {
     inherit overlays;
 
+    # Shared modules addressable as outputs.nixosModules.<name> from any nesting depth; also the module export surface for a future template flake.
+    nixosModules = {
+      site = ./modules/site.nix;
+      nix-settings = ./modules/nix-settings.nix;
+      generic = ./modules/nixos/generic;
+      packages = ./modules/nixos/packages.nix;
+      desktop = ./modules/nixos/desktop;
+      desktop-packages = ./modules/nixos/desktop-packages.nix;
+      security = ./modules/nixos/security.nix;
+      trusted-ssh-ingress = ./modules/nixos/trusted-ssh-ingress.nix;
+      auto-update = ./modules/nixos/auto-update.nix;
+      ip-whitelist = ./modules/nixos/ip-whitelist.nix;
+      caddy = ./modules/nixos/caddy.nix;
+      zfs-maintenance = ./modules/nixos/zfs-maintenance.nix;
+      # A module factory: import it with { pool, startAt } rather than listing it in imports directly.
+      borg-backup = ./modules/nixos/borg-backup.nix;
+      postgres-passwords = ./modules/nixos/postgres-passwords.nix;
+    };
+
+    darwinModules.darwin = ./modules/darwin.nix;
+
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
     # Only expose packages whose meta.platforms includes the target system, so cross-system eval (and nix flake check) doesn't hit "unsupported system".
     packages = forAllSystems (system: nixpkgs.lib.filterAttrs (_: p: nixpkgs.lib.meta.availableOn (nixpkgs.lib.systems.elaborate system) p) (import ./pkgs (pkgsFor system)));

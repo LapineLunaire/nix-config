@@ -10,7 +10,7 @@
     };
   };
 
-  securityHeaders = import ../../../modules/nixos/caddy-security-headers.nix;
+  securityHeaders = config.caddySecurityHeaders;
   wg = config.site.wireguardTunnel;
 in {
   # 8448: Matrix federation port for server-to-server traffic.
