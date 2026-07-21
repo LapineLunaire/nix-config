@@ -20,5 +20,5 @@
   programs.gamemode.enable = true;
   programs.honkers-railway-launcher.enable = true;
   programs.steam.enable = true;
-  environment.systemPackages = [pkgs.protonup-qt];
+  environment.systemPackages = [pkgs.protonplus];
 }
