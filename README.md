@@ -26,28 +26,28 @@ hosts/          Per-host hardware, services, secrets, persistence declarations
     docker-common.nix Journald logging and weekly image prune for the container-based VMs
     vms/<name>/       Per-VM config.nix (+ sops.nix/secrets.yaml where needed)
   sparkle/dmz-net.nix          sparkle's addressing on the DMZ subnet, shared by the sfp0 config, DNS zones, and the git vhost ACL
+  sparxie/wan-net.nix          sparxie's static Hetzner VPS addresses, used by its WAN config and ejabberd's TURN listener
 modules/
+  site.nix      Declares the site option namespace (trusted subnets, SMTP relay, ACME email, auto-update repo and signers, WireGuard tunnel); each system defines its own values at the host boundary
   darwin.nix    macOS system defaults, firewall, privacy settings
   nix-settings.nix  Nix registry and nixPath pinning shared by NixOS and nix-darwin
   nixos/
     generic/    Base NixOS: SSH, impermanence baseline, zram, chrony, polkit, the doas wheel rule; imports security.nix
-    desktop/    KDE Plasma 6, Plasma Login Manager, PipeWire, fonts, Steam
+    desktop/    KDE Plasma 6, Plasma Login Manager, PipeWire, fonts, Steam; imports the aagl module
+    packages.nix        System-wide programs and packages (zsh, neovim, nh) imported by every host
+    desktop-packages.nix  Desktop programs and packages (obs, steam, gamemode, nix-ld) imported by desktop hosts
     auto-update.nix     Daily signature-verified system.autoUpgrade, shared by sparkle and sparxie; sparxie reboots on kernel changes, sparkle overrides that off and restarts the microVM guests the switch changed
-    git-allowed-signers SSH public keys trusted to sign updates, read by auto-update.nix's verify-commit
     borg-backup.nix     Parameterised Borg job to Hetzner from a ZFS snapshot of <pool>/persist
-    caddy.nix           Caddy with ACME via Cloudflare DNS-01, shared by sparkle and sparxie
-    caddy-security-headers.nix    Security header snippet spliced into every Caddy vhost
+    caddy.nix           Caddy with ACME via Cloudflare DNS-01; also exposes the caddySecurityHeaders snippet spliced into every vhost
     ip-whitelist.nix              nftables veto table dropping traffic to given ports unless the source IP is in whitelist files read at runtime (sops secrets, kept out of the store); used for sparxie's SSH
     postgres-passwords.nix        Applies the sops-templated role passwords after postgres starts
-    protonmail-smtp.nix           SMTP relay account shared by msmtp, smartd, and the mail-sending VMs
     secureboot.nix Lanzaboote secure boot
     security.nix   Kernel, network, and account hardening shared by full hosts (via generic) and the microVM guests
-    sparkle-sparxie-wireguard.nix The /31 WireGuard link endpoints between sparkle and sparxie
-    sparxie-public-addresses.nix  sparxie's static Hetzner VPS addresses, shared by its WAN config and sparkle's WireGuard peer endpoint
-    trusted-subnets.nix Client subnets trusted to reach admin surfaces, shared by sparkle's proxy/firewall rules and the sparkle/camellya sshd ingress
+    trusted-ssh-ingress.nix Closes the firewall's ssh port and accepts port 22 from site.trustedSubnets instead
     zfs-maintenance.nix Scrub, TRIM, auto-snapshot retention
-users/carmilla/ The carmilla user (identity, ssh keys, wheel) plus its home-manager config (shell, git, neovim, SSH, desktop), imported by full hosts and darwin; microVM guests have no carmilla user
+users/carmilla/ The carmilla user (identity, ssh keys, wheel) plus its home-manager config (shell, git, neovim, SSH, desktop, plasma), imported by full hosts and darwin; microVM guests have no carmilla user
 pkgs/           Custom derivations
+mk-systems.nix  The mkServerSystem/mkDesktopSystem/mkMicrovmSystem/mkDarwinSystem builders, parameterised over the flake's inputs
 overlays.nix    package overrides (ffmpeg unfree codecs, mpv/yt-dlp ffmpeg, discord, winbox4)
 ```
 
@@ -64,7 +64,7 @@ overlays.nix    package overrides (ffmpeg unfree codecs, mpv/yt-dlp ffmpeg, disc
 | 10.1.0.0/24 | Nox's WireGuard VPN clients |
 | 10.73.212.0/31 | sparkle (`.0`) <-> sparxie (`.1`) WireGuard tunnel |
 
-The four client subnets trusted to reach admin surfaces (both LANs and both WireGuard subnets) are defined once in `modules/nixos/trusted-subnets.nix` and reused by the Caddy vhost ACLs, the VM bridge forward policy, the sparkle and camellya sshd ingress, forgejo's git-ssh ingress, Samba, and iperf3.
+The four client subnets trusted to reach admin surfaces (both LANs and both WireGuard subnets) are declared as `site.trustedSubnets` and defined per system (sparkle, camellya, and the forgejo VM), feeding the Caddy vhost ACLs, the VM bridge forward policy, the sshd ingress on sparkle and camellya, forgejo's git-ssh ingress, Samba, and iperf3.
 
 ## Implementation notes
 
@@ -102,7 +102,7 @@ Threat model is device theft, remote compromise of internet-facing services, and
 
 **Update integrity**
 - Commits are SSH-signed: interactively by a YubiKey resident key, and in CI by a dedicated Forgejo Actions key held as a repo secret
-- sparkle and sparxie auto-upgrade daily at 03:00, refusing to build unless `origin/main` verifies against `modules/nixos/git-allowed-signers`; each then hard-resets its repo to that commit, which is what nix builds. sparxie reboots on kernel changes; sparkle skips reboot (its disk unlock is interactive) and restarts the microVM guests whose config the switch changed, since a host switch leaves them running their old one
+- sparkle and sparxie auto-upgrade daily at 03:00, refusing to build unless `origin/main` verifies against the trusted keys in each host's `site.autoUpdate.allowedSigners`; each then hard-resets its repo to that commit, which is what nix builds. sparxie reboots on kernel changes; sparkle skips reboot (its disk unlock is interactive) and restarts the microVM guests whose config the switch changed, since a host switch leaves them running their old one
 
 **Backups**
 - Borg (repokey-blake2 + zstd) to Hetzner Storage Box, preceded by a ZFS snapshot of `*/persist`
@@ -111,7 +111,7 @@ Threat model is device theft, remote compromise of internet-facing services, and
 **Known limitations**
 - sparxie has no disk encryption and the hypervisor is out of trust scope; its host key and on-disk sops content are readable by anyone with hypervisor-level access
 - doas keeps environment, with a short auth-cookie persistence after the first prompt
-- The Forgejo CI runner holds a signing key trusted by `git-allowed-signers` and can push to `main` for scheduled `flake.lock`, container-digest, and tibia-hash updates, which sparkle and sparxie then auto-deploy
+- The Forgejo CI runner holds a signing key listed in `site.autoUpdate.allowedSigners` and can push to `main` for scheduled `flake.lock`, container-digest, and tibia-hash updates, which sparkle and sparxie then auto-deploy
 
 ## Bootstrapping a new host
 
