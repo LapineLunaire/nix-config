@@ -87,7 +87,7 @@
     ];
     overlays = import ./overlays.nix {inherit inputs;};
 
-    builders = import ./lib/mk-systems.nix {
+    builders = import ./mk-systems.nix {
       inherit inputs outputs;
       pkgsOverlays = [overlays.additions overlays.modifications];
     };
