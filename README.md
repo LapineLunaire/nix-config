@@ -44,7 +44,9 @@ modules/
     security.nix   Kernel, network, and account hardening shared by full hosts (via generic) and the microVM guests
     trusted-ssh-ingress.nix Closes the firewall's ssh port and accepts port 22 from site.trustedSubnets instead
     zfs-maintenance.nix Scrub, TRIM, auto-snapshot retention
-users/carmilla/ The carmilla user (identity, ssh keys, wheel) plus its home-manager config (shell, git, neovim, SSH, desktop, plasma), imported by full hosts and darwin; microVM guests have no carmilla user
+users/
+  common.nix    Generic user factory: import it with { name, uid, sshKeys, homeImports } to get the OS account, the shared home-manager settings, and the neutral home base (userConfig desktop/gui options, stateVersion, startServices)
+  carmilla/     carmilla's identity (uid, ssh keys, git identity, password secret) and personal home config (shell, git, neovim, SSH, desktop, plasma); imported by full hosts and darwin
 pkgs/           Custom derivations
 mk-systems.nix  The mkServerSystem/mkDesktopSystem/mkMicrovmSystem/mkDarwinSystem builders, parameterised over the flake's inputs
 overlays.nix    package overrides (ffmpeg unfree codecs, mpv/yt-dlp ffmpeg, discord, winbox4)

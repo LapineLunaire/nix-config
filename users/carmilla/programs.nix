@@ -6,6 +6,11 @@
 }:
 lib.mkMerge [
   {
+    home.sessionVariables = {
+      PAGER = "nvimpager";
+      MANPAGER = "nvimpager";
+    };
+
     programs.direnv = {
       enable = true;
       enableZshIntegration = true;
