@@ -10,7 +10,7 @@
   # Allow Touch ID to authenticate sudo prompts in terminal.
   security.pam.services.sudo_local.touchIdAuth = true;
 
-  time.timeZone = lib.mkDefault "Europe/Amsterdam";
+  time.timeZone = lib.mkDefault "UTC";
 
   nix = {
     package = pkgs.nix;

@@ -16,12 +16,6 @@
 
   services.desktopManager.plasma6.enable = true;
 
-  services.xserver.xkb = {
-    layout = "us,us";
-    variant = "colemak,";
-    options = "grp:win_space_toggle";
-  };
-
   services.pipewire = {
     enable = true;
     alsa.enable = true;

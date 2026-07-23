@@ -10,6 +10,8 @@
   };
   system.primaryUser = "carmilla";
 
+  time.timeZone = "Europe/Amsterdam";
+
   home-manager.users.carmilla.programs.nh = {
     enable = true;
     flake = "/Users/carmilla/projects/nix-config";

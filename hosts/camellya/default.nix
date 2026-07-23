@@ -28,6 +28,15 @@
     hostName = "camellya";
   };
 
+  time.timeZone = "Europe/Amsterdam";
+
+  console.keyMap = "colemak";
+  services.xserver.xkb = {
+    layout = "us,us";
+    variant = "colemak,";
+    options = "grp:win_space_toggle";
+  };
+
   # Client subnets trusted to reach camellya's sshd: LAN (10.28.64.0/24), WireGuard VPN (10.28.96.0/24), Nox's LAN (10.100.0.0/24), Nox's WireGuard (10.1.0.0/24).
   site.trustedSubnets = ["10.28.64.0/24" "10.28.96.0/24" "10.100.0.0/24" "10.1.0.0/24"];
 
