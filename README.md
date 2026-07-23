@@ -33,9 +33,8 @@ modules/
   nix-settings.nix  Nix registry and nixPath pinning shared by NixOS and nix-darwin
   nixos/
     generic/    Base NixOS: SSH, impermanence baseline, zram, chrony, polkit, the doas wheel rule; imports security.nix
-    desktop/    KDE Plasma 6, Plasma Login Manager, PipeWire, fonts, Steam; imports the aagl module
+    desktop/    KDE Plasma 6, Plasma Login Manager, PipeWire, fonts; imports the aagl module. Desktop app choices (Steam, obs, gamemode, the game launchers) live on the host that enables the desktop
     packages.nix        System-wide programs and packages (zsh, neovim, nh) imported by every host
-    desktop-packages.nix  Desktop programs and packages (obs, steam, gamemode, nix-ld) imported by desktop hosts
     auto-update.nix     Daily signature-verified system.autoUpgrade, shared by sparkle and sparxie; sparxie reboots on kernel changes, sparkle overrides that off and restarts the microVM guests the switch changed
     borg-backup.nix     Parameterised Borg job to Hetzner from a ZFS snapshot of <pool>/persist
     caddy.nix           Caddy with ACME via Cloudflare DNS-01; also exposes the caddySecurityHeaders snippet spliced into every vhost

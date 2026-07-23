@@ -1,4 +1,3 @@
-# Desktop program and package choices, imported by desktop hosts alongside the desktop module.
 {pkgs, ...}: {
   environment.plasma6.excludePackages = with pkgs.kdePackages; [
     elisa

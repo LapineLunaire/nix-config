@@ -19,9 +19,6 @@
     flake = "/persist/nix-config";
   };
 
-  environment.systemPackages = with pkgs; [
-    cifs-utils
-    ghostty.terminfo
-    smartmontools
-  ];
+  # terminfo so SSH sessions from a Ghostty terminal render correctly.
+  environment.systemPackages = [pkgs.ghostty.terminfo];
 }

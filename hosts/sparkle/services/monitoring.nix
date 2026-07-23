@@ -1,4 +1,8 @@
-{config, ...}: let
+{
+  config,
+  pkgs,
+  ...
+}: let
   net = import ../microvms/vm-net.nix;
 in {
   services.smartd.enable = true;
@@ -7,6 +11,8 @@ in {
     sender = config.site.smtp.user;
     recipient = "lapine@lunaire.eu";
   };
+  # smartd references smartmontools but does not add smartctl to PATH.
+  environment.systemPackages = [pkgs.smartmontools];
 
   # node_exporter on sparkle, bound to vm-br0 so the monitoring VM can scrape it.
   services.prometheus.exporters.node = {

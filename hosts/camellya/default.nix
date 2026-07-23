@@ -9,7 +9,6 @@
     outputs.nixosModules.generic
     outputs.nixosModules.packages
     outputs.nixosModules.desktop
-    outputs.nixosModules.desktop-packages
     outputs.nixosModules.trusted-ssh-ingress
     ./hardware-configuration.nix
     ./persistence.nix
@@ -17,6 +16,7 @@
     ./sops.nix
     ./pipewire.nix
     ./samba-mounts.nix
+    ./desktop-packages.nix
   ];
 
   secureboot.enable = true;
@@ -61,6 +61,8 @@
 
   # SMART monitoring without mail notifications: camellya has no mail relay, so alerts land in the journal only.
   services.smartd.enable = true;
+  # smartd references smartmontools but does not add smartctl to PATH.
+  environment.systemPackages = [pkgs.smartmontools];
 
   services.udev.packages = with pkgs; [
     wooting-udev-rules

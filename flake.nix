@@ -124,7 +124,6 @@
       generic = ./modules/nixos/generic;
       packages = ./modules/nixos/packages.nix;
       desktop = ./modules/nixos/desktop;
-      desktop-packages = ./modules/nixos/desktop-packages.nix;
       security = ./modules/nixos/security.nix;
       trusted-ssh-ingress = ./modules/nixos/trusted-ssh-ingress.nix;
       auto-update = ./modules/nixos/auto-update.nix;
