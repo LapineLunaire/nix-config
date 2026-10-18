@@ -3,7 +3,10 @@
   pkgs,
   ...
 }: {
-  sops.secrets."carmilla-password-hash".neededForUsers = true;
+  sops.secrets."carmilla-password-hash" = {
+    sopsFile = ./secrets.yaml;
+    neededForUsers = true;
+  };
 
   users.users.carmilla = {
     isNormalUser = true;

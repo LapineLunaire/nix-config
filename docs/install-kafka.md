@@ -50,7 +50,7 @@ install -m 0600 <identity-directory>/ssh_host_ed25519_key /mnt/persist/etc/ssh/
 install -m 0644 <identity-directory>/ssh_host_ed25519_key.pub /mnt/persist/etc/ssh/
 ```
 
-The encrypted file must contain `carmilla-password-hash` and `attic-pull-token`. Keep the private key outside Git and retain a secure backup. If the key is lost, generate a replacement, update Kafka's recipient in `.sops.yaml`, and recreate the encrypted secrets before installation.
+The host's encrypted file must contain `attic-pull-token`. The shared `users/carmilla/secrets.yaml` must contain `carmilla-password-hash` and include Kafka's key as a recipient. Keep the private key outside Git and retain a secure backup. If the key is lost, generate a replacement, update Kafka's recipient in `.sops.yaml`, recreate the host secrets, and update the shared file's recipients before installation; see [identity and secrets](keys.md).
 
 [Restore or create Secure Boot keys and bind-mount persisted `/var/lib`](secure-boot.md#installer-signing-keys), using `kafka` as the hostname.
 

@@ -19,7 +19,7 @@ in {
   ];
 
   host.trustedSubnets = trustedSubnets.all;
-  host.smtp.passwordSecret = "smartd-smtp-password";
+  host.smtp.passwordSecret = "smtp-password";
 
   microvm = {
     vcpu = 4;

@@ -22,7 +22,7 @@ in {
   host.trustedSubnets = (import ./trusted-subnets.nix).all;
 
   host.flakePath = "/persist/nix-config";
-  host.smtp.passwordSecret = "smartd-smtp-password";
+  host.smtp.passwordSecret = "smtp-password";
 
   nixpkgs.config.allowUnfree = true;
 

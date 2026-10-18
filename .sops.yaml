@@ -19,6 +19,13 @@ keys:
   - &vm_attic age1jefxkwgym3qkjp95udkv60e0eqz8tcm347uea6pvq8lyyywfmy2qdnqy73
 
 creation_rules:
+  - path_regex: users/carmilla/secrets\.yaml$
+    key_groups:
+      - age:
+          - *camellya_host
+          - *kafka_host
+          - *sparkle_host
+          - *sparxie_host
   - path_regex: hosts/camellya/secrets\.yaml$
     key_groups:
       - age:
