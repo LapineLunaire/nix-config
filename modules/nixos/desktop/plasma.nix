@@ -2,6 +2,12 @@
   services.displayManager.plasma-login-manager.enable = true;
   services.desktopManager.plasma6.enable = true;
 
+  # Wait for KWin to export the display environment to user services.
+  systemd.user.services.kde-baloo = {
+    overrideStrategy = "asDropin";
+    after = ["plasma-kwin_wayland.service"];
+  };
+
   environment.plasma6.excludePackages = with pkgs.kdePackages; [
     elisa
     kate
