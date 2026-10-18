@@ -24,6 +24,7 @@
     ../modules/nixos/programs/zsh.nix
     ../modules/nixos/desktop/fonts.nix
     ../modules/nixos/desktop/plasma.nix
+    ../modules/nixos/desktop/system-disks.nix
     ../modules/nixos/desktop/xkb.nix
   ];
 
