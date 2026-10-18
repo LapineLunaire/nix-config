@@ -1,5 +1,9 @@
-{config, ...}: {
-  sops.secrets."attic-pull-token" = {};
+{
+  config,
+  lib,
+  ...
+}: {
+  sops.secrets."attic-pull-token".sopsFile = lib.mkDefault ../../profiles/server/secrets.yaml;
   sops.templates."nix-netrc" = {
     mode = "0400";
     content = ''

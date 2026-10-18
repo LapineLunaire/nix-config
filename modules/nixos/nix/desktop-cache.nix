@@ -1,5 +1,5 @@
 {config, ...}: {
-  sops.secrets."attic-pull-token" = {};
+  sops.secrets."attic-pull-token".sopsFile = ../../../profiles/desktop/secrets.yaml;
   sops.templates."nix-netrc" = {
     mode = "0400";
     content = ''

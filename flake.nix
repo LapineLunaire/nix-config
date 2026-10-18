@@ -151,8 +151,8 @@
     overlays = import ./overlays.nix;
 
     nixosModules = {
-      desktop = ./profiles/desktop.nix;
-      server = ./profiles/server.nix;
+      desktop = ./profiles/desktop;
+      server = ./profiles/server;
       boot = ./modules/nixos/system/boot.nix;
       firewall = ./modules/nixos/networking/firewall.nix;
       gaming = ./modules/nixos/programs/gaming.nix;
@@ -209,7 +209,7 @@
               ];
             }
             aagl.nixosModules.default
-            ./profiles/desktop.nix
+            ./profiles/desktop
             ./hosts/camellya
             ./users/carmilla/hosts/camellya.nix
           ];
@@ -228,7 +228,7 @@
                 plasma-manager.homeModules.plasma-manager
               ];
             }
-            ./profiles/desktop.nix
+            ./profiles/desktop
             ./hosts/kafka
             ./users/carmilla/hosts/kafka.nix
           ];
@@ -244,7 +244,7 @@
             sops-nix.nixosModules.sops
             home-manager-stable.nixosModules.home-manager
             {home-manager.sharedModules = [nixvim-stable.homeModules.nixvim];}
-            ./profiles/server.nix
+            ./profiles/server
             ./hosts/sparkle
             ./users/carmilla/server.nix
           ];
@@ -257,7 +257,7 @@
             sops-nix.nixosModules.sops
             home-manager-stable.nixosModules.home-manager
             {home-manager.sharedModules = [nixvim-stable.homeModules.nixvim];}
-            ./profiles/server.nix
+            ./profiles/server
             ./hosts/sparxie
             ./users/carmilla/server.nix
           ];

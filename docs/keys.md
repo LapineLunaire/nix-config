@@ -4,6 +4,8 @@
 
 Carmilla's Linux login password hash is `carmilla-password-hash` in `users/carmilla/secrets.yaml`, encrypted for Camellya, Kafka, Sparkle, and Sparxie. Create or edit it with `sops users/carmilla/secrets.yaml`. Stage the encrypted file before evaluating the flake. When replacing a host key, update this file's recipients with `sops updatekeys -y users/carmilla/secrets.yaml` using any remaining recipient's identity.
 
+See [shared secrets](secrets.md) for the profile and service files. When replacing a host or guest key, update the recipients of every shared file that lists it, using an identity that can still decrypt the file. If no identity remains, recreate that file from the password manager. Encrypted values cannot be copied between SOPS files without decrypting and re-encrypting them.
+
 Run these steps as root in Bash from the Camellya installer's checkout at `/mnt/persist/nix-config`.
 
 Create `/mnt/persist/etc/ssh/` and restore `ssh_host_ed25519_key` and `ssh_host_ed25519_key.pub` there; the private key must be root-owned with mode `0600`. With the original key, existing secrets need no re-encryption.
@@ -17,7 +19,7 @@ nix --extra-experimental-features 'nix-command flakes' shell --inputs-from . nix
   -c ssh-to-age < /mnt/persist/etc/ssh/ssh_host_ed25519_key.pub
 ```
 
-Update `camellya_host` in `.sops.yaml`. The host key is the only recipient of the host secrets, so a new key cannot decrypt the existing file. Recreate the file with the keys `samba-username`, `samba-password`, and `attic-pull-token`, taking the values from the password manager:
+Update `camellya_host` in `.sops.yaml`. The host key is the only recipient of the host secrets, so a new key cannot decrypt the existing file. Recreate the file with the keys `samba-username` and `samba-password`, taking the values from the password manager:
 
 ```sh
 rm hosts/camellya/secrets.yaml
@@ -25,7 +27,7 @@ nix --extra-experimental-features 'nix-command flakes' shell --inputs-from . nix
   -c sops hosts/camellya/secrets.yaml
 ```
 
-User creation needs the shared password hash, so `users/carmilla/secrets.yaml` must also be ready for the host's key before installation. The installed `sops` alias is not available in the installer.
+Before installation, update the recipients of `users/carmilla/secrets.yaml` and `profiles/desktop/secrets.yaml` using another recipient's identity. User creation needs the shared password hash. The installed `sops` alias is not available in the installer.
 
 Return to [Camellya installation](install-camellya.md#4-prepare-identity-and-signing-keys) or [recovery](recover-camellya.md#reinstall-from-the-installer).
 

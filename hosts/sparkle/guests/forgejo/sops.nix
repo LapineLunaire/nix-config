@@ -1,7 +1,13 @@
 {
   sops = {
-    defaultSopsFile = ./secrets.yaml;
-    secrets."forgejo-db-password".restartUnits = ["forgejo.service"];
-    secrets."forgejo-smtp-password".restartUnits = ["forgejo.service"];
+    secrets."forgejo-db-password" = {
+      sopsFile = ./database.yaml;
+      restartUnits = ["forgejo.service"];
+    };
+    secrets."forgejo-smtp-password" = {
+      sopsFile = ../../smtp.yaml;
+      key = "smtp-password";
+      restartUnits = ["forgejo.service"];
+    };
   };
 }

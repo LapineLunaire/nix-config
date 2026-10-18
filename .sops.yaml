@@ -19,6 +19,53 @@ keys:
   - &vm_attic age1jefxkwgym3qkjp95udkv60e0eqz8tcm347uea6pvq8lyyywfmy2qdnqy73
 
 creation_rules:
+  - path_regex: profiles/desktop/secrets\.yaml$
+    key_groups:
+      - age:
+          - *camellya_host
+          - *kafka_host
+  - path_regex: profiles/server/secrets\.yaml$
+    key_groups:
+      - age:
+          - *sparkle_host
+  - path_regex: hosts/sparkle/smtp\.yaml$
+    key_groups:
+      - age:
+          - *sparkle_host
+          - *vm_vault
+          - *vm_forgejo
+          - *vm_authelia
+          - *vm_vaultwarden
+  - path_regex: hosts/sparkle/lunaire-moe-dns\.yaml$
+    key_groups:
+      - age:
+          - *sparkle_host
+          - *vm_proxy
+          - *vm_unifi
+  - path_regex: hosts/sparkle/guests/attic/database\.yaml$
+    key_groups:
+      - age:
+          - *sparkle_host
+          - *vm_attic
+          - *vm_postgres
+  - path_regex: hosts/sparkle/guests/authelia/database\.yaml$
+    key_groups:
+      - age:
+          - *sparkle_host
+          - *vm_authelia
+          - *vm_postgres
+  - path_regex: hosts/sparkle/guests/forgejo/database\.yaml$
+    key_groups:
+      - age:
+          - *sparkle_host
+          - *vm_forgejo
+          - *vm_postgres
+  - path_regex: hosts/sparkle/guests/vaultwarden/database\.yaml$
+    key_groups:
+      - age:
+          - *sparkle_host
+          - *vm_vaultwarden
+          - *vm_postgres
   - path_regex: users/carmilla/secrets\.yaml$
     key_groups:
       - age:
@@ -30,10 +77,6 @@ creation_rules:
     key_groups:
       - age:
           - *camellya_host
-  - path_regex: hosts/kafka/secrets\.yaml$
-    key_groups:
-      - age:
-          - *kafka_host
   - path_regex: hosts/sparxie/secrets\.yaml$
     key_groups:
       - age:
@@ -78,11 +121,6 @@ creation_rules:
       - age:
           - *vm_attic
           - *sparkle_host
-  - path_regex: hosts/sparkle/guests/forgejo/secrets\.yaml$
-    key_groups:
-      - age:
-          - *vm_forgejo
-          - *sparkle_host
   - path_regex: hosts/sparkle/guests/ci-runner/secrets\.yaml$
     key_groups:
       - age:
@@ -102,9 +140,4 @@ creation_rules:
     key_groups:
       - age:
           - *vm_qbittorrent
-          - *sparkle_host
-  - path_regex: hosts/sparkle/guests/unifi/secrets\.yaml$
-    key_groups:
-      - age:
-          - *vm_unifi
           - *sparkle_host

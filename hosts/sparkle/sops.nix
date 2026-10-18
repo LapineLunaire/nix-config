@@ -10,7 +10,11 @@ in {
     defaultSopsFile = ./secrets.yaml;
     age.sshKeyPaths = ["/persist/etc/ssh/ssh_host_ed25519_key"];
 
-    secrets = lib.genAttrs (map (name: "network/${name}-mac") interfaces) (_: {});
+    secrets =
+      lib.genAttrs (map (name: "network/${name}-mac") interfaces) (_: {})
+      // {
+        "smtp-password".sopsFile = ./smtp.yaml;
+      };
 
     templates = lib.listToAttrs (map (name:
       lib.nameValuePair "10-${name}.link" {
