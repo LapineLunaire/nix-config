@@ -1,0 +1,127 @@
+{
+  config,
+  net,
+  web,
+  ...
+}: {
+  imports = [./sops.nix];
+
+  microvm = {
+    vcpu = 1;
+    mem = 768;
+    initialBalloonMem = 256;
+  };
+
+  microvmGuest.egress = [
+    {
+      proto = "tcp";
+      ports = [587];
+    }
+  ];
+
+  sops.templates."authelia.yaml".content = ''
+    identity_providers:
+      oidc:
+        clients:
+          - client_id: forgejo
+            client_name: Forgejo
+            client_secret: '${config.sops.placeholder."authelia-forgejo-client-secret-hash"}'
+            public: false
+            authorization_policy: two_factor
+            redirect_uris:
+              - ${web.origin.forgejo}/user/oauth2/authelia/callback
+            scopes:
+              - openid
+              - profile
+              - email
+              - groups
+            userinfo_signed_response_alg: none
+            grant_types:
+              - authorization_code
+            response_types:
+              - code
+          - client_id: pgadmin
+            client_name: pgAdmin
+            client_secret: '${config.sops.placeholder."pgadmin-oidc-client-secret-hash"}'
+            public: false
+            authorization_policy: two_factor
+            redirect_uris:
+              - ${web.origin.pgadmin}/oauth2/authorize
+            scopes:
+              - openid
+              - profile
+              - email
+            userinfo_signed_response_alg: none
+            grant_types:
+              - authorization_code
+            response_types:
+              - code
+  '';
+
+  systemd.services.authelia-main = {
+    after = ["redis-authelia.service"];
+    requires = ["redis-authelia.service"];
+  };
+
+  services.redis.servers.authelia = {
+    enable = true;
+    bind = "127.0.0.1";
+    port = 6380;
+    requirePassFile = config.sops.secrets."redis-authelia-password".path;
+  };
+
+  services.authelia.instances.main = {
+    enable = true;
+    environmentVariables = {
+      AUTHELIA_STORAGE_POSTGRES_PASSWORD_FILE = config.sops.secrets."authelia-db-password".path;
+      AUTHELIA_SESSION_REDIS_PASSWORD_FILE = config.sops.secrets."redis-authelia-password".path;
+      AUTHELIA_NOTIFIER_SMTP_PASSWORD_FILE = config.sops.secrets."authelia-smtp-password".path;
+    };
+    settingsFiles = [config.sops.templates."authelia.yaml".path];
+    secrets = {
+      jwtSecretFile = config.sops.secrets."authelia-jwt-secret".path;
+      sessionSecretFile = config.sops.secrets."authelia-session-secret".path;
+      storageEncryptionKeyFile = config.sops.secrets."authelia-storage-encryption-key".path;
+      oidcHmacSecretFile = config.sops.secrets."authelia-oidc-hmac-secret".path;
+      oidcIssuerPrivateKeyFile = config.sops.secrets."authelia-oidc-issuer-key".path;
+    };
+    settings = {
+      theme = "dark";
+      log.level = "info";
+      server.address = "tcp://${net.vmAddress.authelia}:${toString web.endpoints.authelia.port}/";
+      session = {
+        redis = {
+          host = "127.0.0.1";
+          port = 6380;
+        };
+        cookies = [
+          {
+            inherit (web) domain;
+            authelia_url = web.origin.authelia;
+          }
+        ];
+      };
+      storage.postgres = {
+        address = "tcp://${net.vmAddress.postgres}:${toString net.postgresPort}";
+        database = "authelia";
+        username = "authelia";
+      };
+      authentication_backend.file.path = config.sops.secrets."authelia-users".path;
+      webauthn = {
+        disable = false;
+        display_name = "Lunaire Auth";
+        attestation_conveyance_preference = "indirect";
+        selection_criteria.user_verification = "preferred";
+        timeout = "60s";
+      };
+      access_control.default_policy = "two_factor";
+      notifier.smtp = let
+        inherit (config.host) smtp;
+      in {
+        address = "smtp://${smtp.host}:${smtp.port}";
+        username = smtp.user;
+        sender = "Authelia <${smtp.user}>";
+      };
+    };
+  };
+}

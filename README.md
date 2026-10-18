@@ -1,6 +1,6 @@
 # nix-config
 
-Nix configuration for camellya, kafka.
+Nix configuration for camellya, kafka, sparkle, sparxie.
 
 Run `nh os switch .` from the Linux host's checkout at `/persist/nix-config`.
 
