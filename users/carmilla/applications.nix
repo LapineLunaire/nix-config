@@ -39,6 +39,7 @@ in {
 
   programs.codex = {
     enable = true;
+    mutableSettings = true;
     plugins = [superpowers];
   };
 
