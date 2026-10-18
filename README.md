@@ -1,8 +1,9 @@
 # nix-config
 
-Nix configuration for camellya, kafka, sparkle, sparxie.
+Nix configuration for camellya, kafka, sparkle, sparxie, silverwolf.
 
 Run `nh os switch .` from the Linux host's checkout at `/persist/nix-config`.
+Run `nh darwin switch .` from Silverwolf's checkout.
 
 Use `nix develop` for the development tools and staged formatting hook.
 

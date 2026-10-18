@@ -16,6 +16,11 @@
       inputs.nixpkgs.follows = "nixpkgs-stable";
     };
 
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nixvim = {
       url = "github:nix-community/nixvim/main";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -90,6 +95,7 @@
     nixpkgs-stable,
     home-manager,
     home-manager-stable,
+    nix-darwin,
     nixvim,
     nixvim-stable,
     plasma-manager,
@@ -174,6 +180,18 @@
       zfs = ./modules/nixos/services/zfs.nix;
     };
 
+    darwinModules.base = ./profiles/darwin.nix;
+
+    darwinConfigurations.silverwolf = nix-darwin.lib.darwinSystem {
+      modules = [
+        home-manager.darwinModules.home-manager
+        {home-manager.sharedModules = [nixvim.homeModules.nixvim];}
+        ./profiles/darwin.nix
+        ./hosts/silverwolf
+        ./users/carmilla/darwin.nix
+      ];
+    };
+
     nixosConfigurations =
       guestConfigurations
       // {
@@ -255,6 +273,7 @@
           sparkle = self.nixosConfigurations.sparkle.config.system.build.toplevel;
         };
       aarch64-linux.sparxie = self.nixosConfigurations.sparxie.config.system.build.toplevel;
+      aarch64-darwin.silverwolf = self.darwinConfigurations.silverwolf.config.system.build.toplevel;
     };
 
     formatter = forEachSystem (system: nixpkgs.legacyPackages.${system}.alejandra);
