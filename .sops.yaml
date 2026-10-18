@@ -1,9 +1,14 @@
 # Every key below is that system's SSH host key, converted from /etc/ssh/ssh_host_ed25519_key.pub with ssh-to-age.
 keys:
   - &camellya_host age1kt66h37ezqaryvef402f0665aavu3mpj2l7trdkqctpjl6zeeveswgc50j
+  - &kafka_host age1k8teh6exvwspgx9vzq66wkmuc2xpct54csvnyn3n6jhf6vxs7ffqv9vzen
 
 creation_rules:
   - path_regex: hosts/camellya/secrets\.yaml$
     key_groups:
       - age:
           - *camellya_host
+  - path_regex: hosts/kafka/secrets\.yaml$
+    key_groups:
+      - age:
+          - *kafka_host

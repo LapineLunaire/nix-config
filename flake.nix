@@ -86,6 +86,7 @@
           ./modules/nixos/nix/desktop-cache.nix
         ];
       };
+      trusted-ssh-ingress = ./modules/nixos/networking/trusted-ssh-ingress.nix;
       wireless-regulatory-domain = ./modules/nixos/networking/wireless-regulatory-domain.nix;
     };
 
@@ -109,11 +110,31 @@
           ./users/carmilla/hosts/camellya.nix
         ];
       };
+
+      kafka = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          impermanence.nixosModules.impermanence
+          lanzaboote.nixosModules.lanzaboote
+          sops-nix.nixosModules.sops
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.sharedModules = [
+              nixvim.homeModules.nixvim
+              plasma-manager.homeModules.plasma-manager
+            ];
+          }
+          ./profiles/desktop.nix
+          ./hosts/kafka
+          ./users/carmilla/hosts/kafka.nix
+        ];
+      };
     };
 
     checks = {
       x86_64-linux = {
         camellya = self.nixosConfigurations.camellya.config.system.build.toplevel;
+        kafka = self.nixosConfigurations.kafka.config.system.build.toplevel;
       };
     };
 
