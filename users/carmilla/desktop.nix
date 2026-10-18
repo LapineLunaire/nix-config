@@ -29,6 +29,14 @@
       usbutils
     ];
 
+    # Work around Ghostty 1.3.1's early READY notification with systemd 262.
+    # The upstream fix is in https://github.com/ghostty-org/ghostty/pull/14399.
+    xdg.configFile."systemd/user/app-com.mitchellh.ghostty.service.d/startup.conf".text = ''
+      [Service]
+      Type=dbus
+      ExecReload=${pkgs.coreutils}/bin/kill -USR2 $MAINPID
+    '';
+
     # Keep this writable for applications. A rebuild restores these associations.
     home.activation.mimeApps = let
       zed = "dev.zed.Zed.desktop";
