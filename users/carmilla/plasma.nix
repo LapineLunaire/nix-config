@@ -103,6 +103,7 @@
           opacity = "translucent";
           widgets = [
             {
+              iconTasks.appearance.indicateAudioStreams = false;
               iconTasks.launchers = [
                 "applications:systemsettings.desktop"
                 "applications:org.kde.dolphin.desktop"
