@@ -22,7 +22,7 @@
 
   nixpkgs.config.allowUnfree = true;
   host.kernel = {
-    packages = pkgs.linuxPackages_7_2;
+    packages = pkgs.linuxPackages_7_3;
     cpu = "tigerlake";
   };
 
