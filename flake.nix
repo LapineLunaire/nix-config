@@ -51,13 +51,6 @@
 
     lanzaboote = {
       url = "github:nix-community/lanzaboote/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.rust-overlay.follows = "rust-overlay";
-      inputs.pre-commit.inputs.flake-compat.follows = "flake-compat";
-    };
-
-    lanzaboote-stable = {
-      url = "github:nix-community/lanzaboote/master";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
       inputs.rust-overlay.url = "github:oxalica/rust-overlay/master";
       inputs.rust-overlay.inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -101,7 +94,6 @@
     plasma-manager,
     impermanence,
     lanzaboote,
-    lanzaboote-stable,
     sops-nix,
     microvm,
     vpn-confinement,
@@ -111,6 +103,19 @@
   }: let
     systems = ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
     forEachSystem = nixpkgs.lib.genAttrs systems;
+    desktopModules = [
+      impermanence.nixosModules.impermanence
+      lanzaboote.nixosModules.lanzaboote
+      sops-nix.nixosModules.sops
+      home-manager.nixosModules.home-manager
+      {
+        home-manager.sharedModules = [
+          nixvim.homeModules.nixvim
+          plasma-manager.homeModules.plasma-manager
+        ];
+      }
+      ./profiles/desktop
+    ];
     guestRegistry = import ./hosts/sparkle/guest-registry.nix;
     dmz = import ./hosts/sparkle/dmz-net.nix;
     net = import ./hosts/sparkle/guest-net.nix;
@@ -197,41 +202,23 @@
       // {
         camellya = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
-          modules = [
-            impermanence.nixosModules.impermanence
-            lanzaboote.nixosModules.lanzaboote
-            sops-nix.nixosModules.sops
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.sharedModules = [
-                nixvim.homeModules.nixvim
-                plasma-manager.homeModules.plasma-manager
-              ];
-            }
-            aagl.nixosModules.default
-            ./profiles/desktop
-            ./hosts/camellya
-            ./users/carmilla/hosts/camellya.nix
-          ];
+          modules =
+            desktopModules
+            ++ [
+              aagl.nixosModules.default
+              ./hosts/camellya
+              ./users/carmilla/hosts/camellya.nix
+            ];
         };
 
         kafka = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
-          modules = [
-            impermanence.nixosModules.impermanence
-            lanzaboote.nixosModules.lanzaboote
-            sops-nix.nixosModules.sops
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.sharedModules = [
-                nixvim.homeModules.nixvim
-                plasma-manager.homeModules.plasma-manager
-              ];
-            }
-            ./profiles/desktop
-            ./hosts/kafka
-            ./users/carmilla/hosts/kafka.nix
-          ];
+          modules =
+            desktopModules
+            ++ [
+              ./hosts/kafka
+              ./users/carmilla/hosts/kafka.nix
+            ];
         };
 
         sparkle = nixpkgs-stable.lib.nixosSystem {
@@ -240,7 +227,7 @@
           modules = [
             microvm.nixosModules.host
             impermanence.nixosModules.impermanence
-            lanzaboote-stable.nixosModules.lanzaboote
+            lanzaboote.nixosModules.lanzaboote
             sops-nix.nixosModules.sops
             home-manager-stable.nixosModules.home-manager
             {home-manager.sharedModules = [nixvim-stable.homeModules.nixvim];}
