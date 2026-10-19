@@ -1,6 +1,7 @@
 {
   config,
   net,
+  web,
   ...
 }: {
   imports = [./sops.nix];
@@ -35,6 +36,9 @@
   services.kavita = {
     enable = true;
     tokenKeyFile = config.sops.secrets."kavita-token-key".path;
-    settings.IpAddresses = net.vmAddress.kavita;
+    settings = {
+      IpAddresses = net.vmAddress.kavita;
+      Port = web.endpoints.kavita.port;
+    };
   };
 }

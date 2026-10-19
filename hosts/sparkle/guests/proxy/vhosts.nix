@@ -19,14 +19,17 @@
     '';
     # Additional callers beyond trusted clients. Uptime Kuma probes through the proxy.
     uptimeKuma = net.vmAddress.uptime-kuma;
-    vmVhosts = {
-      monitoring.extraAllow = [uptimeKuma];
+    vmVhosts = lib.mapAttrs (name: _:
+      {
+        extraAllow = [uptimeKuma];
+      }
+      // (vmVhostOverrides.${name} or {}))
+    web.endpoints;
+    vmVhostOverrides = {
       # authelia: the forgejo and pgadmin OIDC backchannels, plus uptime-kuma.
       authelia.extraAllow = [net.vmAddress.forgejo net.vmAddress.pgadmin uptimeKuma];
-      pgadmin.extraAllow = [uptimeKuma];
       uptime-kuma.extraAllow = [];
       vaultwarden = {
-        extraAllow = [uptimeKuma];
         body = ''
           reverse_proxy ${net.vmAddress.vaultwarden}:${toString web.endpoints.vaultwarden.port} {
             header_up X-Real-IP {remote_host}
@@ -37,9 +40,6 @@
       forgejo.extraAllow = [dmz.subnet net.vmAddress.ci-runner uptimeKuma];
       # Allow cache access from Sparkle and CI; trusted clients already include the desktop.
       attic.extraAllow = [dmz.subnet];
-      homeassistant.extraAllow = [uptimeKuma];
-      kavita.extraAllow = [uptimeKuma];
-      qbittorrent.extraAllow = [uptimeKuma];
     };
     hostVhosts = {
       "misc.${web.domain}" = {
