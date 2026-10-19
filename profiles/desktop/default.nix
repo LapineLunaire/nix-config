@@ -12,16 +12,13 @@
     ../../modules/nixos/networking/firewall.nix
     ../../modules/nixos/services/chrony.nix
     ../../modules/nixos/services/earlyoom.nix
-    ../../modules/nixos/services/fwupd.nix
     ../../modules/nixos/services/kmscon.nix
     ../../modules/nixos/services/openssh.nix
     ../../modules/nixos/services/pipewire.nix
     ../../modules/nixos/services/smartd.nix
     ../../modules/nixos/programs/ghostty-terminfo.nix
-    ../../modules/nixos/programs/mtr.nix
     ../../modules/nixos/programs/neovim.nix
     ../../modules/nixos/programs/obs-studio.nix
-    ../../modules/nixos/programs/zsh.nix
     ../../modules/nixos/desktop/fonts.nix
     ../../modules/nixos/desktop/plasma.nix
     ../../modules/nixos/desktop/system-disks.nix
@@ -41,5 +38,8 @@
   };
 
   services.pcscd.enable = true;
+  services.fwupd.enable = true;
   services.smartd.notifications.systembus-notify.enable = true;
+  programs.mtr.enable = true;
+  programs.zsh.enable = true;
 }
