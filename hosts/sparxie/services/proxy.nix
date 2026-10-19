@@ -5,6 +5,7 @@
   ...
 }: {
   networking.firewall.allowedTCPPorts = [8448];
+  networking.firewall.allowedUDPPorts = [8448];
 
   sops.templates."caddy-pub-bnnuy-basicauth" = {
     owner = "caddy";

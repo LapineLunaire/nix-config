@@ -31,7 +31,7 @@ Client rules match traffic arriving on `sfp0`. LAN is `10.28.64.0/24`.
 | Client source | Destination | New flows allowed |
 |---|---|---|
 | Trusted | sparkle, forgejo | SSH |
-| Trusted and DMZ | proxy | HTTP and HTTPS; vhost allowlists also apply |
+| Trusted and DMZ | proxy | HTTP TCP 80; HTTPS TCP/UDP 443; vhost allowlists also apply |
 | Trusted | vault | SMB TCP 139 and 445 |
 | Trusted | unifi | HTTPS UI TCP 443 |
 | Trusted | All guests | ICMP echo |
@@ -43,7 +43,7 @@ Client rules match traffic arriving on `sfp0`. LAN is `10.28.64.0/24`.
 | Guest source | Local destination | New flows allowed |
 |---|---|---|
 | proxy | Web backends in the HTTPS table | Listed backend ports |
-| uptime-kuma, forgejo, pgadmin, ci-runner | proxy | HTTPS |
+| uptime-kuma, forgejo, pgadmin, ci-runner | proxy | HTTPS TCP/UDP 443 |
 | uptime-kuma | unifi | HTTPS |
 | uptime-kuma | sparkle, forgejo | SSH checks |
 | monitoring | sparkle and all guests | Node exporter TCP 9100 |
@@ -69,16 +69,16 @@ The rules come from `hosts/sparkle/dmz-bridge.nix`, the guest input firewalls, a
 
 ## Sparxie and public tunnel
 
-| Service | TCP | UDP |
-|---|---|---|
-| Caddy HTTP and HTTPS | 80, 443 | - |
-| Matrix federation | 8448 | - |
-| ejabberd XMPP, uploads, file transfers, and TURN | 5222, 5223, 5269, 5443, 7777 | 3478, 49152-49500 |
-| WireGuard | - | 47329 |
-| SSH | 22 | - |
+| Service | Ports |
+|---|---|
+| Caddy HTTP and HTTPS | TCP 80; TCP/UDP 443 |
+| Matrix federation | TCP/UDP 8448 |
+| ejabberd XMPP, uploads, file transfers, and TURN | TCP 5222, 5223, 5269, 5443, 7777; UDP 3478, 49152-49500 |
+| WireGuard | UDP 47329 |
+| SSH | TCP 22 |
 
 SSH also requires a source address in the SOPS IPv4 or IPv6 allowlist; this applies to loopback and tunnel sources too. Recover a stale allowlist through the Hetzner console. The ejabberd admin interface listens on loopback; from an allowlisted address, run `ssh -N -L 5280:127.0.0.1:5280 carmilla@46.225.108.230` and open `http://127.0.0.1:5280/admin/`.
 
-Sparxie's Caddy serves `bunny.enterprises`, `chat.bunny.enterprises`, `matrix.bunny.enterprises` (also on TCP 8448), and `pub.bunny.enterprises`; ejabberd serves XMPP for `bunny.enterprises`. `pub.bunny.enterprises` requires basic auth and is reverse-proxied over `wg0` to the proxy guest at `10.73.212.0:9000`, where Caddy serves `/srv/misc`, a read-only NFS mount of the vault guest's `/vault/misc`. The proxy firewall allows port 9000 only on `wg0`.
+Sparxie's Caddy serves `bunny.enterprises`, `chat.bunny.enterprises`, `matrix.bunny.enterprises` (also on TCP/UDP 8448), and `pub.bunny.enterprises`; ejabberd serves XMPP for `bunny.enterprises`. `pub.bunny.enterprises` requires basic auth and is reverse-proxied over `wg0` to the proxy guest at `10.73.212.0:9000`, where Caddy serves `/srv/misc`, a read-only NFS mount of the vault guest's `/vault/misc`. The proxy firewall allows port 9000 only on `wg0`.
 
 The proxy guest initiates WireGuard to `46.225.108.230:47329` with a 25-second keepalive. Sparxie's tunnel address is `10.73.212.1`, and each peer allows only the other's `/32`. Requests to port 9000 travel inside the tunnel, so the bridge sees only the WireGuard UDP flow and needs no TCP 9000 rule.

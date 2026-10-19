@@ -143,10 +143,12 @@ in {
         iifname "sfp0" oifname "dns" udp dport 53 accept
         iifname "sfp0" oifname "dns" tcp dport 53 accept
 
-        # Clients reach the proxy; each vhost's own source-IP allowlist gates the rest.
+        # HTTP and HTTPS, including HTTP/3. Each vhost also checks its source-IP allowlist.
         iifname "sfp0" oifname "proxy" ip saddr { ${trusted}, ${dmz.subnet} } tcp dport { 80, 443 } accept
-        # Health checks, OIDC backchannels and CI requests.
+        iifname "sfp0" oifname "proxy" ip saddr { ${trusted}, ${dmz.subnet} } udp dport 443 accept
+        # HTTPS, including HTTP/3, for health checks, OIDC backchannels and CI requests.
         iifname { "uptime-kuma", "forgejo", "pgadmin", "ci-runner" } oifname "proxy" tcp dport 443 accept
+        iifname { "uptime-kuma", "forgejo", "pgadmin", "ci-runner" } oifname "proxy" udp dport 443 accept
         # The proxy reaches each backend on the port guest-web.nix gives it.
         ${lib.concatStrings (lib.mapAttrsToList (name: e: "iifname \"proxy\" oifname \"${name}\" tcp dport ${toString e.port} accept\n") web.endpoints)}
 
