@@ -159,6 +159,7 @@
       desktop = ./profiles/desktop;
       server = ./profiles/server;
       boot = ./modules/nixos/system/boot.nix;
+      tuned-kernel = ./modules/nixos/system/tuned-kernel.nix;
       firewall = ./modules/nixos/networking/firewall.nix;
       gaming = ./modules/nixos/programs/gaming.nix;
       secure-boot = {

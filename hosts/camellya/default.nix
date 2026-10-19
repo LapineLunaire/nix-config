@@ -2,6 +2,7 @@
   imports = [
     ../../modules/nixos/system/boot.nix
     ../../modules/nixos/system/secure-boot.nix
+    ../../modules/nixos/system/tuned-kernel.nix
     ../../modules/nixos/programs/gaming.nix
     ../../modules/nixos/networking/steam-frame.nix
     ../../modules/nixos/nix/desktop-cache.nix
@@ -21,22 +22,10 @@
   hardware.steamFrame.lanSubnets = ["10.28.64.0/24"];
   nixpkgs.config.allowUnfree = true;
 
-  # An explicit target lets other machines build and cache the kernel.
-  boot.kernelPackages = let
-    march = "znver5";
-  in
-    pkgs.linuxPackages_7_2.extend (_: prev: {
-      kernel = prev.kernel.override {
-        # Keep each make flag one shell word. The later CFLAGS override -mtune=generic;
-        # Rust objects need their own target flag.
-        extraMakeFlags = [
-          "KCFLAGS=-march=${march}"
-          "CFLAGS_KERNEL=-mtune=${march}"
-          "CFLAGS_MODULE=-mtune=${march}"
-          "KRUSTFLAGS=-Ctarget-cpu=${march}"
-        ];
-      };
-    });
+  host.kernel = {
+    packages = pkgs.linuxPackages_7_2;
+    cpu = "znver5";
+  };
 
   # Let CPPC manage frequency scaling.
   boot.kernelParams = ["amd_pstate=active"];

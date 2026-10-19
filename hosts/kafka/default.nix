@@ -2,6 +2,7 @@
   imports = [
     ../../modules/nixos/system/boot.nix
     ../../modules/nixos/system/secure-boot.nix
+    ../../modules/nixos/system/tuned-kernel.nix
     ../../modules/nixos/programs/gaming.nix
     ../../modules/nixos/nix/desktop-cache.nix
     ../../modules/nixos/networking/trusted-ssh-ingress.nix
@@ -20,19 +21,10 @@
   };
 
   nixpkgs.config.allowUnfree = true;
-  boot.kernelPackages = let
-    march = "tigerlake";
-  in
-    pkgs.linuxPackages_7_2.extend (_: prev: {
-      kernel = prev.kernel.override {
-        extraMakeFlags = [
-          "KCFLAGS=-march=${march}"
-          "CFLAGS_KERNEL=-mtune=${march}"
-          "CFLAGS_MODULE=-mtune=${march}"
-          "KRUSTFLAGS=-Ctarget-cpu=${march}"
-        ];
-      };
-    });
+  host.kernel = {
+    packages = pkgs.linuxPackages_7_2;
+    cpu = "tigerlake";
+  };
 
   services.thermald.enable = true;
   hardware.bluetooth.enable = true;

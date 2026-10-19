@@ -4,6 +4,7 @@ in {
   imports = [
     ../../modules/nixos/system/boot.nix
     ../../modules/nixos/system/secure-boot.nix
+    ../../modules/nixos/system/tuned-kernel.nix
     ../../modules/nixos/services/zfs.nix
     ../../modules/nixos/networking/trusted-ssh-ingress.nix
     ../../modules/nixos/services/mail-relay.nix
@@ -23,6 +24,10 @@ in {
 
   host.flakePath = "/persist/nix-config";
   host.smtp.passwordSecret = "smtp-password";
+  host.kernel = {
+    packages = pkgs.linuxPackages_6_18;
+    cpu = "alderlake";
+  };
 
   nixpkgs.config.allowUnfree = true;
 
@@ -61,23 +66,6 @@ in {
   boot.blacklistedKernelModules = ["cp210x" "mpt3sas"];
 
   boot = {
-    # Keep each make flag separate. Set C and Rust targets explicitly for reproducible builds.
-    # CFLAGS_KERNEL and CFLAGS_MODULE override the kernel's generic tuning flags.
-    kernelPackages = let
-      march = "alderlake";
-    in
-      pkgs.linuxPackages_6_18.extend (
-        _: prev: {
-          kernel = prev.kernel.override {
-            extraMakeFlags = [
-              "KCFLAGS=-march=${march}"
-              "CFLAGS_KERNEL=-mtune=${march}"
-              "CFLAGS_MODULE=-mtune=${march}"
-              "KRUSTFLAGS=-Ctarget-cpu=${march}"
-            ];
-          };
-        }
-      );
     kernelParams = [
       "intel_pstate=active"
       "intel_iommu=on"
