@@ -26,7 +26,7 @@
   ];
 
   time.timeZone = lib.mkDefault "Europe/Amsterdam";
-  nixpkgs.overlays = [(import ../../overlays.nix).modifications];
+  nixpkgs.overlays = [(import ../../overlays).modifications];
   console.keyMap = "colemak";
   nix.daemonCPUSchedPolicy = "idle";
   networking.networkmanager.enable = true;

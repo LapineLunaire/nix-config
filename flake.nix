@@ -153,7 +153,7 @@
       })
     guestRegistry;
   in {
-    overlays = import ./overlays.nix;
+    overlays = import ./overlays;
 
     nixosModules = {
       desktop = ./profiles/desktop;
