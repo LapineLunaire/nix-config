@@ -26,8 +26,9 @@
       default_db: sql
       default_ram_db: redis
 
-      auth_password_format: scram
-      auth_scram_hash: sha256
+      auth_stored_password_types: [scram_sha256, scram_sha512]
+      # The SHA-512 hash is only stored when a password is set. Remove this once every account has one.
+      auth_password_types_hidden_in_sasl1: [scram_sha512]
 
       sql_type: pgsql
       sql_server: 127.0.0.1
