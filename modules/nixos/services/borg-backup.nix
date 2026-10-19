@@ -6,6 +6,7 @@
 }: let
   dataset = config.fileSystems."/persist".device;
   job = config.services.borgbackup.jobs.hetzner;
+  zfs = lib.getExe config.boot.zfs.package;
   loadRepository = ''
     BORG_REPO=$(< ${config.sops.secrets."borg-repo".path})
     : "''${BORG_REPO:?Borg repository secret is empty}"
@@ -54,14 +55,14 @@ in {
       ${loadRepository}
       # Recover the mount and snapshot left by an interrupted backup.
       ${pkgs.util-linux}/bin/umount /mnt/borg-snapshot 2>/dev/null || true
-      ${pkgs.zfs}/bin/zfs destroy ${dataset}@borg-backup 2>/dev/null || true
-      ${pkgs.zfs}/bin/zfs snapshot ${dataset}@borg-backup
+      ${zfs} destroy ${dataset}@borg-backup 2>/dev/null || true
+      ${zfs} snapshot ${dataset}@borg-backup
       ${pkgs.coreutils}/bin/mkdir -p /mnt/borg-snapshot
       ${pkgs.util-linux}/bin/mount -t zfs ${dataset}@borg-backup /mnt/borg-snapshot
     '';
     postHook = ''
       ${pkgs.util-linux}/bin/umount /mnt/borg-snapshot 2>/dev/null || true
-      ${pkgs.zfs}/bin/zfs destroy ${dataset}@borg-backup 2>/dev/null || true
+      ${zfs} destroy ${dataset}@borg-backup 2>/dev/null || true
     '';
     # The script's last step, reached only after every Borg command succeeds.
     postPrune = ''
