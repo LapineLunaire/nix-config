@@ -38,7 +38,7 @@
       redis_server: 127.0.0.1
       redis_db: 1
 
-      disable_sasl_mechanisms: ["DIGEST-MD5"]
+      disable_sasl_mechanisms: ["DIGEST-MD5", "PLAIN"]
 
       c2s_tls_compression: false
       c2s_protocol_options:
