@@ -26,6 +26,9 @@
       default_db: sql
       default_ram_db: redis
 
+      auth_password_format: scram
+      auth_scram_hash: sha256
+
       sql_type: pgsql
       sql_server: 127.0.0.1
       sql_port: 5432
