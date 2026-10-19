@@ -5,7 +5,7 @@
   web,
   ...
 }: {
-  imports = [../../binary-cache.nix ./sops.nix];
+  imports = [../../../../modules/nixos/nix/server-cache.nix ./sops.nix];
 
   microvm = let
     swapImage = "/persist/vms/ci-runner/volumes/swap.img";

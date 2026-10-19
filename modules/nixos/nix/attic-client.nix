@@ -1,9 +1,13 @@
 {
+  cache,
+  publicKey,
+  sopsFile,
+}: {
   config,
   lib,
   ...
 }: {
-  sops.secrets."attic-pull-token".sopsFile = lib.mkDefault ../../profiles/server/secrets.yaml;
+  sops.secrets."attic-pull-token".sopsFile = lib.mkDefault sopsFile;
   sops.templates."nix-netrc" = {
     mode = "0400";
     content = ''
@@ -12,8 +16,8 @@
   };
 
   nix.settings = {
-    extra-substituters = ["https://cache.lunaire.moe/server?priority=10"];
-    extra-trusted-public-keys = ["server:oFkIrocLJr2oRVgeOqJ1TUUPwTYLWKm0Lpg9aRKU5zU="];
+    extra-substituters = ["https://cache.lunaire.moe/${cache}?priority=10"];
+    extra-trusted-public-keys = [publicKey];
     netrc-file = config.sops.templates."nix-netrc".path;
   };
 }

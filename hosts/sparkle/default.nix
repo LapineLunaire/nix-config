@@ -13,7 +13,7 @@ in {
     ./persistence.nix
     ./sops.nix
     ./dmz-bridge.nix
-    ./binary-cache.nix
+    ../../modules/nixos/nix/server-cache.nix
     ./auto-update.nix
     ./telemetry.nix
     ./ci-runner-store.nix
