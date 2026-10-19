@@ -272,6 +272,7 @@
           versioning: true
         mod_s2s_bidi: {}
         mod_s2s_dialback: {}
+        mod_scram_upgrade: {}
         mod_shared_roster: {}
         mod_stream_mgmt:
           resume_timeout: 24h
