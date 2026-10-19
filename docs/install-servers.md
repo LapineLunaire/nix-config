@@ -76,6 +76,6 @@ zpool export <hostname>
 
 The checkout belongs to `carmilla:users`. Root password login is locked, and root cannot log in over SSH. The host does not force-import its root pool, so export it before rebooting. Removing the timer stamps prevents a recovered host from catching up on a missed upgrade or backup immediately after boot; the next scheduled runs still happen.
 
-Copy the hardware, host ID, and SOPS changes to Camellya, Kafka, or Silverwolf, where commit signing is configured. Sign them with a key in `host.autoUpdate.allowedSigners` and push them to `main` before the next upgrade at 02:30 UTC. The upgrade resets the checkout to `origin/main` and would otherwise revert them.
+Copy the hardware, host ID, and SOPS changes to Camellya, Kafka, or Silverwolf, where commit signing is configured. Sign them with a key in `host.autoUpdate.allowedSigners` and push them to `main` before the next upgrade at 04:00 UTC. The upgrade resets the checkout to `origin/main` and would otherwise revert them.
 
 Run `reboot`. Sparkle asks for the pool passphrase on every boot; keep that passphrase outside SOPS. After boot, [enroll and verify Sparkle Secure Boot](secure-boot.md#installed-system-enrollment) and [prepare the vault pool](vault.md). Sparxie needs no key enrollment.

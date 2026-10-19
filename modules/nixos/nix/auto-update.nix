@@ -27,7 +27,7 @@ in {
     flake = "git+file://${flakePath}?rev=$rev";
     allowReboot = lib.mkDefault true;
     upgrade = false;
-    dates = "02:30";
+    dates = "04:00";
     randomizedDelaySec = "15min";
     persistent = true;
   };

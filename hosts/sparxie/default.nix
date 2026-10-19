@@ -46,7 +46,7 @@ in {
 
   nixpkgs.config.allowUnfree = true;
 
-  services.borgbackup.jobs.hetzner.startAt = "04:00";
+  services.borgbackup.jobs.hetzner.startAt = "03:00";
   services.fwupd.enable = lib.mkForce false;
 
   # Hetzner's IPv4 gateway is outside the /32, so it needs GatewayOnLink.

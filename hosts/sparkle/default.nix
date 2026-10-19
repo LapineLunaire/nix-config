@@ -26,7 +26,7 @@ in {
 
   nixpkgs.config.allowUnfree = true;
 
-  services.borgbackup.jobs.hetzner.startAt = "03:30";
+  services.borgbackup.jobs.hetzner.startAt = "03:00";
 
   networking = let
     net = import ./guest-net.nix;
