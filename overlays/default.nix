@@ -11,11 +11,10 @@
       commandLineArgs = "--force-device-scale-factor=1";
     };
 
-    # Dino 0.5.1 only supports SCRAM-SHA-1. This patch adds SCRAM-SHA-256 until upstream ships it.
-    # The patch is written for 0.5.1 and may fail to apply to later versions.
+    # Adds SCRAM-SHA-256, SCRAM-SHA-512 and channel binding to Dino 0.5.1. Written for 0.5.1 only.
     # Upstream issue: https://github.com/dino/dino/issues/493
     dino = prev.dino.overrideAttrs (old: {
-      patches = (old.patches or []) ++ [./patches/dino-scram-sha-256.patch];
+      patches = (old.patches or []) ++ [./patches/dino-scram.patch];
     });
   };
 }
