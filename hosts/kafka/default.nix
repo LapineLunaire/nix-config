@@ -32,10 +32,7 @@
   nix.settings = {
     max-jobs = 2;
     cores = 4;
-    # Build on disk rather than in the laptop's limited tmpfs.
-    build-dir = "/nix/var/nix/builds";
   };
-  systemd.tmpfiles.rules = ["d /nix/var/nix/builds 0755 root root -"];
 
   system.stateVersion = "26.11";
   home-manager.users.carmilla.home.stateVersion = "26.11";
