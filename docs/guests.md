@@ -14,7 +14,7 @@ doas systemctl restart microvm@<name>
 ## Add a guest
 
 1. Add its directory under `hosts/sparkle/guests/` and a unique index from 10 to 99 in `hosts/sparkle/guest-registry.nix`. Do not change existing indices, because they determine each guest's IP address, VSOCK CID, and hexadecimal MAC suffix.
-2. Add web backends to `hosts/sparkle/guest-web.nix`, which also generates the DNS records and the firewall rules between proxy and the guest. Add a `vmVhosts` entry with its `extraAllow` callers to `hosts/sparkle/guests/proxy/vhosts.nix`; without it, proxy serves no vhost for the name. Declare `microvmGuest.egress`, and add any other ingress to `hosts/sparkle/dmz-bridge.nix` and the guest firewall. See [network access](network.md).
+2. Add web backends to `hosts/sparkle/guest-web.nix`, which also generates the DNS records and the firewall rules between proxy and the guest. Proxy serves a vhost for each backend that admits trusted clients and uptime-kuma. For other callers or a custom body, add an entry to `vmVhostOverrides` in `hosts/sparkle/guests/proxy/vhosts.nix`. Declare `microvmGuest.egress`, and add any other ingress to `hosts/sparkle/dmz-bridge.nix` and the guest firewall. See [network access](network.md).
 3. For NFS, update `nfsClients` in `hosts/sparkle/guest-net.nix`, the guest's mount, and the vault guest's export.
 4. Restore the guest's keys and state, or create its identity as root:
 
