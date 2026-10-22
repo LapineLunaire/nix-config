@@ -62,8 +62,6 @@
     extra-substituters = lib.mkAfter ["https://cache.lunaire.moe/desktop?priority=10"];
     extra-trusted-public-keys = lib.mkAfter ["desktop:QBHQfUrDyPKWwQolz4KiaJ1NlC+dGZLP4m29qgvkYs4="];
 
-    # Do not GC this overlay: whiteouts can hide paths needed by the next guest generation.
-    # ci-runner-store.nix recreates the store and database together.
     build-dir = "/var/nixbuild";
     max-jobs = 3;
   };
