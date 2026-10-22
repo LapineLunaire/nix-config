@@ -6,6 +6,7 @@
     ../../modules/nixos/programs/gaming.nix
     ../../modules/nixos/networking/steam-frame.nix
     ../../modules/nixos/nix/desktop-cache.nix
+    ../../modules/nixos/networking/trusted-ssh-ingress.nix
     ../../modules/nixos/networking/wireless-regulatory-domain.nix
     ./hardware-configuration.nix
     ./persistence.nix
@@ -19,6 +20,7 @@
 
   host.flakePath = "/persist/nix-config";
   host.wirelessRegulatoryDomain = "NL";
+  host.trustedSubnets = ["10.28.64.0/24" "10.28.96.0/24" "10.100.0.0/24" "10.1.0.0/24"];
   hardware.steamFrame.lanSubnets = ["10.28.64.0/24"];
   nixpkgs.config.allowUnfree = true;
 
@@ -32,12 +34,8 @@
 
   powerManagement.cpuFreqGovernor = "powersave";
 
-  services.openssh.openFirewall = false;
-
-  # Allow SSH from the LANs and VPNs below.
   # WinBox discovery (UDP 5678) is LAN-only.
   networking.firewall.extraInputRules = ''
-    ip saddr { 10.28.64.0/24, 10.28.96.0/24, 10.100.0.0/24, 10.1.0.0/24 } tcp dport 22 accept
     ip saddr 10.28.64.0/24 udp dport 5678 accept
   '';
 
