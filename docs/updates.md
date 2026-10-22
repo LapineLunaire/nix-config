@@ -10,7 +10,12 @@
 
 The [update workflow](../.forgejo/workflows/flake-update.yml) also supports manual runs. Updates queue per branch, and each run checks out the latest branch to include earlier update commits.
 
-The job updates `flake.lock` and refreshes the Caddy plugin hash if necessary. On Mondays and manual runs it also refreshes Home Assistant's container digest. If either changes, it evaluates all systems and builds Camellya, Kafka, and Sparkle, including Sparkle's guest runners, once before pushing a signed commit with the combined changes. Sparxie and Silverwolf are evaluated but not built by the x86_64 Linux runner.
+On Mondays and manual runs the job refreshes Home Assistant's container digest. It then updates the flake inputs in two groups:
+
+- The server-only inputs in `SERVER_INPUTS` update first, with the Caddy plugin hash refreshed if necessary. They must pass the flake check and a Sparkle build.
+- The remaining inputs update next. They must pass the flake check and builds of Sparkle, Camellya, and Kafka.
+
+A group that fails is rolled back, and the other group's update still goes ahead. If anything changed, the job checks all systems again, builds Camellya, Kafka, and Sparkle, including Sparkle's guest runners, and pushes one signed commit with the combined changes. If a group was rolled back, the run then fails and names that group. Sparxie and Silverwolf are evaluated but not built by the x86_64 Linux runner.
 
 `CI_SIGNING_KEY` supplies the SSH signing key. With `ATTIC_TOKEN` set, the workflow uploads Sparkle to the `server` cache and Camellya and Kafka to the `desktop` cache before committing and pushing. An upload failure blocks the push; without a token, uploads are skipped. Temporary signing keys and cache credentials are removed when their steps finish.
 
