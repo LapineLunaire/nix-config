@@ -38,7 +38,7 @@
     };
 
     impermanence = {
-      url = "github:nix-community/impermanence/master";
+      url = "github:LapineLunaire/impermanence/initrd-systemd-enable-removal";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };

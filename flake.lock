@@ -174,16 +174,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1792503832,
-        "narHash": "sha256-WsqPR04nPS1bi5bYva04cJJcJyHw7x/rbaJmoXMzF04=",
-        "owner": "nix-community",
+        "lastModified": 1792686760,
+        "narHash": "sha256-s0TeXWG5Ci75Y/Hzon0Z7NrN/fG773Rc54/z6oPFszQ=",
+        "owner": "LapineLunaire",
         "repo": "impermanence",
-        "rev": "936ced36ecd25fcbd9b4789184b88aa2e4c2a901",
+        "rev": "0aac5187db0a9a9303454298a21d20cce9009fe5",
         "type": "github"
       },
       "original": {
-        "owner": "nix-community",
-        "ref": "master",
+        "owner": "LapineLunaire",
+        "ref": "initrd-systemd-enable-removal",
         "repo": "impermanence",
         "type": "github"
       }
