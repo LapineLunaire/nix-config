@@ -12,6 +12,10 @@ concurrency:
 jobs:
   update:
     runs-on: nixos
+    env:
+      # Update server-only inputs separately so a failed update of the other inputs does not hold them back.
+      SERVER_INPUTS: nixpkgs-stable home-manager-stable nixvim-stable microvm vpn-confinement unifi-os-server
+      CHECK: nix flake check --all-systems --no-build --no-write-lock-file --option allow-import-from-derivation false
     steps:
       - name: Checkout
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
@@ -38,18 +42,14 @@ jobs:
 
           sed -i "s|home-assistant/home-assistant@sha256:[a-f0-9]*|home-assistant/home-assistant@${ha}|" hosts/sparkle/guests/homeassistant/default.nix
 
-      - name: Update flake inputs
-        run: nix flake update
-
-      - name: Check for changes
-        id: check
+      - name: Update server inputs
+        id: server
+        continue-on-error: true
         run: |
+          set -euo pipefail
+          read -ra inputs <<< "$SERVER_INPUTS"
+          nix flake update "${inputs[@]}"
           if git diff --quiet flake.lock; then
-            echo "lock_changed=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "lock_changed=true" >> "$GITHUB_OUTPUT"
-          fi
-          if git diff --quiet -- flake.lock hosts/sparkle/guests/homeassistant/default.nix; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -58,7 +58,9 @@ jobs:
       # Rebuild the plugin source to detect stale fixed-output hashes hidden by substitution.
       # Build first because --rebuild requires an existing output.
       - name: Refresh the caddy plugin hash
-        if: steps.check.outputs.lock_changed == 'true'
+        id: caddy
+        if: steps.server.outputs.changed == 'true'
+        continue-on-error: true
         run: |
           set -euo pipefail
           target=".#nixosConfigurations.proxy.config.services.caddy.package.src"
@@ -84,9 +86,79 @@ jobs:
           echo "caddy plugin hash refreshed: $old -> $got"
           nix build --no-link "$target"
 
+      - name: Check server inputs
+        id: server-check
+        if: steps.server.outputs.changed == 'true' && steps.caddy.outcome == 'success'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          $CHECK
+          nix build --no-link .#nixosConfigurations.sparkle.config.system.build.toplevel
+
+      - name: Revert server inputs
+        id: server-revert
+        if: steps.server.outcome == 'failure' || (steps.server.outputs.changed == 'true' && steps.server-check.outcome != 'success')
+        run: git checkout -- flake.lock modules/nixos/services/caddy.nix
+
+      - name: Save checked lock file
+        run: cp flake.lock "$RUNNER_TEMP/flake.lock"
+
+      - name: Update remaining inputs
+        id: rest
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          input_names=$(nix eval --impure --raw --expr 'builtins.concatStringsSep " " (builtins.attrNames (builtins.fromJSON (builtins.readFile ./flake.lock)).nodes.root.inputs)')
+          read -ra all_inputs <<< "$input_names"
+          inputs=()
+          for input in "${all_inputs[@]}"; do
+            case " $SERVER_INPUTS " in
+              *" $input "*) ;;
+              *) inputs+=("$input") ;;
+            esac
+          done
+          # nix flake update with no names updates every input.
+          if [ "${#inputs[@]}" -eq 0 ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          nix flake update "${inputs[@]}"
+          if cmp -s flake.lock "$RUNNER_TEMP/flake.lock"; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Shared inputs also affect sparkle.
+      - name: Check remaining inputs
+        id: rest-check
+        if: steps.rest.outputs.changed == 'true'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          $CHECK
+          for host in sparkle camellya kafka; do
+            nix build --no-link ".#nixosConfigurations.$host.config.system.build.toplevel"
+          done
+
+      - name: Revert remaining inputs
+        id: rest-revert
+        if: steps.rest.outcome == 'failure' || (steps.rest.outputs.changed == 'true' && steps.rest-check.outcome != 'success')
+        run: cp "$RUNNER_TEMP/flake.lock" flake.lock
+
+      - name: Check for changes
+        id: check
+        run: |
+          if git diff --quiet -- flake.lock modules/nixos/services/caddy.nix hosts/sparkle/guests/homeassistant/default.nix; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Checks the combined result, and a Home Assistant digest change on its own.
       - name: Check flake outputs
         if: steps.check.outputs.changed == 'true'
-        run: nix flake check --all-systems --no-build --no-write-lock-file --option allow-import-from-derivation false
+        run: $CHECK
 
       # Sparkle includes every guest runner. The ARM VPS is evaluated above.
       - name: Build
@@ -137,3 +209,17 @@ jobs:
           message: "flake: update dependencies"
           ssh-signing-key: ${{ secrets.CI_SIGNING_KEY }}
           push-token: ${{ github.token }}
+
+      - name: Report reverted inputs
+        if: steps.server-revert.outcome == 'success' || steps.rest-revert.outcome == 'success'
+        env:
+          SERVER_REVERTED: ${{ steps.server-revert.outcome == 'success' }}
+          REST_REVERTED: ${{ steps.rest-revert.outcome == 'success' }}
+        run: |
+          if [ "$SERVER_REVERTED" = "true" ]; then
+            echo "Server inputs were not updated" >&2
+          fi
+          if [ "$REST_REVERTED" = "true" ]; then
+            echo "Remaining inputs were not updated" >&2
+          fi
+          exit 1
