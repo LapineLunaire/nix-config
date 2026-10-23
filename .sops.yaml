@@ -1,7 +1,7 @@
 # Every key below is that system's SSH host key, converted from /etc/ssh/ssh_host_ed25519_key.pub with ssh-to-age.
 keys:
   - &camellya_host age1kt66h37ezqaryvef402f0665aavu3mpj2l7trdkqctpjl6zeeveswgc50j
-  - &kafka_host age1k8teh6exvwspgx9vzq66wkmuc2xpct54csvnyn3n6jhf6vxs7ffqv9vzen
+  - &kafka_host age1umqvf63lmrkexkknyfx3haux2pr2rczszt6mhwrflnkg9qvwmprsxnye8e
   - &sparkle_host age10anc2xygfedadkvlsc6whyurx7plyquxa47w0c9ut728n8ur4vas677ax7
   - &sparxie_host age1tddj97txq5mckvzrs8czekp5lc530rc35yw0mtd3w9qxjjwf4vpsn7s8yl
   - &vm_proxy age1zqe754t3w9pct9g3rtkx06njw9l5s7mj9xc8m5qrd2hp4h8d0cjsp04g3t
