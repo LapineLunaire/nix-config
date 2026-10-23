@@ -130,7 +130,7 @@ in {
         # UniFi controller reaches the APs on the management network for adoption, provisioning, and firmware pushes.
         iifname "unifi" oifname "sfp0" ip daddr ${dmz.management} accept
         # UniFi APs reach the controller for L3 inform and adoption and for service traffic.
-        iifname "sfp0" oifname "unifi" ip saddr ${dmz.management} tcp dport { 8080, 8443, 6789, 8880, 8843 } accept
+        iifname "sfp0" oifname "unifi" ip saddr ${dmz.management} tcp dport { 8080, 8443, 6789, 8880, 8843, 28082, 5671 } accept
         iifname "sfp0" oifname "unifi" ip saddr ${dmz.management} udp dport { 3478, 10001 } accept
         # Admins reach the controller web UI directly, with no reverse proxy in front of it.
         iifname "sfp0" oifname "unifi" ip saddr { ${trusted} } tcp dport 443 accept
