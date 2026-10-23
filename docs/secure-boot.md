@@ -25,7 +25,7 @@ nix --extra-experimental-features 'nix-command flakes' shell '.#nixosConfigurati
   -c sbctl --config /tmp/sbctl-install.yaml create-keys
 ```
 
-Return to [Camellya installation](install-camellya.md#5-install-and-reboot), [server installation](install-servers.md#4-install-and-export), or the relevant [recovery guide](install.md). Keep Secure Boot enforcement disabled until the signing keys are enrolled.
+Return to [Camellya installation](install-camellya.md#5-install-and-reboot), [Kafka installation](install-kafka.md#4-install-and-reboot), [server installation](install-servers.md#4-install-and-export), or the relevant [recovery guide](install.md). Keep Secure Boot enforcement disabled until the signing keys are enrolled.
 
 ## Installed system enrollment
 

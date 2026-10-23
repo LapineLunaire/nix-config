@@ -50,9 +50,30 @@ install -m 0600 <identity-directory>/ssh_host_ed25519_key /mnt/persist/etc/ssh/
 install -m 0644 <identity-directory>/ssh_host_ed25519_key.pub /mnt/persist/etc/ssh/
 ```
 
-`profiles/desktop/secrets.yaml` must contain `attic-pull-token`, and `users/carmilla/secrets.yaml` must contain `carmilla-password-hash`. Both files must include Kafka's key as a recipient. Keep the private key outside Git and retain a secure backup. If the key is lost, generate a replacement, update Kafka's recipient in `.sops.yaml`, and update both files' recipients before installation; see [identity and secrets](keys.md).
+`profiles/desktop/secrets.yaml` must contain `attic-pull-token`, and `users/carmilla/secrets.yaml` must contain `carmilla-password-hash`. Both files must include Kafka's key as a recipient. Keep the private key outside Git and retain a secure backup.
 
 [Restore or create Secure Boot keys and bind-mount persisted `/var/lib`](secure-boot.md#installer-signing-keys), using `kafka` as the hostname.
+
+### If the SSH key is lost
+
+Kafka has no host secrets file, so only the two shared files need its new key. Camellya is a recipient of both and re-encrypts them.
+
+Generate a key in the installer and print its age recipient:
+
+```sh
+install -d -m 0755 /mnt/persist/etc/ssh
+ssh-keygen -t ed25519 -N '' -f /mnt/persist/etc/ssh/ssh_host_ed25519_key
+nix --extra-experimental-features 'nix-command flakes' shell --inputs-from . nixpkgs#ssh-to-age -c ssh-to-age < /mnt/persist/etc/ssh/ssh_host_ed25519_key.pub
+```
+
+On Camellya, set `kafka_host` in `.sops.yaml` to the printed recipient, then re-encrypt both files with the `sops` alias:
+
+```sh
+sops updatekeys -y users/carmilla/secrets.yaml
+sops updatekeys -y profiles/desktop/secrets.yaml
+```
+
+Commit and push the three files, then run `git pull` in the installer's checkout before installing.
 
 ## 4. Install and reboot
 
