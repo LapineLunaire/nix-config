@@ -65,7 +65,7 @@ doas borg-job-hetzner key export :: ~/borg-key
 
 The repository holds the only copy of the key. Store the exported key with the passphrase in the password manager, then run `doas rm ~/borg-key`.
 
-Extract into a separate directory, stop the affected guest, then copy the selected state into `/persist`. Archive paths begin with `mnt/borg-snapshot/`:
+Extract into a separate directory, stop the affected guest, then copy the selected state into `/persist`. Archive paths begin with `mnt/borg-snapshot/`. `--checksum` replaces files whose size and modification time happen to match, and `--delete` removes files missing from the archive. The excluded `volumes/` stays in place:
 
 For ci-runner, replace the guest start command below with `doas systemctl start ci-runner-store-reset`. This clears any restored Nix database and existing store image before starting the guest.
 
@@ -74,7 +74,7 @@ mkdir -p ~/borg-restore
 cd ~/borg-restore
 doas borg-job-hetzner extract --numeric-ids ::<archive> mnt/borg-snapshot/vms/<name>
 doas systemctl stop microvm@<name>
-doas rsync -aHAX --numeric-ids mnt/borg-snapshot/vms/<name>/ /persist/vms/<name>/
+doas rsync -aHAX --numeric-ids --checksum --delete --exclude=/volumes/ mnt/borg-snapshot/vms/<name>/ /persist/vms/<name>/
 doas systemctl start microvm@<name>
 cd ~
 doas rm -rf ~/borg-restore
