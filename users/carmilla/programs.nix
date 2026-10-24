@@ -1,5 +1,4 @@
 {
-  config,
   lib,
   pkgs,
   ...
@@ -107,7 +106,6 @@
 
   programs.zsh = {
     enable = true;
-    history.path = "${config.xdg.dataHome}/zsh/history";
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
     initContent = ''
