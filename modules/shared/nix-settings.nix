@@ -12,6 +12,7 @@
       auto-optimise-store = true;
       # Build from source if downloading a cached package fails.
       fallback = true;
+      use-xdg-base-directories = true;
     };
     channel.enable = false;
   };

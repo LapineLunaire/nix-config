@@ -105,10 +105,7 @@
         run install -Dm644 ${mimeApps} "${config.xdg.configHome}/mimeapps.list"
       '';
 
-    home.preferXdgDirectories = true;
     xdg = {
-      enable = true;
-
       # App-generated handlers retain old store paths across package upgrades.
       desktopEntries = {
         nix-claude-code-url-handler = {
