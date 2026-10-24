@@ -105,6 +105,7 @@
         run install -Dm644 ${mimeApps} "${config.xdg.configHome}/mimeapps.list"
       '';
 
+    home.preferXdgDirectories = true;
     xdg = {
       enable = true;
 

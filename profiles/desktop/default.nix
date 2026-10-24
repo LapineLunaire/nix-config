@@ -29,6 +29,7 @@
   nixpkgs.overlays = [(import ../../overlays).modifications];
   console.keyMap = "colemak";
   nix.daemonCPUSchedPolicy = "idle";
+  nix.settings.use-xdg-base-directories = true;
   networking.networkmanager.enable = true;
 
   programs.nix-ld.enable = true;
