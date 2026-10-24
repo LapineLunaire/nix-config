@@ -15,7 +15,7 @@ in {
   home.packages = with pkgs; [
     alejandra
     bat
-    brave
+    brave-origin
     duf
     eza
     ffmpeg
