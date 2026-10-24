@@ -52,6 +52,9 @@ in {
     ];
     persistentTimer = true;
     preHook = ''
+      while [ "$(${config.systemd.package}/bin/systemctl show -P ActiveState nixos-upgrade.service)" = activating ] || [ -e /run/systemd/shutdown/scheduled ]; do
+        ${pkgs.coreutils}/bin/sleep 30
+      done
       ${loadRepository}
       # Recover the mount and snapshot left by an interrupted backup.
       ${pkgs.util-linux}/bin/umount /mnt/borg-snapshot 2>/dev/null || true
@@ -94,11 +97,17 @@ in {
 
   systemd.services."borgbackup-job-hetzner" = {
     onFailure = ["borgbackup-failed.service"];
+    # Restarting a waiting backup during an upgrade's switch would deadlock.
+    restartIfChanged = false;
     serviceConfig = {
+      # nixos-upgrade's ordering only waits for a backup that runs as a oneshot.
+      Type = "oneshot";
       ReadWritePaths = ["/mnt"];
       StateDirectory = "borgbackup/hetzner";
     };
   };
+
+  systemd.services.nixos-upgrade.after = lib.mkIf config.system.autoUpgrade.enable ["borgbackup-job-hetzner.service"];
 
   systemd.services.borgbackup-failed = {
     description = "Mail the failed Borg backup log";
