@@ -19,3 +19,9 @@
 - Test behavior you are unsure about before relying on it.
 - Say what was checked: syntax, Nix evaluation, builds, or running behavior.
 - If a check could not run, say so. Do not report it as passed.
+
+## Commits
+
+- Write one imperative subject line with no body or trailers, like the existing `git log`.
+- Name the change itself, such as "Share Attic client configuration between desktops and servers", not the reason or the steps.
+- Commit only when asked. Do not push unless asked.
