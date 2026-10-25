@@ -4,18 +4,21 @@ Boot an x86_64 NixOS installer in UEFI mode with Secure Boot enforcement disable
 
 ## 1. Partition and encrypt
 
-**The following commands erase the selected disk.** Check the model and size with `lsblk`; substitute the actual internal SSD if it is not `/dev/nvme0n1`. Keep the LUKS passphrase for recovery.
+**The following commands erase the selected disk.** Pick the internal SSD by model and serial from `/dev/disk/by-id`, and set `disk` to it. Keep the LUKS passphrase for recovery.
 
 ```sh
-lsblk -o NAME,SIZE,MODEL,FSTYPE,MOUNTPOINTS
-parted /dev/nvme0n1 -- mklabel gpt
-parted /dev/nvme0n1 -- mkpart ESP fat32 1MiB 1GiB
-parted /dev/nvme0n1 -- set 1 esp on
-parted /dev/nvme0n1 -- mkpart kafka-crypt 1GiB 100%
-mkfs.vfat -F32 -n KAFKA-EFI /dev/nvme0n1p1
+lsblk -o NAME,SIZE,MODEL,SERIAL,FSTYPE,PARTLABEL,MOUNTPOINTS
+ls /dev/disk/by-id/nvme-*
+disk=/dev/disk/by-id/<disk>
+parted $disk -- mklabel gpt
+parted $disk -- mkpart kafka-efi fat32 1MiB 1GiB
+parted $disk -- set 1 esp on
+parted $disk -- mkpart kafka-crypt 1GiB 100%
+udevadm settle
+mkfs.vfat -F32 /dev/disk/by-partlabel/kafka-efi
 
-cryptsetup luksFormat --type luks2 /dev/nvme0n1p2
-cryptsetup open /dev/nvme0n1p2 cryptroot
+cryptsetup luksFormat --type luks2 /dev/disk/by-partlabel/kafka-crypt
+cryptsetup open /dev/disk/by-partlabel/kafka-crypt cryptroot
 mkfs.btrfs -L KAFKA /dev/mapper/cryptroot
 mkdir -p /mnt
 mount -o subvolid=5 /dev/mapper/cryptroot /mnt
@@ -25,14 +28,14 @@ btrfs subvolume create /mnt/@home
 umount /mnt
 ```
 
-Keep the labels and subvolume names as shown; the hardware configuration uses them to mount the filesystems.
+Keep the partition and subvolume names as shown; the hardware configuration uses them to mount the filesystems. GPT partition names allow 36 characters, so they carry the host name. FAT volume labels allow only 11 and are not used.
 
 ## 2. Mount and clone
 
 ```sh
 mount -t tmpfs -o size=2G,mode=755 none /mnt
 mkdir -p /mnt/{boot,nix,persist,home}
-mount -o umask=0077 /dev/disk/by-label/KAFKA-EFI /mnt/boot
+mount -o umask=0077 /dev/disk/by-partlabel/kafka-efi /mnt/boot
 mount -o subvol=@nix,compress=zstd:3,noatime /dev/mapper/cryptroot /mnt/nix
 mount -o subvol=@persist,compress=zstd:3,noatime,nosuid,nodev /dev/mapper/cryptroot /mnt/persist
 mount -o subvol=@home,compress=zstd:3,noatime,nosuid,nodev /dev/mapper/cryptroot /mnt/home

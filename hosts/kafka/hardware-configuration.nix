@@ -47,7 +47,7 @@
       options = ["subvol=@home" "compress=zstd:3" "noatime" "nosuid" "nodev"];
     };
     "/boot" = {
-      device = "/dev/disk/by-label/KAFKA-EFI";
+      device = "/dev/disk/by-partlabel/kafka-efi";
       fsType = "vfat";
       options = ["umask=0077"];
     };
