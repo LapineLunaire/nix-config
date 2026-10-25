@@ -21,6 +21,7 @@
     ../../modules/nixos/programs/obs-studio.nix
     ../../modules/nixos/desktop/fonts.nix
     ../../modules/nixos/desktop/plasma.nix
+    ../../modules/nixos/desktop/plymouth.nix
     ../../modules/nixos/desktop/system-disks.nix
     ../../modules/nixos/desktop/xkb.nix
   ];
