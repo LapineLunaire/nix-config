@@ -18,6 +18,8 @@
     fsType = "nfs4";
     options = [
       "ro"
+      "nosuid"
+      "nodev"
       "_netdev"
       "x-systemd.automount"
       "x-systemd.mount-timeout=20"

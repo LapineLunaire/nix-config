@@ -22,6 +22,8 @@ in {
     device = "${net.vmAddress.vault}:/vault/torrents";
     fsType = "nfs4";
     options = [
+      "nosuid"
+      "nodev"
       "_netdev"
       "x-systemd.automount"
       "x-systemd.mount-timeout=20"
