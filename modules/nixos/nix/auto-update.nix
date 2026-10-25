@@ -77,9 +77,11 @@ in {
 
       # Keep the dependency graph and sources fixed; only locked versions may advance.
       check_lock() {
-        ${jq} -e -n --argjson old "$(git show "$1:flake.lock")" --argjson new "$(git show "$2:flake.lock")" '
+        ${jq} -e -n --slurpfile old <(git show "$1:flake.lock") --slurpfile new <(git show "$2:flake.lock") '
           def structure: del(.nodes) + {nodes: (.nodes | map_values(del(.locked)))};
           def source: del(.rev, .narHash, .lastModified, .revCount);
+          ($old | length) == 1 and ($new | length) == 1 and (
+          $old[0] as $old | $new[0] as $new |
           ($old | structure) == ($new | structure)
           and all($new.nodes | to_entries[];
             .key as $key | .value.locked as $next | $old.nodes[$key].locked as $prev
@@ -87,7 +89,7 @@ in {
             and ($prev == $next or (
               ($prev.lastModified | type) == "number"
               and ($next.lastModified | type) == "number"
-              and $prev.lastModified <= $next.lastModified)))
+              and $prev.lastModified <= $next.lastModified))))
         ' > /dev/null || refuse "CI commit $2 changes a flake input source or moves an input back"
       }
 

@@ -27,6 +27,8 @@ Sparkle and Sparxie check `origin/main` as described below, then reset `/persist
 - From the tip, commits signed with a `host.autoUpdate.ciSigners` key are walked back to a commit signed with a `host.autoUpdate.allowedSigners` key or the deployed commit. A signature from `allowedSigners` covers the commit's whole history.
 - A CI commit must have one parent and change only flake input versions or text matching the patterns in `host.autoUpdate.ciPins`. Flake inputs keep their sources and dependency wiring and cannot move back in time. File modes cannot change. Add new inputs with their lock entries in a signed commit. When the workflow starts refreshing another pinned value, add its file and pattern to `ciPins`.
 
+After a deliberate force push, run `doas rm /var/lib/nixos-upgrade/deployed-rev` on each affected host to accept the rewritten history. The next upgrade still checks commit signatures and CI changes.
+
 A dependency update that adds, removes, renames, or rewires lock entries makes the next CI commit fail this check. Review that commit and push a signed commit on top, such as `git commit --allow-empty -S -m "Accept the flake update"`.
 
 Sparxie reboots when the kernel, kernel modules, or initrd change. Sparkle restarts changed running guests; boot changes need a manual reboot and the pool passphrase. Failed upgrades mail the last 50 log lines. Upgrades and backups never overlap: an upgrade waits for a running backup, and a backup waits for a running upgrade and the reboot it may schedule. Commits pushed after the upgrade check wait for the next night. Desktop activation remains manual.
