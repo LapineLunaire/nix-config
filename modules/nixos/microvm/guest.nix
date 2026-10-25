@@ -18,6 +18,7 @@ in {
     ../system/security.nix
     ../networking/firewall.nix
     ../programs/ghostty-terminfo.nix
+    ./host-clock.nix
   ];
 
   options.microvmGuest.egress = lib.mkOption {
@@ -93,9 +94,6 @@ in {
     nix.settings.auto-optimise-store = lib.mkForce false;
 
     sops.age.sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
-
-    # Use the host's NTS-synchronised clock through kvm-clock.
-    services.timesyncd.enable = false;
 
     services.prometheus.exporters.node = {
       enable = true;
