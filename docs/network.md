@@ -79,6 +79,8 @@ The rules come from `hosts/sparkle/dmz-bridge.nix`, the guest input firewalls, a
 
 SSH also requires a source address in the SOPS IPv4 or IPv6 allowlist; this applies to loopback and tunnel sources too. Recover a stale allowlist through the Hetzner console. The ejabberd admin interface listens on loopback; from an allowlisted address, run `ssh -N -L 5280:127.0.0.1:5280 carmilla@46.225.108.230` and open `http://127.0.0.1:5280/admin/`.
 
+The ejabberd HTTP API also requires the admin account, even through the SSH tunnel. For local account management, run `doas -u ejabberd ejabberdctl`; it cannot reach the node as root.
+
 Sparxie's Caddy serves `bunny.enterprises`, `chat.bunny.enterprises`, `matrix.bunny.enterprises` (also on TCP/UDP 8448), and `pub.bunny.enterprises`; ejabberd serves XMPP for `bunny.enterprises`. `pub.bunny.enterprises` requires basic auth and is reverse-proxied over `wg0` to the proxy guest at `10.73.212.0:9000`, where Caddy serves `/srv/misc`, a read-only NFS mount of the vault guest's `/vault/misc`. The proxy firewall allows port 9000 only on `wg0`.
 
 The proxy guest initiates WireGuard to `46.225.108.230:47329` with a 25-second keepalive. Sparxie's tunnel address is `10.73.212.1`, and each peer allows only the other's `/32`. Requests to port 9000 travel inside the tunnel, so the bridge sees only the WireGuard UDP flow and needs no TCP 9000 rule.

@@ -171,13 +171,11 @@
           who:
             access:
               allow:
-                - acl: loopback
                 - acl: admin
             oauth:
               scope: "ejabberd:admin"
               access:
                 allow:
-                  - acl: loopback
                   - acl: admin
           what:
             - "*"
