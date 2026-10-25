@@ -181,12 +181,6 @@
             - "*"
             - "!stop"
             - "!start"
-        "public commands":
-          who:
-            ip: 127.0.0.1/8
-          what:
-            - status
-            - connected_users_number
 
       shaper:
         normal:
