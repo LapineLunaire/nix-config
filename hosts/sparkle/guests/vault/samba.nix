@@ -38,6 +38,7 @@
         "server string" = "vault";
         "netbios name" = "vault";
         "security" = "user";
+        "server signing" = "mandatory";
         "hosts allow" = "${lib.concatStringsSep " " config.host.trustedSubnets} 127.0.0.0/8 ::1";
         "hosts deny" = "0.0.0.0/0";
         "guest account" = "nobody";
