@@ -55,7 +55,8 @@ in {
     verifyOriginBranch = pkgs.writeShellScript "verify-origin-${branch}" ''
       set -euo pipefail
       export HOME=/home/${owner}
-      git() { ${pkgs.util-linux}/bin/runuser -u ${owner} -- ${pkgs.gitMinimal}/bin/git -C ${flakePath} "$@"; }
+      # Nix ignores replace refs and grafts, so Git must check the same commits Nix builds.
+      git() { ${pkgs.util-linux}/bin/runuser -u ${owner} -- ${pkgs.coreutils}/bin/env GIT_GRAFT_FILE=/dev/null ${pkgs.gitMinimal}/bin/git --no-replace-objects -C ${flakePath} "$@"; }
 
       refuse() {
         echo "refusing to upgrade: $*" >&2
