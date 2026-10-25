@@ -3,6 +3,7 @@
     ../../modules/nixos/system/boot.nix
     ../../modules/nixos/system/secure-boot.nix
     ../../modules/nixos/system/tuned-kernel.nix
+    ../../modules/nixos/services/btrfs.nix
     ../../modules/nixos/programs/gaming.nix
     ../../modules/nixos/networking/steam-frame.nix
     ../../modules/nixos/nix/desktop-cache.nix

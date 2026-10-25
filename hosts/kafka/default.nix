@@ -3,6 +3,7 @@
     ../../modules/nixos/system/boot.nix
     ../../modules/nixos/system/secure-boot.nix
     ../../modules/nixos/system/tuned-kernel.nix
+    ../../modules/nixos/services/btrfs.nix
     ../../modules/nixos/programs/gaming.nix
     ../../modules/nixos/nix/desktop-cache.nix
     ../../modules/nixos/networking/trusted-ssh-ingress.nix
