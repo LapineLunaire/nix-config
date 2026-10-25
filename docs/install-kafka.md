@@ -95,6 +95,8 @@ The boot-time passphrase prompt and console use Colemak. Plasma also offers the 
 
 [Enroll and verify Secure Boot](secure-boot.md#installed-system-enrollment), then [enroll TPM2 with a PIN](secure-boot.md#tpm2-enrollment) using `/dev/disk/by-partlabel/kafka-crypt`. Restore the [YubiKey SSH and Git signing identity](keys.md#yubikey-ssh-and-git-signing).
 
+Kafka accepts SSH from the trusted subnets only on the NetworkManager connections listed in `host.trustedConnections` in `hosts/kafka/default.nix`, which are the home Wi-Fi and the WireGuard VPN. A recreated connection gets a new UUID. Find it with `nmcli -t -f UUID,TYPE connection show` and update the list.
+
 Check the built-in display, Wi-Fi, audio, brightness keys, and suspend/resume before relying on the laptop. Later switches use `nh os switch .` from `/persist/nix-config`.
 
 ## Disk usage
