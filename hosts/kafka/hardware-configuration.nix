@@ -11,9 +11,10 @@
   boot.initrd.kernelModules = ["i915"];
   boot.kernelModules = ["kvm-intel"];
 
+  # Unlocking extends PCR 15. The TPM token is bound to its initial value, so it cannot be unsealed after any volume is unlocked.
   boot.initrd.luks.devices.cryptroot = {
     device = "/dev/disk/by-partlabel/kafka-crypt";
-    crypttabExtraOpts = ["tpm2-device=auto"];
+    crypttabExtraOpts = ["tpm2-device=auto" "tpm2-measure-pcr=yes"];
     allowDiscards = true;
   };
 

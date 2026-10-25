@@ -16,9 +16,10 @@
 
   # LUKS -> LVM -> XFS volumes for /nix, /persist and /home.
   # Use the enrolled TPM token; the LUKS passphrase remains available for recovery.
+  # Unlocking extends PCR 15. The TPM token is bound to its initial value, so it cannot be unsealed after any volume is unlocked.
   boot.initrd.luks.devices."cryptroot" = {
     device = "/dev/disk/by-uuid/d72ac9db-b522-4087-8352-fdf216090ed5";
-    crypttabExtraOpts = ["tpm2-device=auto"];
+    crypttabExtraOpts = ["tpm2-device=auto" "tpm2-measure-pcr=yes"];
     allowDiscards = true;
   };
 
