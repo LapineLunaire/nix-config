@@ -69,7 +69,18 @@
 
       allowedSigners = lib.mkOption {
         type = lib.types.lines;
-        description = "SSH allowed-signers entries trusted to sign upgrades.";
+        description = "SSH allowed-signers entries trusted to sign any upgrade.";
+      };
+
+      ciSigners = lib.mkOption {
+        type = lib.types.lines;
+        description = "SSH allowed-signers entries trusted only for flake input updates and the values in ciPins.";
+      };
+
+      ciPins = lib.mkOption {
+        type = lib.types.attrsOf lib.types.str;
+        default = {};
+        description = "Files besides flake.lock that CI-signed commits may change, each mapped to an extended regular expression matching the only text that may change on a line.";
       };
     };
 
