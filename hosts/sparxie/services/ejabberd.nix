@@ -6,6 +6,9 @@
   security.acme.certs."bunny.enterprises".reloadServices = ["ejabberd.service"];
   users.users.ejabberd.extraGroups = ["bunny-cert"];
 
+  # The ejabberd module points Erlang at 127.0.0.1, but the epmd socket listens on all addresses by default.
+  services.epmd.listenStream = "127.0.0.1:4369";
+
   sops.templates."ejabberd-secrets.yml" = {
     restartUnits = ["ejabberd.service"];
     owner = "ejabberd";
