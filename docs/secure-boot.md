@@ -43,11 +43,11 @@ Sparkle uses its ZFS pool passphrase at boot and needs no LUKS enrollment.
 
 ## TPM2 enrollment
 
-Only after verifying Secure Boot, test the LUKS recovery passphrase and enroll TPM2 with a PIN. The commands below use Camellya's disk; for Kafka, replace `/dev/nvme0n1p2` with `/dev/disk/by-partlabel/kafka-crypt`:
+Only after verifying Secure Boot, test the LUKS recovery passphrase and enroll TPM2 with a PIN. The commands below use Camellya's disk; for Kafka, replace `camellya-crypt` with `kafka-crypt`:
 
 ```sh
-doas cryptsetup open --test-passphrase /dev/nvme0n1p2
-doas systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=7+15:sha256=0000000000000000000000000000000000000000000000000000000000000000 --tpm2-with-pin=yes --wipe-slot=tpm2 /dev/nvme0n1p2
+doas cryptsetup open --test-passphrase /dev/disk/by-partlabel/camellya-crypt
+doas systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=7+15:sha256=0000000000000000000000000000000000000000000000000000000000000000 --tpm2-with-pin=yes --wipe-slot=tpm2 /dev/disk/by-partlabel/camellya-crypt
 ```
 
 This replaces old TPM tokens while retaining password slots. Reboot and confirm the PIN prompt. Rebuilds do not enroll LUKS tokens. PCR 7 records the Secure Boot state and the certificates that authorized the boot images; it does not measure the kernel, initrd, or command line. PCR 15 must still hold its initial zero value, which the initrd changes when it unlocks a volume. A swapped-in volume unlocked with another passphrase therefore cannot be followed by unsealing this token. Keep the PIN and recovery passphrase. See `man systemd-cryptenroll` on the installed host for its enrollment reference.

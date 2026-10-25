@@ -8,15 +8,14 @@ Use the LUKS passphrase. Once Secure Boot is verified again, repeat [TPM enrollm
 
 Boot an x86_64 NixOS installer in UEFI mode with Secure Boot temporarily disabled. Run as root in Bash. **Skip all partitioning and formatting.**
 
-Unlock and activate the existing volumes:
+Unlock the existing disk:
 
 ```sh
-cryptsetup open /dev/nvme0n1p2 cryptroot
-vgchange -ay camellya
+cryptsetup open /dev/disk/by-partlabel/camellya-crypt cryptroot
 ```
 
-1. [Mount the existing volumes](install-camellya.md#2-mount).
-2. Reuse `/mnt/persist/nix-config` and its existing UUIDs; change into that checkout.
+1. [Mount the existing subvolumes](install-camellya.md#2-mount).
+2. Reuse `/mnt/persist/nix-config`; change into that checkout.
 3. [Restore the SSH host key and secrets](keys.md#host-identity-and-secrets) if needed. The original key decrypts existing secrets without re-encryption.
 4. [Restore Secure Boot keys and bind-mount persisted `/var/lib`](secure-boot.md#installer-signing-keys) before reinstalling.
 5. [Reinstall and reboot](install-camellya.md#5-install-and-reboot).
