@@ -27,6 +27,8 @@
         "defaults"
         "size=2G"
         "mode=755"
+        "nosuid"
+        "nodev"
       ];
     };
 
@@ -39,14 +41,14 @@
     "/persist" = {
       device = "sparxie/persist";
       fsType = "zfs";
-      options = ["zfsutil"];
+      options = ["zfsutil" "nosuid" "nodev"];
       neededForBoot = true;
     };
 
     "/home" = {
       device = "sparxie/home";
       fsType = "zfs";
-      options = ["zfsutil"];
+      options = ["zfsutil" "nosuid" "nodev"];
     };
 
     "/boot" = {

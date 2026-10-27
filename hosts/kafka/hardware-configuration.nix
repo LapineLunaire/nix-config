@@ -28,7 +28,7 @@
     "/" = {
       device = "none";
       fsType = "tmpfs";
-      options = ["defaults" "size=2G" "mode=755"];
+      options = ["defaults" "size=2G" "mode=755" "nosuid" "nodev"];
     };
     "/nix" = {
       device = "/dev/mapper/cryptroot";

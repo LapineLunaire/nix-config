@@ -37,6 +37,8 @@
         "defaults"
         "size=2G"
         "mode=755"
+        "nosuid"
+        "nodev"
       ];
     };
 

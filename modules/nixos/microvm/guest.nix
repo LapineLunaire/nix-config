@@ -51,7 +51,27 @@ in {
   };
 
   config = {
-    fileSystems."/persist".neededForBoot = true;
+    fileSystems = let
+      temporary = {
+        device = "none";
+        fsType = "tmpfs";
+        options = ["defaults" "size=25%" "mode=1777" "nosuid" "nodev" "noexec"];
+      };
+    in {
+      # Replaces microvm.nix's default root.
+      "/" = {
+        device = "rootfs";
+        fsType = "tmpfs";
+        options = ["defaults" "size=50%" "mode=755" "nosuid" "nodev"];
+        neededForBoot = true;
+      };
+      "/persist" = {
+        neededForBoot = true;
+        options = ["nosuid" "nodev"];
+      };
+      "/tmp" = temporary;
+      "/var/tmp" = temporary;
+    };
     environment.persistence."/persist" = {
       directories = [
         "/var/lib"
