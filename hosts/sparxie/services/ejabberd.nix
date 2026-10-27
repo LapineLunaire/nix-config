@@ -302,6 +302,32 @@
       "postgresql-passwords.service"
       "redis.service"
     ];
+    # No MemoryDenyWriteExecute: the Erlang JIT needs it.
+    serviceConfig = {
+      NoNewPrivileges = true;
+      CapabilityBoundingSet = "";
+      PrivateTmp = true;
+      PrivateDevices = true;
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      ReadWritePaths = [
+        config.services.ejabberd.spoolDir
+        config.services.ejabberd.logsDir
+      ];
+      ProtectKernelTunables = true;
+      ProtectKernelModules = true;
+      ProtectKernelLogs = true;
+      ProtectControlGroups = true;
+      ProtectClock = true;
+      ProtectHostname = true;
+      ProtectProc = "invisible";
+      RestrictAddressFamilies = ["AF_INET" "AF_INET6" "AF_UNIX" "AF_NETLINK"];
+      RestrictNamespaces = true;
+      RestrictRealtime = true;
+      RestrictSUIDSGID = true;
+      LockPersonality = true;
+      SystemCallArchitectures = "native";
+    };
   };
 
   networking.firewall = {
