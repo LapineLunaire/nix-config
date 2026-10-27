@@ -1,15 +1,16 @@
 diff --git a/xmpp-vala/src/module/sasl.vala b/xmpp-vala/src/module/sasl.vala
-index 3f3eca5..e9bc45c 100644
+index 3f3eca5..9b64834 100644
 --- a/xmpp-vala/src/module/sasl.vala
 +++ b/xmpp-vala/src/module/sasl.vala
-@@ -1,12 +1,19 @@
+@@ -1,12 +1,20 @@
  namespace Xmpp.Sasl {
      private const string NS_URI = "urn:ietf:params:xml:ns:xmpp-sasl";
 
 +    public errordomain SaslError {
 +        INVALID_CHALLENGE,
 +        CHANNEL_BINDING,
-+        INVALID_SERVER_SIGNATURE
++        INVALID_SERVER_SIGNATURE,
++        RANDOM
 +    }
 +
      public class Flag : XmppStreamFlag {
@@ -22,7 +23,7 @@ index 3f3eca5..e9bc45c 100644
          public uint8[] server_signature;
          public bool finished = false;
 
-@@ -18,6 +25,32 @@ namespace Xmpp.Sasl {
+@@ -18,6 +26,32 @@ namespace Xmpp.Sasl {
          public const string PLAIN = "PLAIN";
          public const string SCRAM_SHA_1 = "SCRAM-SHA-1";
          public const string SCRAM_SHA_1_PLUS = "SCRAM-SHA-1-PLUS";
@@ -55,7 +56,7 @@ index 3f3eca5..e9bc45c 100644
      }
 
      public class Module : XmppStreamNegotiationModule {
-@@ -44,70 +77,16 @@ namespace Xmpp.Sasl {
+@@ -44,70 +78,16 @@ namespace Xmpp.Sasl {
              stream.received_nonza.disconnect(this.received_nonza);
          }
 
@@ -132,7 +133,7 @@ index 3f3eca5..e9bc45c 100644
                          }
                      }
                      stream.require_setup();
-@@ -118,34 +97,16 @@ namespace Xmpp.Sasl {
+@@ -118,34 +98,16 @@ namespace Xmpp.Sasl {
                      received_auth_failure(stream, node);
                  } else if (node.name == "challenge" && stream.has_flag(Flag.IDENTITY)) {
                      Flag flag = stream.get_flag(Flag.IDENTITY);
@@ -176,7 +177,7 @@ index 3f3eca5..e9bc45c 100644
                      }
                  }
              }
-@@ -179,19 +140,19 @@ namespace Xmpp.Sasl {
+@@ -179,19 +141,19 @@ namespace Xmpp.Sasl {
                      name = split[0];
                  }
              }
@@ -208,7 +209,7 @@ index 3f3eca5..e9bc45c 100644
              } else if (Mechanism.PLAIN in supported_mechanisms) {
                  stream.write(new StanzaNode.build("auth", NS_URI).add_self_xmlns()
                                      .put_attribute("mechanism", Mechanism.PLAIN)
-@@ -217,6 +178,16 @@ namespace Xmpp.Sasl {
+@@ -217,6 +179,16 @@ namespace Xmpp.Sasl {
              return res;
          }
 
@@ -225,7 +226,7 @@ index 3f3eca5..e9bc45c 100644
          public override bool mandatory_outstanding(XmppStream stream) {
              return !stream.has_flag(Flag.IDENTITY) || !stream.get_flag(Flag.IDENTITY).finished;
          }
-@@ -228,4 +199,228 @@ namespace Xmpp.Sasl {
+@@ -228,4 +200,231 @@ namespace Xmpp.Sasl {
          public override string get_ns() { return NS_URI; }
          public override string get_id() { return IDENTITY.id; }
      }
@@ -281,7 +282,10 @@ index 3f3eca5..e9bc45c 100644
 +            foreach (uint8 b in channel_binding_data) channel_binding += b;
 +        }
 +
-+        string client_nonce = Random.next_int().to_string("%.8x") + Random.next_int().to_string("%.8x") + Random.next_int().to_string("%.8x");
++        uint8[] nonce = new uint8[24];
++        FileStream? random = FileStream.open("/dev/urandom", "rb");
++        if (random == null || random.read(nonce) != nonce.length) throw new SaslError.RANDOM("Cannot read /dev/urandom");
++        string client_nonce = Base64.encode(nonce);
 +        string sasl_name = name.replace("=", "=3D").replace(",", "=2C");
 +        client_first_message = @"$(gs2_header)n=$sasl_name,r=$client_nonce";
 +
