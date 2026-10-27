@@ -156,6 +156,28 @@ in {
     '';
   };
 
+  # The same comparison nixos-upgrade uses to decide on a reboot.
+  systemd.services.reboot-pending = {
+    description = "Mail when the running kernel differs from the installed one";
+    serviceConfig.Type = "oneshot";
+    script = ''
+      booted=$(${pkgs.coreutils}/bin/readlink /run/booted-system/{initrd,kernel,kernel-modules})
+      current=$(${pkgs.coreutils}/bin/readlink /run/current-system/{initrd,kernel,kernel-modules})
+      if [ "$booted" != "$current" ]; then
+        printf 'Subject: ${config.networking.hostName}: reboot pending\n\nThe installed kernel is not running yet.\n' \
+          | ${config.programs.msmtp.package}/bin/sendmail carmilla@lunaire.eu
+      fi
+    '';
+  };
+
+  systemd.timers.reboot-pending = {
+    wantedBy = ["timers.target"];
+    timerConfig = {
+      OnCalendar = "12:00";
+      Persistent = true;
+    };
+  };
+
   environment.etc."gitconfig".text = ''
     [safe]
     directory = ${flakePath}
