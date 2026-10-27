@@ -14,11 +14,12 @@
     initialBalloonMem = 1024;
   };
 
-  # Grafana contact points, plugin and dashboard fetches are all configured at runtime.
+  # Grafana plugins, dashboards and contact points, including email.
   microvmGuest.egress = [
-    {proto = "tcp";}
-    {proto = "udp";}
-    {proto = "icmp";}
+    {
+      proto = "tcp";
+      ports = [80 443 587];
+    }
   ];
 
   services.prometheus = {

@@ -28,11 +28,12 @@
     ];
   };
 
-  # Metadata fetching, plus a runtime-configurable SMTP host with its own port.
+  # Metadata fetches and SMTP.
   microvmGuest.egress = [
-    {proto = "tcp";}
-    {proto = "udp";}
-    {proto = "icmp";}
+    {
+      proto = "tcp";
+      ports = [80 443 587];
+    }
   ];
 
   services.kavita = {

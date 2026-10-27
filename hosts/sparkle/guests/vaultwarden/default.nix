@@ -12,11 +12,12 @@
     initialBalloonMem = 256;
   };
 
-  # SMTP is declared, but icon fetching reaches any site a stored entry names.
+  # Icon fetches and SMTP.
   microvmGuest.egress = [
-    {proto = "tcp";}
-    {proto = "udp";}
-    {proto = "icmp";}
+    {
+      proto = "tcp";
+      ports = [80 443 587];
+    }
   ];
 
   sops.templates."vaultwarden.env" = {

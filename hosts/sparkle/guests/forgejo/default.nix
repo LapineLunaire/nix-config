@@ -24,11 +24,12 @@
     initialBalloonMem = 256;
   };
 
-  # Webhook targets and push mirrors are per-repository settings, and a mirror can use ssh or the git protocol.
+  # Mirrors over SSH, HTTP and the git protocol, webhooks, and SMTP.
   microvmGuest.egress = [
-    {proto = "tcp";}
-    {proto = "udp";}
-    {proto = "icmp";}
+    {
+      proto = "tcp";
+      ports = [22 80 443 587 9418];
+    }
   ];
 
   services.forgejo = let
