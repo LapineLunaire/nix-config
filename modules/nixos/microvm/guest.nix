@@ -74,6 +74,7 @@ in {
           source = "/nix/store";
           mountPoint = "/nix/.ro-store";
           proto = "virtiofs";
+          readOnly = true;
         }
       ];
       writableStoreOverlay = "/nix/.rw-store";
