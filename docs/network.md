@@ -24,7 +24,7 @@ These HTTPS names use `.lunaire.moe` and admit trusted clients plus the listed c
 
 ## Sparkle firewall
 
-`sfp0` and the guest taps join `dmz0`. The bridge drops unlisted forwarding, validates each guest's Ethernet source MAC, IPv4 source, and ARP sender IPv4 before conntrack, and allows valid ARP and established or related traffic. Traffic to Sparkle itself uses the host input firewall. Inspect the bridge rules with `doas nft list table bridge dmz`.
+`sfp0` and the guest taps join `dmz0`. The bridge drops unlisted forwarding, validates each guest's Ethernet source MAC, IPv4 source, and ARP sender IPv4 before conntrack, drops other guest protocols, and allows valid ARP and established or related traffic. Traffic to Sparkle itself uses the host input firewall. Inspect the bridge rules with `doas nft list table bridge dmz`.
 
 Client rules match traffic arriving on `sfp0`. LAN is `10.28.64.0/24`.
 

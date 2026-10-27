@@ -82,6 +82,9 @@ in {
         # Validate before MAC learning, so a guest cannot move another guest's bridge entry.
         iifname . ether saddr != @guest-mac goto spoof-drop
 
+        # Guests are IPv4-only.
+        ether type != { ip, arp } drop
+
         ether type ip iifname . ip saddr != @guest-identity goto spoof-drop
         # Check the ARP payload as well as the Ethernet source.
         ether type arp iifname . arp saddr ip != @guest-identity goto spoof-drop
