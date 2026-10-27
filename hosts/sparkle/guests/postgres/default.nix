@@ -53,6 +53,8 @@
       host  forgejo         forgejo     ${net.vmAddress.forgejo}/32 scram-sha-256
       host  vaultwarden     vaultwarden ${net.vmAddress.vaultwarden}/32 scram-sha-256
       host  all             carmilla    ${net.vmAddress.pgadmin}/32 scram-sha-256
+      host  all             all         127.0.0.1/32 scram-sha-256
+      host  all             all         ::1/128 scram-sha-256
     '';
   };
 
