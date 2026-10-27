@@ -24,6 +24,9 @@ jobs:
           ref: ${{ github.ref_name }}
           persist-credentials: false
 
+      - name: Configure Nix caches
+        uses: ./.forgejo/actions/configure-nix
+
       - name: Update Home Assistant digest
         env:
           EVENT_NAME: ${{ github.event_name }}

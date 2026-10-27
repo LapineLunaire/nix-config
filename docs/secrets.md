@@ -16,7 +16,7 @@ SOPS files group credentials by their readers. Every recipient can decrypt every
 
 Create or edit a file with `sops <file>`. Values such as SMTP passwords, DNS tokens, and Attic tokens are plaintext inside the editor; only the login password uses a hash. Stage new encrypted files before checking the Git-backed flake.
 
-Desktop and server Attic tokens need read access to their respective caches. ci-runner uses its own `attic-pull-token` in its guest secrets file, with read access to both caches. Nix uses one netrc entry for `cache.lunaire.moe`, so the runner does not select separate credentials by cache URL.
+Desktop and server Attic tokens need read access to their respective caches. ci-runner uses its own `attic-pull-token` in its guest secrets file, with read access to both caches and no write permissions. Every job receives this token as `ATTIC_PULL_TOKEN`; the `configure-nix` action writes its own netrc file. Nix uses one netrc entry for `cache.lunaire.moe`, so jobs do not select separate credentials by cache URL. The image contains no credentials.
 
 Sparkle's applications read the shared SMTP value through their existing runtime secret names. Keep that credential valid for their configured SMTP account and sender. Sparxie's SMTP credential stays in its host secrets file.
 

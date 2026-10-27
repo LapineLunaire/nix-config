@@ -17,7 +17,6 @@ in {
     ../../modules/nixos/nix/server-cache.nix
     ./auto-update.nix
     ./telemetry.nix
-    ./ci-runner-store.nix
   ];
 
   host.trustedSubnets = (import ./trusted-subnets.nix).all;

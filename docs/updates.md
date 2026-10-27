@@ -2,7 +2,6 @@
 
 | UTC | Event |
 |---|---|
-| 02:00 | CI runner store reset |
 | 03:00 | Sparkle and Sparxie backups |
 | 04:00 | Server upgrades, with up to 15 minutes of jitter |
 | 05:00 | Forgejo update and build workflow |
@@ -35,4 +34,4 @@ Sparxie reboots when the kernel, kernel modules, or initrd change. Sparkle resta
 
 The 05:00 workflow prepares updates for the following day's upgrade.
 
-The CI store reset and server upgrades do not wait for running jobs, so long or manual workflows can be interrupted. See [guest operations](guests.md#ci-store) for store reset recovery.
+Server upgrades do not wait for running jobs, so long or manual workflows can be interrupted. See [guest operations](guests.md#ci-jobs) for the container image and job storage.

@@ -15,6 +15,9 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Configure Nix caches
+        uses: ./.forgejo/actions/configure-nix
+
       - name: Check formatting
         run: nix fmt --no-write-lock-file -- --check .
 

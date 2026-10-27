@@ -1,0 +1,11 @@
+name: Configure Nix caches
+description: Write the runner's read-only cache credential into this job's filesystem
+runs:
+  using: composite
+  steps:
+    - name: Configure Nix caches
+      shell: bash
+      run: |
+        : "${ATTIC_PULL_TOKEN:?Runner cache credential is missing}"
+        printf '::add-mask::%s\n' "$ATTIC_PULL_TOKEN"
+        printf 'machine cache.lunaire.moe password %s\n' "$ATTIC_PULL_TOKEN" > /etc/nix/netrc

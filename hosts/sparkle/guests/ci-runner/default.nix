@@ -4,7 +4,13 @@
   pkgs,
   web,
   ...
-}: {
+}: let
+  image = import ./image.nix {
+    inherit pkgs;
+    extraSubstituters = config.nix.settings.extra-substituters;
+    extraTrustedPublicKeys = config.nix.settings.extra-trusted-public-keys;
+  };
+in {
   imports = [../../../../modules/nixos/nix/server-cache.nix ./sops.nix];
 
   microvm = let
@@ -15,16 +21,9 @@
     initialBalloonMem = 0;
     volumes = [
       {
-        image = "/persist/vms/ci-runner/volumes/nix-store.img";
-        size = 131072;
-        mountPoint = "/nix/.rw-store";
-        fsType = "xfs";
-      }
-      # Keep build scratch off the tmpfs root.
-      {
-        image = "/persist/vms/ci-runner/volumes/nix-build.img";
-        size = 65536;
-        mountPoint = "/var/nixbuild";
+        image = "/persist/vms/ci-runner/volumes/docker.img";
+        size = 196608;
+        mountPoint = "/var/lib/docker";
         fsType = "xfs";
       }
       # Create raw swap on the host; microvm's filesystem creator cannot format it.
@@ -53,24 +52,43 @@
   # Use disk swap after zram. Labels survive changes in disk declaration order.
   swapDevices = [{label = "ci-swap";}];
 
-  environment.persistence."/persist".directories = ["/nix/var"];
-
-  # Allow the runner's DynamicUser to connect to the Nix daemon.
-  nix.settings.allowed-users = ["gitea-runner"];
-
   nix.settings = {
     extra-substituters = lib.mkAfter ["https://cache.lunaire.moe/desktop?priority=10"];
     extra-trusted-public-keys = lib.mkAfter ["desktop:QBHQfUrDyPKWwQolz4KiaJ1NlC+dGZLP4m29qgvkYs4="];
-
-    build-dir = "/var/nixbuild";
-    max-jobs = 3;
   };
+
+  virtualisation.docker.enable = true;
 
   sops.templates."runner-token.env" = {
     restartUnits = ["gitea-runner-sparkle.service"];
     content = ''
       TOKEN=${config.sops.placeholder."forgejo-runner-token"}
     '';
+  };
+
+  sops.templates."runner-cache.env" = {
+    restartUnits = ["gitea-runner-sparkle.service"];
+    content = ''
+      ATTIC_PULL_TOKEN=${config.sops.placeholder."attic-pull-token"}
+    '';
+  };
+
+  systemd.services.gitea-runner-sparkle = {
+    path = [config.virtualisation.docker.package];
+    serviceConfig = {
+      LoadCredential = ["cache.env:${config.sops.templates."runner-cache.env".path}"];
+      # Docker here only runs CI, so clear what interrupted jobs left and load the image before every runner start.
+      ExecStartPre = lib.mkBefore [
+        (pkgs.writeShellScript "ci-runner-prepare" ''
+          set -euo pipefail
+          docker container ls --all --quiet | xargs --no-run-if-empty docker container rm --force --volumes
+          docker volume prune --all --force
+          docker network prune --force
+          docker load --input ${image}
+          docker image prune --force
+        '')
+      ];
+    };
   };
 
   services.gitea-actions-runner = {
@@ -80,25 +98,15 @@
       name = "sparkle";
       url = web.origin.forgejo;
       tokenFile = config.sops.templates."runner-token.env".path;
-      labels = ["nixos:host"];
-      # hostPackages replaces the defaults, so include the runner tools as well as build tools.
-      hostPackages = with pkgs; [
-        bash
-        coreutils
-        curl
-        gawk
-        gitMinimal
-        gnused
-        nodejs
-        wget
-        attic-client
-        gnugrep
-        nix
-        openssh
-        skopeo
-      ];
-      settings.runner.capacity = 1;
-      settings.runner.timeout = "6h";
+      labels = ["nixos:docker://${image.imageName}:${image.imageTag}"];
+      settings = {
+        runner = {
+          capacity = 1;
+          timeout = "6h";
+          env_file = "/run/credentials/gitea-runner-sparkle.service/cache.env";
+        };
+        cache.enabled = false;
+      };
     };
   };
 }

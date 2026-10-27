@@ -27,15 +27,17 @@ doas systemctl restart microvm@<name>
 
 Stage new files with `git add` before evaluating or switching, because a Git-backed flake omits untracked files. Commit the guest, sign it with a key in `host.autoUpdate.allowedSigners`, and push it before the next nightly upgrade. The upgrade runs `git reset --hard` to `origin/main`, which also deletes staged files that are not committed.
 
-## CI store
+## CI jobs
 
-The ci-runner guest runs the `nixos` Forgejo Actions jobs for this repository and substitutes from cache.nixos.org and the `server` and `desktop` Attic caches.
+The ci-runner guest runs each `nixos` Forgejo Actions job in a fresh Docker container. [image.nix](../hosts/sparkle/guests/ci-runner/image.nix) builds the job image from locked Nixpkgs. The image is part of Sparkle's build and needs no registry. Its fixed `localhost/nix-ci:current` tag avoids re-registering the runner when the image changes.
 
-Guests mount the host store read-only at `/nix/.ro-store` and write to an overlay upper layer at `/nix/.rw-store`, which most guests keep on the tmpfs root. ci-runner keeps it on a persistent 128 GiB XFS image and persists `/nix/var`. Do not run garbage collection inside ci-runner, because overlay whiteouts can hide host store paths that later generations need.
+The runner takes one job at a time, so a job can use all 8 CPUs, 20 GiB RAM, and the swap for large builds; other jobs queue. Nix runs three builds at once. Forgejo supersedes older validation pushes to the same branch, and the update workflow serializes updates to the same branch.
 
-The nightly reset stops ci-runner, deletes its Nix database and store image, and queues its restart. A cleanup failure leaves the guest stopped; a failed stop prevents cleanup. The reset unit reports these failures without sending mail, but a queued restart can still fail after the reset unit succeeds.
+Jobs have separate Nix stores, databases, checkouts, and credentials, removed when they finish. Nix runs in local single-user mode without its build sandbox; Docker and the microVM provide isolation. Jobs are not privileged and get no host mounts or daemon sockets. They download or build paths absent from the image, using the [read-only cache token](secrets.md). Signing and publishing credentials come from Forgejo workflow secrets.
 
-Check both units with `doas systemctl status ci-runner-store-reset microvm@ci-runner`, fix the cause, and run `doas systemctl start ci-runner-store-reset`. A missed reset waits for the next night. Missing store paths are fetched from the caches or rebuilt. See the [nightly schedule](updates.md).
+Before each start, including after a crash, the runner service removes all containers, volumes, and unused networks, loads the image, and removes the old untagged image. Docker in this guest must therefore only run CI jobs. Docker uses a 192 GiB XFS disk, with 32 GiB swap after zram. The disk images live in `/persist/vms/ci-runner/volumes`. Check the guest with `systemctl status docker gitea-runner-sparkle`.
+
+The guest itself mounts the host store read-only at `/nix/.ro-store` with a tmpfs upper layer at `/nix/.rw-store`. Do not garbage-collect inside the guest, because overlay whiteouts can hide host paths that later generations need. Job stores live in the containers, not in this overlay.
 
 ## Borg backup and recovery
 
@@ -43,8 +45,7 @@ Sparkle and Sparxie back up a snapshot of `/persist` and keep 7 daily, 4 weekly,
 
 Sparkle's backup excludes:
 
-- `/persist/vms/*/volumes/`: the ci-runner store, build, and swap images, and the homeassistant Docker and unifi Podman storage images.
-- `/persist/vms/ci-runner/nix/var`: the ci-runner Nix database, which describes the excluded store image.
+- `/persist/vms/*/volumes/`: the ci-runner Docker and swap images, and the homeassistant Docker and unifi Podman storage images.
 
 Home Assistant's bind-mounted `/config` and UniFi's `/var/lib/unifi-os-server` stay in the backup. Preserve numeric owners when restoring.
 
@@ -66,8 +67,6 @@ doas borg-job-hetzner key export :: ~/borg-key
 The repository holds the only copy of the key. Store the exported key with the passphrase in the password manager, then run `doas rm ~/borg-key`.
 
 Extract into a separate directory, stop the affected guest, then copy the selected state into `/persist`. Archive paths begin with `mnt/borg-snapshot/`. `--checksum` replaces files whose size and modification time happen to match, and `--delete` removes files missing from the archive. The excluded `volumes/` stays in place:
-
-For ci-runner, replace the guest start command below with `doas systemctl start ci-runner-store-reset`. This clears any restored Nix database and existing store image before starting the guest.
 
 ```sh
 mkdir -p ~/borg-restore

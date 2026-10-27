@@ -41,8 +41,6 @@ cd /mnt/persist/nix-config
 
 The restored checkout contains the old hardware identifiers, so repeat the UUID, dataset, and host ID edits from [hardware configuration](install-servers.md#2-mount-and-configure-hardware).
 
-The CI store image is excluded from backups. Before booting Sparkle, discard any restored CI Nix database with `rm -rf /mnt/persist/vms/ci-runner/nix/var`; it cannot be reused without its store.
-
 Restore [identity and state](keys.md#restore-identity-and-state), prepare [Sparkle signing keys](secure-boot.md#installer-signing-keys), then [install and export the pool](install-servers.md#4-install-and-export). Borg does not cover `/home`; restore it from another copy if one exists. After Sparkle boots, [restore the vault pool](vault.md#recovery).
 
 ## After recovery
