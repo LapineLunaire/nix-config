@@ -23,7 +23,7 @@ doas systemctl restart microvm@<name>
    ssh-keygen -t ed25519 -N '' -f /persist/vms/<name>/etc/ssh/ssh_host_ed25519_key
    ```
 
-   For SOPS, convert the public key with `ssh-to-age`, add the recipient and a creation rule to `.sops.yaml`, and encrypt the secrets for both the guest and Sparkle. Restore keys and state with their numeric owners. Sparkle creates each `volumes` directory as `microvm:kvm` with mode `0750`. For secret value formats, see [restore identity and state](keys.md#restore-identity-and-state).
+   For SOPS, convert the public key with `ssh-to-age`, add the recipient and a creation rule to `.sops.yaml`, and encrypt the secrets for both the guest and Sparkle. Restore keys and state with their numeric owners. Put disk images under `/persist/volumes/<name>`, never inside a guest's writable share, where guest root could redirect them to another guest's image. Sparkle creates each image directory as `microvm:kvm` with mode `0750`. For secret value formats, see [restore identity and state](keys.md#restore-identity-and-state).
 
 Stage new files with `git add` before evaluating or switching, because a Git-backed flake omits untracked files. Commit the guest, sign it with a key in `host.autoUpdate.allowedSigners`, and push it before the next nightly upgrade. The upgrade runs `git reset --hard` to `origin/main`, which also deletes staged files that are not committed.
 
@@ -35,7 +35,7 @@ The runner takes one job at a time, so a job can use all 8 CPUs, 20 GiB RAM, and
 
 Jobs have separate Nix stores, databases, checkouts, and credentials, removed when they finish. Nix runs without a daemon or its build sandbox; Docker and the microVM provide isolation. Builds run as unprivileged `nixbld` users, so builders cannot create `/homeless-shelter`, which makes unsandboxed Nix refuse to build. Jobs are not privileged and get no host mounts or daemon sockets. They download or build paths absent from the image, using the [read-only cache token](secrets.md). Signing and publishing credentials come from Forgejo workflow secrets.
 
-Before each start, including after a crash, the runner service removes all containers, volumes, and unused networks, loads the image, and removes the old untagged image. Docker in this guest must therefore only run CI jobs. Docker uses a 192 GiB XFS disk, with 32 GiB swap after zram. The disk images live in `/persist/vms/ci-runner/volumes`. Check the guest with `systemctl status docker gitea-runner-sparkle`.
+Before each start, including after a crash, the runner service removes all containers, volumes, and unused networks, loads the image, and removes the old untagged image. Docker in this guest must therefore only run CI jobs. Docker uses a 192 GiB XFS disk, with 32 GiB swap after zram. The disk images live in `/persist/volumes/ci-runner`. Check the guest with `systemctl status docker gitea-runner-sparkle`.
 
 The guest itself mounts the host store read-only at `/nix/.ro-store` with a tmpfs upper layer at `/nix/.rw-store`. Do not garbage-collect inside the guest, because overlay whiteouts can hide host paths that later generations need. Job stores live in the containers, not in this overlay.
 
@@ -45,7 +45,7 @@ Sparkle and Sparxie back up a snapshot of `/persist` and keep 7 daily, 4 weekly,
 
 Sparkle's backup excludes:
 
-- `/persist/vms/*/volumes/`: the ci-runner Docker and swap images, and the homeassistant Docker and unifi Podman storage images.
+- `/persist/volumes/`: the ci-runner Docker and swap images, and the homeassistant Docker and unifi Podman storage images.
 
 Home Assistant's bind-mounted `/config` and UniFi's `/var/lib/unifi-os-server` stay in the backup. Preserve numeric owners when restoring.
 
@@ -66,14 +66,14 @@ doas borg-job-hetzner key export :: ~/borg-key
 
 The repository holds the only copy of the key. Store the exported key with the passphrase in the password manager, then run `doas rm ~/borg-key`.
 
-Extract into a separate directory, stop the affected guest, then copy the selected state into `/persist`. Archive paths begin with `mnt/borg-snapshot/`. `--checksum` replaces files whose size and modification time happen to match, and `--delete` removes files missing from the archive. The excluded `volumes/` stays in place:
+Extract into a separate directory, stop the affected guest, then copy the selected state into `/persist`. Archive paths begin with `mnt/borg-snapshot/`. `--checksum` replaces files whose size and modification time happen to match, and `--delete` removes files missing from the archive:
 
 ```sh
 mkdir -p ~/borg-restore
 cd ~/borg-restore
 doas borg-job-hetzner extract --numeric-ids ::<archive> mnt/borg-snapshot/vms/<name>
 doas systemctl stop microvm@<name>
-doas rsync -aHAX --numeric-ids --checksum --delete --exclude=/volumes/ mnt/borg-snapshot/vms/<name>/ /persist/vms/<name>/
+doas rsync -aHAX --numeric-ids --checksum --delete mnt/borg-snapshot/vms/<name>/ /persist/vms/<name>/
 doas systemctl start microvm@<name>
 cd ~
 doas rm -rf ~/borg-restore

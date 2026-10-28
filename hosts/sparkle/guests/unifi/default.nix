@@ -18,7 +18,7 @@
     # Dedicated XFS volume for podman; overlayfs can't run on virtiofs.
     volumes = [
       {
-        image = "/persist/vms/unifi/volumes/podman.img";
+        image = "/persist/volumes/unifi/podman.img";
         size = 10240;
         mountPoint = "/var/lib/containers";
         fsType = "xfs";

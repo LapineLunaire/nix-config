@@ -97,14 +97,6 @@ in {
           readOnly = true;
         }
       ];
-      # Guests control their image paths.
-      preStart = lib.mkBefore (lib.concatMapStrings (volume: ''
-          if [ -L ${lib.escapeShellArg volume.image} ] || { [ -e ${lib.escapeShellArg volume.image} ] && [ ! -f ${lib.escapeShellArg volume.image} ]; }; then
-            echo "refusing to start: ${volume.image} is not a regular file" >&2
-            exit 1
-          fi
-        '')
-        config.microvm.volumes);
       writableStoreOverlay = "/nix/.rw-store";
       balloon = lib.mkDefault true;
       deflateOnOOM = true;

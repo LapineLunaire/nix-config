@@ -14,14 +14,14 @@ in {
   imports = [../../../../modules/nixos/nix/server-cache.nix ./sops.nix];
 
   microvm = let
-    swapImage = "/persist/vms/ci-runner/volumes/swap.img";
+    swapImage = "/persist/volumes/ci-runner/swap.img";
   in {
     vcpu = 8;
     mem = 20480;
     initialBalloonMem = 0;
     volumes = [
       {
-        image = "/persist/vms/ci-runner/volumes/docker.img";
+        image = "/persist/volumes/ci-runner/docker.img";
         size = 196608;
         mountPoint = "/var/lib/docker";
         fsType = "xfs";

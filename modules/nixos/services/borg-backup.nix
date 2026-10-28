@@ -44,12 +44,8 @@ in {
     };
     environment.BORG_RSH = "ssh -i ${config.sops.secrets."borg-ssh-key".path} -o StrictHostKeyChecking=yes -o UserKnownHostsFile=${config.sops.secrets."borg-known-hosts".path}";
     compression = "auto,zstd";
-    # Exclude disposable guest caches. sh: keeps * within one path component.
-    exclude = [
-      "sh:/mnt/borg-snapshot/vms/*/volumes"
-      # A restored database must not advertise paths from the excluded writable store.
-      "pp:/mnt/borg-snapshot/vms/ci-runner/nix/var"
-    ];
+    # Exclude disposable guest disk images.
+    exclude = ["pp:/mnt/borg-snapshot/volumes"];
     persistentTimer = true;
     preHook = ''
       while [ "$(${config.systemd.package}/bin/systemctl show -P ActiveState nixos-upgrade.service)" = activating ] || [ -e /run/systemd/shutdown/scheduled ]; do

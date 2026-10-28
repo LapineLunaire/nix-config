@@ -7,7 +7,7 @@
     cloud-hypervisor.extraArgs = ["--cpus" "max_phys_bits=39"];
     volumes = [
       {
-        image = "/persist/vms/homeassistant/volumes/docker.img";
+        image = "/persist/volumes/homeassistant/docker.img";
         mountPoint = "/var/lib/docker";
         size = 10240;
         fsType = "xfs";
