@@ -33,7 +33,7 @@ The ci-runner guest runs each `nixos` Forgejo Actions job in a fresh Docker cont
 
 The runner takes one job at a time, so a job can use all 8 CPUs, 20 GiB RAM, and the swap for large builds; other jobs queue. Nix runs three builds at once. Forgejo supersedes older validation pushes to the same branch, and the update workflow serializes updates to the same branch.
 
-Jobs have separate Nix stores, databases, checkouts, and credentials, removed when they finish. Nix runs in local single-user mode without its build sandbox; Docker and the microVM provide isolation. Jobs are not privileged and get no host mounts or daemon sockets. They download or build paths absent from the image, using the [read-only cache token](secrets.md). Signing and publishing credentials come from Forgejo workflow secrets.
+Jobs have separate Nix stores, databases, checkouts, and credentials, removed when they finish. Nix runs without a daemon or its build sandbox; Docker and the microVM provide isolation. Builds run as unprivileged `nixbld` users, so builders cannot create `/homeless-shelter`, which makes unsandboxed Nix refuse to build. Jobs are not privileged and get no host mounts or daemon sockets. They download or build paths absent from the image, using the [read-only cache token](secrets.md). Signing and publishing credentials come from Forgejo workflow secrets.
 
 Before each start, including after a crash, the runner service removes all containers, volumes, and unused networks, loads the image, and removes the old untagged image. Docker in this guest must therefore only run CI jobs. Docker uses a 192 GiB XFS disk, with 32 GiB swap after zram. The disk images live in `/persist/vms/ci-runner/volumes`. Check the guest with `systemctl status docker gitea-runner-sparkle`.
 

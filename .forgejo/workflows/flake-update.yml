@@ -58,22 +58,15 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # Rebuild the plugin source to detect stale fixed-output hashes hidden by substitution.
-      # Build first because --rebuild requires an existing output.
+      # Jobs start with an empty store, and no cache holds the plugin source, so this build always checks the hash.
       - name: Refresh the caddy plugin hash
         id: caddy
         if: steps.server.outputs.changed == 'true'
         continue-on-error: true
         run: |
           set -euo pipefail
-          target=".#nixosConfigurations.proxy.config.services.caddy.package.src"
-          err=""
-          if out=$(nix build --no-link "$target" 2>&1); then
-            if err=$(nix build --no-link --rebuild "$target" 2>&1); then
-              exit 0
-            fi
-          else
-            err=$out
+          if err=$(nix build --no-link .#nixosConfigurations.proxy.config.services.caddy.package.src 2>&1); then
+            exit 0
           fi
           got=$(printf '%s\n' "$err" | sed -n 's/^ *got: *\(sha256-[A-Za-z0-9+/=]\{1,\}\).*/\1/p' | head -1)
           if [ -z "$got" ]; then
@@ -87,7 +80,6 @@ jobs:
           fi
           sed -i "s|\"$old\"|\"$got\"|" modules/nixos/services/caddy.nix
           echo "caddy plugin hash refreshed: $old -> $got"
-          nix build --no-link "$target"
 
       - name: Check server inputs
         id: server-check
