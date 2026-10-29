@@ -63,7 +63,9 @@ Egress rules without a destination exclude `10.0.0.0/8`, `172.16.0.0/12`, `192.1
 | qbittorrent | UDP 51820; ICMP echo; the application runs in `qbtvpn` |
 | uptime-kuma | Any TCP/UDP; ICMP echo, including 10.69.69.69 |
 | vault | SMTP submission; mDNS and WSD groups; WSD replies to the LAN and gateway |
-| ci-runner, forgejo, homeassistant, kavita, monitoring, vaultwarden | Any TCP/UDP; ICMP echo |
+| ci-runner, homeassistant | Any TCP/UDP; ICMP echo |
+| forgejo | TCP 22, 80, 443, 587, and 9418 |
+| kavita, monitoring, vaultwarden | TCP 80, 443, and 587 |
 
 The rules come from `hosts/sparkle/dmz-bridge.nix`, the guest input firewalls, and `microvmGuest.egress`. DNAT bypasses the guest input firewall, so the bridge alone filters UniFi's published container ports. The bridge and the `qbtvpn` namespace's `accessibleFrom` both restrict qBittorrent's forwarded UI.
 
