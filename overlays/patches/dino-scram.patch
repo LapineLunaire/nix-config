@@ -1,5 +1,5 @@
 diff --git a/xmpp-vala/src/module/sasl.vala b/xmpp-vala/src/module/sasl.vala
-index 3f3eca5..9b64834 100644
+index 3f3eca5..fedcfc0 100644
 --- a/xmpp-vala/src/module/sasl.vala
 +++ b/xmpp-vala/src/module/sasl.vala
 @@ -1,12 +1,20 @@
@@ -226,7 +226,7 @@ index 3f3eca5..9b64834 100644
          public override bool mandatory_outstanding(XmppStream stream) {
              return !stream.has_flag(Flag.IDENTITY) || !stream.get_flag(Flag.IDENTITY).finished;
          }
-@@ -228,4 +200,231 @@ namespace Xmpp.Sasl {
+@@ -228,4 +200,242 @@ namespace Xmpp.Sasl {
          public override string get_ns() { return NS_URI; }
          public override string get_id() { return IDENTITY.id; }
      }
@@ -240,8 +240,9 @@ index 3f3eca5..9b64834 100644
 +            if (Mechanism.is_plus(mechanism)) server_offers_plus = true;
 +        }
 +        StanzaNode? binding_node = stream.features.get_subnode("sasl-channel-binding", CHANNEL_BINDING_NS_URI);
-+        // Reject inconsistent announcements so neither feature can be stripped.
-+        if (server_offers_plus != (binding_node != null)) {
++        // Only relax the checks for servers without XEP-0440, so an announcement is always enforced.
++        bool strict_binding = binding_node != null;
++        if (strict_binding && server_offers_plus != (binding_node != null)) {
 +            throw new SaslError.CHANNEL_BINDING("Incomplete channel-binding announcement");
 +        }
 +
@@ -259,12 +260,22 @@ index 3f3eca5..9b64834 100644
 +            }
 +            if (binding_type != null) break;
 +        }
-+        if (server_offers_plus && channel_binding_data == null) {
++        if (binding_node == null) {
++            // Use the RFC 9266 default, trying tls-unique first because TLS 1.3 connections refuse it.
++            foreach (string candidate in new string[] { "tls-unique", "tls-exporter" }) {
++                channel_binding_data = get_channel_binding_data(stream, candidate == "tls-unique" ? TlsChannelBindingType.UNIQUE : TlsChannelBindingType.EXPORTER);
++                if (channel_binding_data != null) {
++                    binding_type = candidate;
++                    break;
++                }
++            }
++        }
++        if (strict_binding && server_offers_plus && channel_binding_data == null) {
 +            throw new SaslError.CHANNEL_BINDING("No usable channel-binding type");
 +        }
 +
 +        string? mechanism = Mechanism.select_scram(supported_mechanisms, channel_binding_data != null);
-+        if (server_offers_plus && (mechanism == null || !Mechanism.is_plus(mechanism))) {
++        if (strict_binding && server_offers_plus && (mechanism == null || !Mechanism.is_plus(mechanism))) {
 +            throw new SaslError.CHANNEL_BINDING("No supported channel-binding mechanism");
 +        }
 +        if (mechanism == null) return null;
@@ -272,8 +283,8 @@ index 3f3eca5..9b64834 100644
 +        string gs2_header = "n,,";
 +        if (Mechanism.is_plus(mechanism)) {
 +            gs2_header = @"p=$(binding_type),,";
-+        } else if (get_channel_binding_data(stream, TlsChannelBindingType.EXPORTER) != null ||
-+                   get_channel_binding_data(stream, TlsChannelBindingType.SERVER_END_POINT) != null) {
++        } else if (!server_offers_plus && (get_channel_binding_data(stream, TlsChannelBindingType.EXPORTER) != null ||
++                   get_channel_binding_data(stream, TlsChannelBindingType.SERVER_END_POINT) != null)) {
 +            gs2_header = "y,,";
 +        }
 +
