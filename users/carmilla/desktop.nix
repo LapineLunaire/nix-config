@@ -26,6 +26,7 @@
       pciutils
       proton-vpn
       protonmail-desktop
+      t3code
       usbutils
     ];
 
