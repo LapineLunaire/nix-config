@@ -5,11 +5,8 @@
   lib,
   pkgs,
   ...
-}: let
-  # Match the port forwarded by this ProtonVPN configuration.
-  forwardedPort = 57140;
-in {
-  imports = [./sops.nix];
+}: {
+  imports = [./sops.nix ./vpn.nix];
 
   microvm = {
     vcpu = 2;
@@ -32,42 +29,18 @@ in {
     ];
   };
 
-  # WireGuard handshakes leave from this namespace. vpn-confinement also pings the endpoint.
   # The endpoint address is held in SOPS; verify its port when replacing the VPN configuration.
   microvmGuest.egress = [
     {
       proto = "udp";
       ports = [51820];
     }
-    {
-      proto = "icmp";
-    }
   ];
-
-  vpnNamespaces.qbtvpn = {
-    enable = true;
-    wireguardConfigFile = config.sops.secrets."qbittorrent-protonvpn-conf".path;
-    accessibleFrom = ["${net.vmAddress.proxy}/32"];
-    portMappings = [
-      {
-        from = web.endpoints.qbittorrent.port;
-        to = web.endpoints.qbittorrent.port;
-        protocol = "tcp";
-      }
-    ];
-    openVPNPorts = [
-      {
-        port = forwardedPort;
-        protocol = "both";
-      }
-    ];
-  };
 
   services.qbittorrent = {
     enable = true;
     openFirewall = false;
     webuiPort = web.endpoints.qbittorrent.port;
-    torrentingPort = forwardedPort;
     serverConfig = {
       Core.AutoDeleteAddedTorrentFile = "Never";
       Preferences.WebUI = {
@@ -85,11 +58,6 @@ in {
         MaxActiveUploads = -1;
       };
     };
-  };
-
-  systemd.services.qbittorrent.vpnConfinement = {
-    enable = true;
-    vpnNamespace = "qbtvpn";
   };
 
   # Run as qBittorrent after its generated ExecStartPre installs the configuration.

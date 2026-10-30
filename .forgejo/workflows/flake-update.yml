@@ -14,7 +14,7 @@ jobs:
     runs-on: nixos
     env:
       # Update server-only inputs separately so a failed update of the other inputs does not hold them back.
-      SERVER_INPUTS: nixpkgs-stable home-manager-stable nixvim-stable microvm vpn-confinement unifi-os-server
+      SERVER_INPUTS: nixpkgs-stable home-manager-stable nixvim-stable microvm unifi-os-server
       CHECK: nix flake check --all-systems --no-build --no-write-lock-file --option allow-import-from-derivation false
     steps:
       - name: Checkout

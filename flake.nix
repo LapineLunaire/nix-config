@@ -67,8 +67,6 @@
       inputs.nixpkgs.follows = "nixpkgs-stable";
     };
 
-    vpn-confinement.url = "github:Maroka-chan/VPN-Confinement/master";
-
     unifi-os-server = {
       url = "github:rcambrj/unifi-os-server";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -96,7 +94,6 @@
     lanzaboote,
     sops-nix,
     microvm,
-    vpn-confinement,
     unifi-os-server,
     aagl,
     ...
@@ -121,7 +118,6 @@
     net = import ./hosts/sparkle/guest-net.nix;
     web = import ./hosts/sparkle/guest-web.nix;
     guestModules = {
-      qbittorrent = [vpn-confinement.nixosModules.default];
       unifi = [unifi-os-server.nixosModules.unifi-os-server];
     };
     guestConfigurations = nixpkgs-stable.lib.mapAttrs (name: _:

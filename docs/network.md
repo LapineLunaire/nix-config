@@ -60,14 +60,14 @@ Egress rules without a destination exclude `10.0.0.0/8`, `172.16.0.0/12`, `192.1
 | authelia | SMTP submission |
 | proxy | HTTPS; TCP/UDP DNS; WireGuard to Sparxie |
 | unifi | HTTP and HTTPS; DNS; any protocol to management |
-| qbittorrent | UDP 51820; ICMP echo; the application runs in `qbtvpn` |
+| qbittorrent | UDP 51820; the application runs in `qbtvpn` |
 | uptime-kuma | Any TCP/UDP; ICMP echo, including 10.69.69.69 |
 | vault | SMTP submission; mDNS and WSD groups; WSD replies to the LAN and gateway |
 | ci-runner, homeassistant | Any TCP/UDP; ICMP echo |
 | forgejo | TCP 22, 80, 443, 587, and 9418 |
 | kavita, monitoring, vaultwarden | TCP 80, 443, and 587 |
 
-The rules come from `hosts/sparkle/dmz-bridge.nix`, the guest input firewalls, and `microvmGuest.egress`. DNAT bypasses the guest input firewall, so the bridge alone filters UniFi's published container ports. The bridge and the `qbtvpn` namespace's `accessibleFrom` both restrict qBittorrent's forwarded UI.
+The rules come from `hosts/sparkle/dmz-bridge.nix`, the guest input firewalls, and `microvmGuest.egress`. DNAT bypasses the guest input firewall, so the bridge alone filters UniFi's published container ports. The bridge and guest firewall restrict qBittorrent's UI, which `qbittorrent-webui.socket` passes into `qbtvpn`.
 
 ## Sparxie and public tunnel
 

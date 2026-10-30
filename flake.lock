@@ -413,8 +413,7 @@
         "plasma-manager": "plasma-manager",
         "rust-overlay": "rust-overlay_2",
         "sops-nix": "sops-nix",
-        "unifi-os-server": "unifi-os-server",
-        "vpn-confinement": "vpn-confinement"
+        "unifi-os-server": "unifi-os-server"
       }
     },
     "rust-overlay": {
@@ -561,22 +560,6 @@
       "original": {
         "owner": "rcambrj",
         "repo": "unifi-os-server",
-        "type": "github"
-      }
-    },
-    "vpn-confinement": {
-      "locked": {
-        "lastModified": 1791310298,
-        "narHash": "sha256-SpqEEuyrkzTqjIHwHrZE+Rs6ez2tzIeYkSY67zp6fcQ=",
-        "owner": "Maroka-chan",
-        "repo": "VPN-Confinement",
-        "rev": "cc37bcf5000e237709e725a9cda010a5cbce3111",
-        "type": "github"
-      },
-      "original": {
-        "owner": "Maroka-chan",
-        "ref": "master",
-        "repo": "VPN-Confinement",
         "type": "github"
       }
     }
