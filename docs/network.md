@@ -69,6 +69,8 @@ Egress rules without a destination exclude `10.0.0.0/8`, `172.16.0.0/12`, `192.1
 
 The rules come from `hosts/sparkle/dmz-bridge.nix`, the guest input firewalls, and `microvmGuest.egress`. DNAT bypasses the guest input firewall, so the bridge alone filters UniFi's published container ports. The bridge and guest firewall restrict qBittorrent's UI, which `qbittorrent-webui.socket` passes into `qbtvpn`.
 
+Proton assigns qBittorrent's incoming port over NAT-PMP, so its WireGuard configuration must be generated with NAT-PMP enabled. `qbtvpn-port-forward` renews the mapping and restarts qBittorrent when the port changes. `/run/qbtvpn-port-forward/port` holds the last mapped port.
+
 ## Sparxie and public tunnel
 
 | Service | Ports |
