@@ -65,6 +65,9 @@ in {
     '';
     # The script's last step, reached only after every Borg command succeeds.
     postPrune = ''
+      if [ "$(${pkgs.coreutils}/bin/date +%d)" = 01 ]; then
+        borgWrapper check --repository-only
+      fi
       ${pkgs.coreutils}/bin/touch ${lastSuccess}
     '';
     prune.keep = {

@@ -81,7 +81,11 @@ doas rm -rf ~/borg-restore
 
 For a full host recovery, see [server recovery](recover-servers.md).
 
-The job fails on Borg warnings as well as errors, and each failure mails the last 50 lines of the job log. Only a run that completes creation, pruning, and compaction touches `/var/lib/borgbackup/hetzner/last-success`. At 12:00 UTC, `borgbackup-freshness` mails when that file is missing or more than 24 hours old. To inspect the job:
+The job fails on Borg warnings as well as errors, and each failure mails the last 50 lines of the job log. Only a run that completes creation, pruning, and compaction touches `/var/lib/borgbackup/hetzner/last-success`. At 12:00 UTC, `borgbackup-freshness` mails when that file is missing or more than 24 hours old.
+
+On the first of each month the job also runs `borg check --repository-only`, which must pass too. It does not read archive contents; `doas borg-job-hetzner check --verify-data` does, but downloads the whole repository.
+
+To inspect the job:
 
 ```sh
 doas systemctl status borgbackup-job-hetzner.timer borgbackup-job-hetzner.service borgbackup-freshness.timer
