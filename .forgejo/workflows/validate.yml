@@ -23,3 +23,11 @@ jobs:
 
       - name: Evaluate all systems
         run: nix flake check --all-systems --no-build --no-write-lock-file --option allow-import-from-derivation false
+
+      # The runner cannot build Sparxie or Silverwolf.
+      - name: Build systems
+        run: |
+          set -euo pipefail
+          for host in sparkle camellya kafka; do
+            nix build --no-link --no-write-lock-file ".#nixosConfigurations.$host.config.system.build.toplevel"
+          done
