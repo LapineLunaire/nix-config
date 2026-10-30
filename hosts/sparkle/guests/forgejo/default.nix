@@ -44,7 +44,6 @@
       createDatabase = false;
     };
     settings = {
-      session.COOKIE_SECURE = true;
       security = {
         REVERSE_PROXY_LIMIT = 1;
         REVERSE_PROXY_TRUSTED_PROXIES = net.vmAddress.proxy;

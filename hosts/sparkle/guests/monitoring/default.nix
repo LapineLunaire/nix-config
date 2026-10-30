@@ -49,7 +49,6 @@
         root_url = "${web.origin.monitoring}/";
       };
       security = {
-        cookie_secure = true;
         secret_key = "$__file{${config.sops.secrets."grafana-secret-key".path}}";
         # Only seeds a new database. Rotate an existing password through Grafana.
         admin_password = "$__file{${config.sops.secrets."grafana-admin-password".path}}";
