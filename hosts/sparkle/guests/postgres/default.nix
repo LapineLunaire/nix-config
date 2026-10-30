@@ -17,7 +17,8 @@
     enable = true;
     package = pkgs.postgresql_18;
     settings = {
-      listen_addresses = lib.mkForce "127.0.0.1,${net.vmAddress.postgres}";
+      # With a specific address, PostgreSQL stays up on loopback alone if eth0 is not ready. The firewall and pg_hba limit clients.
+      listen_addresses = lib.mkForce "*";
       port = net.postgresPort;
       shared_buffers = "512MB";
       effective_cache_size = "1536MB";
