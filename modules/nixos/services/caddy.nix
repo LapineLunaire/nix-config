@@ -14,10 +14,11 @@
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
         X-Content-Type-Options "nosniff"
         Referrer-Policy "strict-origin-when-cross-origin"
+        >Set-Cookie ^(.*)$ "$1; Secure"
         -Server
       }
     '';
-    description = "Security headers shared by Caddy virtual hosts.";
+    description = "Security headers shared by Caddy virtual hosts, which must be HTTPS-only.";
   };
 
   options.caddy.tlsDns = lib.mkOption {
