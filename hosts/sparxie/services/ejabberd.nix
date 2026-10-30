@@ -227,6 +227,8 @@
             "Access-Control-Allow-Origin": "https://xmpp.bunny.enterprises"
             "Access-Control-Allow-Methods": "GET,HEAD,PUT,OPTIONS"
             "Access-Control-Allow-Headers": "Content-Type"
+        mod_http_upload_quota:
+          max_days: 180
         mod_last: {}
         mod_mam:
           assume_mam_usage: true
