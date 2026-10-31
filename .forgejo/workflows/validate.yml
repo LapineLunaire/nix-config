@@ -6,6 +6,10 @@ on:
   pull_request: {}
   workflow_dispatch: {}
 
+concurrency:
+  group: validation-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   validate:
     runs-on: nixos
