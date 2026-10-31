@@ -120,11 +120,15 @@
             {
               iconTasks.appearance.indicateAudioStreams = false;
               iconTasks.launchers = [
-                "applications:systemsettings.desktop"
-                "applications:org.kde.dolphin.desktop"
                 "applications:firefox.desktop"
+                "applications:org.kde.dolphin.desktop"
                 "applications:com.mitchellh.ghostty.desktop"
                 "applications:dev.zed.Zed.desktop"
+                "applications:t3code.desktop"
+                "applications:discord.desktop"
+                "applications:im.dino.Dino.desktop"
+                "applications:Fluffychat.desktop"
+                "applications:proton-mail.desktop"
               ];
             }
             "org.kde.plasma.marginsseparator"
