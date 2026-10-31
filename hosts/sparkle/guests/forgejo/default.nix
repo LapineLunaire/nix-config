@@ -1,5 +1,6 @@
 {
   config,
+  pkgs,
   net,
   trustedSubnets,
   web,
@@ -36,6 +37,7 @@
     inherit (config.host) smtp;
   in {
     enable = true;
+    package = pkgs.forgejo;
     secrets.mailer.PASSWD = config.sops.secrets."forgejo-smtp-password".path;
     database = {
       type = "postgres";
