@@ -51,6 +51,12 @@ in {
   };
 
   config = {
+    assertions = [
+      {
+        assertion = config.microvm.devices == [] || !config.microvm.balloon;
+        message = "Guests with passthrough devices must disable microvm.balloon.";
+      }
+    ];
     fileSystems = let
       temporary = {
         device = "none";

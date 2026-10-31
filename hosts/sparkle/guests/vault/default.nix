@@ -24,7 +24,7 @@ in {
   microvm = {
     vcpu = 4;
     mem = 8192;
-    # Use fixed memory so balloon reclamation does not compete with ZFS ARC.
+    # Fixed memory protects VFIO-pinned pages and avoids competing with ZFS ARC.
     balloon = false;
     devices = [
       {

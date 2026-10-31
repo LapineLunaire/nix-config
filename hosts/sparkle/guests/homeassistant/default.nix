@@ -2,7 +2,8 @@
   microvm = {
     vcpu = 2;
     mem = 2048;
-    initialBalloonMem = 512;
+    # VFIO pins pages that balloon reporting can reclaim.
+    balloon = false;
     # Limit guest addresses to the 39-bit VT-d aperture; higher PCI BARs fail IOMMU mapping.
     cloud-hypervisor.extraArgs = ["--cpus" "max_phys_bits=39"];
     volumes = [
