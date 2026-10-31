@@ -61,6 +61,8 @@
       };
     in
       mkVhost ''
+        header X-Frame-Options SAMEORIGIN
+        header Content-Security-Policy "frame-ancestors 'self'"
         root * ${element-web}
         file_server
       '';
