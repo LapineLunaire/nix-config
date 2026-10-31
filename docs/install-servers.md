@@ -53,7 +53,7 @@ Forgejo runs on Sparkle. Keep a mirror or local clone available for recovery whi
 
 Update the EFI UUID in `hosts/<hostname>/hardware-configuration.nix`, and the dataset names only if the pool name differs from the hostname. If you generated a new host ID, set `networking.hostId` in `hosts/<hostname>/default.nix`. Keep the tmpfs root, `neededForBoot` on `/persist`, and the mount options.
 
-On replacement Sparkle hardware, check the kernel `march` in `hosts/sparkle/default.nix`, the guest PCI passthrough addresses, and `max_phys_bits` in the vault and homeassistant guests. After [restoring the host key](keys.md#restore-identity-and-state), update the NIC MAC addresses in the `network/ipmi0-mac`, `network/sfp0-mac`, and `network/sfp1-mac` values of `hosts/sparkle/secrets.yaml`.
+On replacement Sparkle hardware, check `host.kernel.cpu` in `hosts/sparkle/default.nix`, the guest PCI passthrough addresses, and `max_phys_bits` in the vault and homeassistant guests. After [restoring the host key](keys.md#restore-identity-and-state), update the NIC MAC addresses in the `network/ipmi0-mac`, `network/sfp0-mac`, and `network/sfp1-mac` values of `hosts/sparkle/secrets.yaml`.
 
 On a replacement Sparxie VPS, update `hosts/sparxie/wan-net.nix` and the interface name and gateways in `hosts/sparxie/default.nix`.
 
