@@ -53,7 +53,6 @@
         "create mask" = "0644";
         "directory mask" = "0755";
         # Fruit VFS module: macOS compatibility for extended attributes and metadata.
-        "fruit:aapl" = "yes";
         "vfs objects" = "catia fruit streams_xattr";
       };
       misc = {
@@ -62,14 +61,12 @@
         "writeable" = "no";
         "force user" = "carmilla";
         "force group" = "users";
-        "fruit:aapl" = "yes";
         "vfs objects" = "catia fruit streams_xattr";
       };
       torrents = {
         "path" = "/vault/torrents";
         "valid users" = "carmilla";
         "writeable" = "no";
-        "fruit:aapl" = "yes";
         "vfs objects" = "catia fruit streams_xattr";
       };
     };
