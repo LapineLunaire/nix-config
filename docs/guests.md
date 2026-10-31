@@ -49,6 +49,8 @@ Sparkle's backup excludes:
 
 Home Assistant's bind-mounted `/config` and UniFi's `/var/lib/unifi-os-server` stay in the backup. Preserve numeric owners when restoring.
 
+Borg keeps its security state and cache in `/var/lib/borgbackup/hetzner`. The cache is excluded from backups.
+
 The `borg-job-hetzner` helper reads the repository, passphrase, SSH key, and pinned host key from the SOPS secrets at runtime:
 
 ```sh

@@ -42,10 +42,10 @@ in {
       mode = "repokey-blake2";
       passCommand = "cat ${config.sops.secrets."borg-passphrase".path}";
     };
+    environment.BORG_BASE_DIR = "/var/lib/borgbackup/hetzner";
     environment.BORG_RSH = "ssh -i ${config.sops.secrets."borg-ssh-key".path} -o StrictHostKeyChecking=yes -o UserKnownHostsFile=${config.sops.secrets."borg-known-hosts".path}";
     compression = "auto,zstd";
-    # Exclude disposable guest disk images.
-    exclude = ["pp:/mnt/borg-snapshot/volumes"];
+    exclude = ["pp:/mnt/borg-snapshot/var/lib/borgbackup/hetzner/.cache/borg"];
     persistentTimer = true;
     preHook = ''
       while [ "$(${config.systemd.package}/bin/systemctl show -P ActiveState nixos-upgrade.service)" = activating ] || [ -e /run/systemd/shutdown/scheduled ]; do
@@ -82,6 +82,7 @@ in {
       set -euo pipefail
       ${loadRepository}
       export BORG_PASSCOMMAND=${lib.escapeShellArg job.encryption.passCommand}
+      export BORG_BASE_DIR=${lib.escapeShellArg job.environment.BORG_BASE_DIR}
       export BORG_RSH=${lib.escapeShellArg job.environment.BORG_RSH}
       exec ${lib.getExe config.services.borgbackup.package} "$@"
     '')

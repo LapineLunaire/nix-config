@@ -30,7 +30,11 @@ in {
 
   nixpkgs.config.allowUnfree = true;
 
-  services.borgbackup.jobs.hetzner.startAt = "03:00";
+  services.borgbackup.jobs.hetzner = {
+    startAt = "03:00";
+    # Exclude disposable guest disk images.
+    exclude = ["pp:/mnt/borg-snapshot/volumes"];
+  };
 
   networking = let
     net = import ./guest-net.nix;
