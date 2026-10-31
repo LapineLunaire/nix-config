@@ -112,6 +112,8 @@
         password_reset.disable = true;
         password_change.disable = true;
       };
+      # The guest uses the host clock and cannot reach NTP servers.
+      ntp.disable_startup_check = true;
       webauthn = {
         disable = false;
         display_name = "Lunaire Auth";
