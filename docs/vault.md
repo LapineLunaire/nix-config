@@ -36,6 +36,8 @@ zfs get -r com.sun:auto-snapshot vault
 
 Read-only NFS exports squash to UID 1000 and GID 100. The writable torrents export squashes to 3000:3000, so existing torrent content must be writable by that ID. Samba forces `carmilla:users` on the `carmilla` and `misc` shares; the read-only `torrents` share uses the authenticated user's permissions, so `carmilla` needs read access to the torrent content. For a fresh Samba account, run `smbpasswd -a carmilla` in the vault guest's root console. Snapshots stay on this pool.
 
+ZED mails pool faults on Vault, Sparkle, and Sparxie to `carmilla@lunaire.eu`.
+
 ## Recovery
 
 If the vault guest cannot import or unlock its pool automatically, for example because its SOPS key is lost, import and unlock it from the guest's root console. Skip `zpool import` if `zpool list vault` already shows the pool:

@@ -3,6 +3,7 @@
   boot.zfs.forceImportRoot = false;
 
   services.zfs = {
+    zed.settings.ZED_EMAIL_ADDR = ["carmilla@lunaire.eu"];
     autoScrub.enable = true;
     trim.enable = true;
     autoSnapshot = {
