@@ -253,6 +253,8 @@
         mod_proxy65:
           access: local
           max_connections: 5
+          # Otherwise it listens on 127.0.0.2, the address of the hostname.
+          ip: "${wan.ipv4}"
         mod_pubsub:
           access_createnode: pubsub_createnode
           plugins:
