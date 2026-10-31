@@ -106,7 +106,12 @@
         database = "authelia";
         username = "authelia";
       };
-      authentication_backend.file.path = config.sops.secrets."authelia-users".path;
+      authentication_backend = {
+        file.path = config.sops.secrets."authelia-users".path;
+        # SOPS manages the read-only user database.
+        password_reset.disable = true;
+        password_change.disable = true;
+      };
       webauthn = {
         disable = false;
         display_name = "Lunaire Auth";
