@@ -2,12 +2,10 @@
   dmz,
   net,
   web,
-  zoneSerial,
   lib,
   ...
 }: let
   dotResolvers = ["1.1.1.1" "1.0.0.1"];
-  serial = toString zoneSerial;
   camellyaAddress = "10.28.64.96";
   proxiedNames = (map (e: e.sub) (lib.attrValues web.endpoints)) ++ ["misc"];
   cnames = lib.concatMapStrings (sub: "${sub} IN CNAME proxy.${web.domain}.\n") proxiedNames;
@@ -15,6 +13,28 @@
   ptrLabel = ip: let
     octets = lib.splitString "." ip;
   in "${lib.elemAt octets 3}.${lib.elemAt octets 2}";
+  records = ''
+    sparkle  IN A    ${dmz.hostAddress}
+    camellya IN A    ${camellyaAddress}
+    git-ssh  IN A    ${net.vmAddress.forgejo}
+    unifi    IN A    ${net.vmAddress.unifi}
+    vault    IN A    ${net.vmAddress.vault}
+    proxy    IN A    ${net.vmAddress.proxy}
+    dns      IN A    ${net.vmAddress.dns}
+    ${cnames}
+  '';
+  reverseRecords = ''
+    ${ptrLabel dmz.hostAddress}   IN PTR  sparkle.${web.domain}.
+    ${ptrLabel camellyaAddress}   IN PTR  camellya.${web.domain}.
+    ${ptrLabel net.vmAddress.forgejo}   IN PTR  git-ssh.${web.domain}.
+    ${ptrLabel net.vmAddress.unifi}   IN PTR  unifi.${web.domain}.
+    ${ptrLabel net.vmAddress.vault}   IN PTR  vault.${web.domain}.
+    ${ptrLabel net.vmAddress.proxy}   IN PTR  proxy.${web.domain}.
+    ${ptrLabel net.vmAddress.dns}   IN PTR  dns.${web.domain}.
+  '';
+  # Follow the records, so commits that leave them unchanged do not restart this guest.
+  # A hash does not always increase, which only matters to secondaries, and there are none.
+  serial = toString (lib.fromHexString (builtins.substring 0 7 (builtins.hashString "sha256" (records + reverseRecords))));
 in {
   microvm = {
     vcpu = 1;
@@ -54,15 +74,7 @@ in {
 
     @       IN NS   dns.${web.domain}.
 
-    sparkle  IN A    ${dmz.hostAddress}
-    camellya IN A    ${camellyaAddress}
-    git-ssh  IN A    ${net.vmAddress.forgejo}
-    unifi    IN A    ${net.vmAddress.unifi}
-    vault    IN A    ${net.vmAddress.vault}
-    proxy    IN A    ${net.vmAddress.proxy}
-    dns      IN A    ${net.vmAddress.dns}
-    ${cnames}
-  '';
+    ${records}'';
 
   environment.etc."coredns/zones/db.28.10".text = ''
     $ORIGIN 28.10.in-addr.arpa.
@@ -78,14 +90,7 @@ in {
 
     @       IN NS   dns.${web.domain}.
 
-    ${ptrLabel dmz.hostAddress}   IN PTR  sparkle.${web.domain}.
-    ${ptrLabel camellyaAddress}   IN PTR  camellya.${web.domain}.
-    ${ptrLabel net.vmAddress.forgejo}   IN PTR  git-ssh.${web.domain}.
-    ${ptrLabel net.vmAddress.unifi}   IN PTR  unifi.${web.domain}.
-    ${ptrLabel net.vmAddress.vault}   IN PTR  vault.${web.domain}.
-    ${ptrLabel net.vmAddress.proxy}   IN PTR  proxy.${web.domain}.
-    ${ptrLabel net.vmAddress.dns}   IN PTR  dns.${web.domain}.
-  '';
+    ${reverseRecords}'';
 
   services.coredns = let
     dotServername = "cloudflare-dns.com";
