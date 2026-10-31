@@ -51,7 +51,7 @@ Client rules match traffic arriving on `sfp0`. LAN is `10.28.64.0/24`.
 | proxy, kavita, qbittorrent | vault | NFSv4 TCP 2049 |
 | All guests | dns | TCP/UDP 53 |
 
-Egress rules without a destination exclude `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `100.64.0.0/10`, and `169.254.0.0/16`; rules with an explicit destination can reach those ranges. ICMP rules allow echo requests only.
+Egress rules without a destination exclude `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `100.64.0.0/10`, `169.254.0.0/16`, and `224.0.0.0/3`; rules with an explicit destination can reach those ranges. ICMP rules allow echo requests only.
 
 | Guest | Access outside the DMZ |
 |---|---|

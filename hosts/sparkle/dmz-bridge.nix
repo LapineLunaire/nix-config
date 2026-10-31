@@ -39,9 +39,9 @@ in {
     guests = net.tapsNft;
     # Read each MAC from the guest configuration.
     guestMacsNft = lib.concatStringsSep ", " (lib.mapAttrsToList (name: _: "\"${name}\" . ${(builtins.head guestConfigurations.${name}.config.microvm.interfaces).mac}") registry);
-    # Private space, excluded from any flow that names no destination of its own.
-    privateSpace = "{ 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, 169.254.0.0/16 }";
-    # Unspecified destinations exclude private networks.
+    # Private, multicast and reserved space, excluded from any flow that names no destination of its own.
+    privateSpace = "{ 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, 169.254.0.0/16, 224.0.0.0/3 }";
+    # Unspecified destinations exclude private, multicast and reserved networks.
     renderFlow = tap: flow: let
       destination =
         if flow.destinations == []
