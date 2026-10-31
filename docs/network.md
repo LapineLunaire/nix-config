@@ -38,7 +38,7 @@ Client rules match traffic arriving on `sfp0`. LAN is `10.28.64.0/24`.
 | LAN and gateway | vault | NetBIOS UDP 137 and 138; WSD TCP 5357 |
 | Any via sfp0 | vault | mDNS to 224.0.0.251; WSD to 239.255.255.250 |
 | Any via sfp0 | dns | TCP/UDP 53 |
-| Management | unifi | TCP 8080, 8443, 6789, 8880, 8843; UDP 3478, 10001 |
+| Management | unifi | TCP 8080, 8443, 6789, 8880, 8843, 28082, 5671; UDP 3478, 10001 |
 
 | Guest source | Local destination | New flows allowed |
 |---|---|---|
