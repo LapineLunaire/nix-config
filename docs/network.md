@@ -85,7 +85,7 @@ SSH also requires a source address in the SOPS IPv4 or IPv6 allowlist; this appl
 
 The ejabberd HTTP API also requires the admin account, even through the SSH tunnel. For local account management, run `doas -u ejabberd ejabberdctl`; it cannot reach the node as root.
 
-HTTP uploads expire after 180 days.
+HTTP uploads expire after 180 days. TURN refuses to relay to loopback and private addresses.
 
 Sparxie's Caddy serves `bunny.enterprises`, `chat.bunny.enterprises`, `matrix.bunny.enterprises` (also on TCP/UDP 8448), and `pub.bunny.enterprises`; ejabberd serves XMPP for `bunny.enterprises`. `pub.bunny.enterprises` requires basic auth and is reverse-proxied over `wg0` to the proxy guest at `10.73.212.0:9000`, where Caddy serves `/srv/misc`, a read-only NFS mount of the vault guest's `/vault/misc`. The proxy firewall allows port 9000 only on `wg0`.
 

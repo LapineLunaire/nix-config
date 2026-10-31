@@ -120,6 +120,17 @@
           transport: udp
           module: ejabberd_stun
           use_turn: true
+          # Replaces the default list, which only holds loopback.
+          turn_blacklist:
+            - "127.0.0.0/8"
+            - "::1/128"
+            - "10.0.0.0/8"
+            - "172.16.0.0/12"
+            - "192.168.0.0/16"
+            - "100.64.0.0/10"
+            - "169.254.0.0/16"
+            - "fc00::/7"
+            - "fe80::/10"
           turn_ipv4_address: "${wan.ipv4}"
           turn_ipv6_address: "${wan.ipv6}"
           turn_min_port: 49152
