@@ -1,6 +1,5 @@
 {
   config,
-  lib,
   pkgs,
   ...
 }: let
@@ -16,7 +15,6 @@ in {
   home.packages = with pkgs; [
     alejandra
     bat
-    brave-origin
     duf
     eza
     ffmpeg
@@ -30,6 +28,13 @@ in {
     yt-dlp
     yubikey-manager
   ];
+
+  programs.brave-origin = {
+    enable = true;
+    extensions = [
+      {id = "nngceckbapebfimnlniiiahkandclblb";} # Bitwarden
+    ];
+  };
 
   programs.claude-code = {
     enable = true;
@@ -85,9 +90,16 @@ in {
 
   programs.firefox = {
     enable = true;
-    nativeMessagingHosts = lib.optionals pkgs.stdenv.hostPlatform.isLinux [
-      pkgs.kdePackages.plasma-browser-integration
-    ];
+    policies.ExtensionSettings = {
+      "{446900e4-71c2-419f-a6a7-df9c091e268b}" = {
+        installation_mode = "normal_installed";
+        install_url = "https://addons.mozilla.org/firefox/downloads/latest/bitwarden-password-manager/latest.xpi";
+      };
+      "uBlock0@raymondhill.net" = {
+        installation_mode = "normal_installed";
+        install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
+      };
+    };
   };
 
   programs.ghostty = {

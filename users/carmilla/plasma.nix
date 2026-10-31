@@ -6,6 +6,21 @@
   config = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     home.packages = [pkgs.bibata-cursors];
 
+    programs.brave-origin = {
+      nativeMessagingHosts = [pkgs.kdePackages.plasma-browser-integration];
+      extensions = [
+        {id = "cimiefiiaegbelhefglklhhakcgmhkai";} # Plasma Integration
+      ];
+    };
+
+    programs.firefox = {
+      nativeMessagingHosts = [pkgs.kdePackages.plasma-browser-integration];
+      policies.ExtensionSettings."plasma-browser-integration@kde.org" = {
+        installation_mode = "normal_installed";
+        install_url = "https://addons.mozilla.org/firefox/downloads/latest/plasma-integration/latest.xpi";
+      };
+    };
+
     programs.plasma = let
       interfaceFont = {
         family = "Noto Sans";
