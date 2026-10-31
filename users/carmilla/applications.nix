@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   ...
 }: let
@@ -19,7 +20,6 @@ in {
     duf
     eza
     ffmpeg
-    firefox
     gping
     megatools
     nixd
@@ -81,6 +81,13 @@ in {
         "colors"
       ];
     };
+  };
+
+  programs.firefox = {
+    enable = true;
+    nativeMessagingHosts = lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+      pkgs.kdePackages.plasma-browser-integration
+    ];
   };
 
   programs.ghostty = {
