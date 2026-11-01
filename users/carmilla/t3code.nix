@@ -39,4 +39,18 @@
       };
     };
   };
+
+  # The server locks ~/.t3/userdata, so the desktop app cannot run its own backend.
+  home.activation.t3codeDesktopClientOnly = lib.hm.dag.entryAfter ["linkGeneration"] (
+    lib.hm.generators.mkImpureConfigMerger {
+      inherit pkgs;
+      format = "json";
+      empty = "{}";
+      jqOperation = "$dynamic * $static";
+      path = "${config.home.homeDirectory}/.t3/userdata/desktop-settings.json";
+      staticSettings = (pkgs.formats.json {}).generate "t3code-desktop-settings" {
+        localEnvironmentEnabled = false;
+      };
+    }
+  );
 }
