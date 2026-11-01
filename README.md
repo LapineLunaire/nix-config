@@ -31,6 +31,10 @@ Each host imports its upstream modules, system profile, host configuration, and 
 
 Carmilla's entries share Home Manager programs. Camellya and Kafka use entries under `users/carmilla/hosts/` for per-system packages and settings. Both import the shared desktop configuration. Silverwolf shares application settings and also uses Homebrew for its macOS application list.
 
+Camellya and Kafka run T3 Code as a Home Manager user service on port 3773, using the configured Codex and Claude Code packages. User lingering starts the server at boot and keeps it running after logout. The firewall restricts it to the same trusted subnets as SSH; Kafka also requires a trusted NetworkManager connection. Settings remain writable; a rebuild restores declared values.
+
+Switch from a normal terminal: package updates restart the service and interrupt its agents. Activation starts `t3code.service`, which retries until the desktop app's local environment is off. After switching, turn off that local environment on each host, then connect the app to the server using `t3 pair`. Both use the existing `~/.t3` state. Check the service with `systemctl --user status t3code` and its logs with `journalctl --user -u t3code`.
+
 Camellya, Kafka, and Silverwolf use unstable packages and Home Manager; Sparkle, Sparxie, and the guests use stable packages. Each host sets its system and home state versions.
 
 ## Development

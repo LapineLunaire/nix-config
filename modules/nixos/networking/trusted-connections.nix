@@ -5,7 +5,7 @@
   ...
 }: let
   uuids = config.host.trustedConnections;
-  ports = lib.concatMapStringsSep ", " toString config.services.openssh.ports;
+  ports = lib.concatMapStringsSep ", " toString (config.services.openssh.ports ++ config.host.trustedTCPPorts);
   nmcli = "${config.networking.networkmanager.package}/bin/nmcli";
   # Replace the set's contents with the interfaces of the active trusted connections.
   sync = pkgs.writeShellScript "sync-trusted-interfaces" ''
@@ -23,11 +23,11 @@
 in {
   options.host.trustedConnections = lib.mkOption {
     type = lib.types.listOf lib.types.str;
-    description = "UUIDs of the NetworkManager connections whose interfaces may carry SSH from the trusted subnets.";
+    description = "UUIDs of the NetworkManager connections whose interfaces may carry SSH and trusted TCP services from the trusted subnets.";
   };
 
   config = {
-    # Drop SSH before nixos-fw unless it arrives on a trusted connection's interface, so other networks that reuse the trusted subnets are refused.
+    # Drop admin traffic before nixos-fw unless it arrives on a trusted connection's interface, so other networks that reuse the trusted subnets are refused.
     networking.nftables.tables.trusted-connections = {
       family = "inet";
       content = ''
@@ -37,7 +37,7 @@ in {
 
         chain input {
           type filter hook input priority filter - 1;
-          tcp dport { ${ports} } iifname != @interfaces drop
+          tcp dport { ${ports} } iifname != "lo" iifname != @interfaces drop
         }
       '';
     };

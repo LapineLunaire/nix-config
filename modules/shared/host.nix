@@ -14,6 +14,12 @@
       description = "Client subnets trusted to reach this host's admin services.";
     };
 
+    trustedTCPPorts = lib.mkOption {
+      type = lib.types.listOf lib.types.port;
+      default = [];
+      description = "Additional TCP ports restricted like SSH to trusted subnets and connections.";
+    };
+
     trustedSubnetsNft = lib.mkOption {
       type = lib.types.str;
       default = builtins.concatStringsSep ", " config.host.trustedSubnets;

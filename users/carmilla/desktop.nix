@@ -5,6 +5,8 @@
   ];
 
   users.users.carmilla.extraGroups = ["wheel" "networkmanager"];
+  users.users.carmilla.linger = true;
+  host.trustedTCPPorts = [3773];
 
   home-manager.users.carmilla = {
     config,
@@ -12,7 +14,7 @@
     pkgs,
     ...
   }: {
-    imports = [./applications.nix ./plasma.nix];
+    imports = [./applications.nix ./plasma.nix ./t3code.nix];
 
     home.packages = with pkgs; [
       dino
@@ -26,7 +28,6 @@
       pciutils
       proton-vpn
       protonmail-desktop
-      t3code
       usbutils
     ];
 

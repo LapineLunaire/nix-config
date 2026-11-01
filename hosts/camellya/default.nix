@@ -1,8 +1,4 @@
-{
-  config,
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   imports = [
     ../../modules/nixos/system/boot.nix
     ../../modules/nixos/system/secure-boot.nix
@@ -39,10 +35,9 @@
 
   powerManagement.cpuFreqGovernor = "powersave";
 
-  # WinBox discovery (UDP 5678) is LAN-only. T3 Code's network access (TCP 3773) is open to trusted subnets.
+  # WinBox discovery is LAN-only.
   networking.firewall.extraInputRules = ''
     ip saddr 10.28.64.0/24 udp dport 5678 accept
-    ip saddr { ${config.host.trustedSubnetsNft} } tcp dport 3773 accept
   '';
 
   services.udev.packages = [pkgs.wooting-udev-rules];
