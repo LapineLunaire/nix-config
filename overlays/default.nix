@@ -5,5 +5,14 @@
     dino = prev.dino.overrideAttrs (old: {
       patches = (old.patches or []) ++ [./patches/dino-scram.patch];
     });
+
+    # Groups T3 Code's Wayland windows under its launcher instead of the hidden URL handler it writes.
+    t3code = prev.t3code.overrideAttrs (old: {
+      buildCommand =
+        old.buildCommand
+        + ''
+          sed -i 's/^StartupWMClass=.*/StartupWMClass=com.t3tools.T3Code/' "$out/share/applications/t3code.desktop"
+        '';
+    });
   };
 }
