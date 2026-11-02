@@ -38,7 +38,7 @@ Then add the cloned repositories as projects in the app. Check the service with 
 
 Agents follow [their instructions](../users/t3/agents.md): they fork the repository to the `t3` account, keep the fork's default branch up to date with the original, push their branch to the fork, and open a pull request against the original. They use targeted local checks while developing and leave the full repository checks to CI.
 
-Forgejo runs the workflow files from a pull request, including its changes, once the run is approved. Review the changes, including workflows, local actions, and code they execute, before approving a run on the shared runner. Wait for validation to pass on the latest pull request head before merging. If the branch changes, review the new changes and wait for their checks. `t3-land` does not enforce CI status.
+Forgejo runs the workflow files from a pull request, including its changes, once the run is approved. Review the changes, including workflows, local actions, and code they execute, before approving a run on the shared runner. An approved run can read the runner's read-only cache token, `ATTIC_PULL_TOKEN`, and send it elsewhere; see [secrets](secrets.md). Wait for validation to pass on the latest pull request head before merging. If the branch changes, review the new changes and wait for their checks. `t3-land` does not enforce CI status.
 
 Review the pull request in Forgejo or in a checkout of your own. Do not open the `t3` user's directories or enter a development shell from the pull request as Carmilla, because that runs the agent's code as her.
 
