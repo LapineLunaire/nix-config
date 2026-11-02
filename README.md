@@ -20,7 +20,7 @@ Linux hosts use `/persist/nix-config`; Silverwolf uses `~/projects/nix-config`.
 - [Network access](docs/network.md)
 - [Automated updates](docs/updates.md)
 - [Shared secrets](docs/secrets.md)
-- [T3 Code](docs/t3-code.md)
+- [T3 Code and agent pull requests](docs/t3-code.md)
 
 ## Configuration
 
@@ -32,7 +32,7 @@ Each host imports its upstream modules, system profile, host configuration, and 
 
 Carmilla's entries share Home Manager programs. Camellya and Kafka use entries under `users/carmilla/hosts/` for per-system packages and settings. Both import the shared desktop configuration. Silverwolf shares application settings and also uses Homebrew for its macOS application list.
 
-Camellya and Kafka run the T3 Code server as the separate `t3` user, so coding agents cannot read Carmilla's home, use doas, or reach her YubiKey. Carmilla's desktop app is its client. See [T3 Code](docs/t3-code.md).
+Camellya and Kafka run the T3 Code server as the separate `t3` user, so coding agents cannot read Carmilla's home, use doas, or reach her YubiKey. Carmilla's desktop app is its client. Agents push to the `t3` account's Forgejo forks, and Carmilla merges with `t3-land`. See [T3 Code](docs/t3-code.md).
 
 Camellya, Kafka, and Silverwolf use unstable packages and Home Manager; Sparkle, Sparxie, and the guests use stable packages. Each host sets its system and home state versions.
 

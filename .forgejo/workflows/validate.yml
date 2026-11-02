@@ -12,6 +12,8 @@ concurrency:
 
 jobs:
   validate:
+    # Skips pull requests from forks, such as T3 Code's. A fork can change this file, so leaving its runs unapproved is what keeps its workflows off the shared runner.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: nixos
     steps:
       - name: Checkout

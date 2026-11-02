@@ -32,10 +32,14 @@ in {
   home-manager.users.t3 = {config, ...}: {
     imports = [../carmilla/coding-agents.nix];
 
+    programs.claude-code.context = ./agents.md;
+    programs.codex.context = ./agents.md;
+
     home = {
       username = "t3";
       homeDirectory = "/var/lib/t3";
       inherit (nixosConfig.home-manager.users.carmilla.home) stateVersion;
+      packages = [pkgs.forgejo-cli];
     };
     xdg.enable = true;
     systemd.user.startServices = "sd-switch";
@@ -53,6 +57,12 @@ in {
         commit.gpgsign = false;
         tag.gpgsign = false;
       };
+    };
+
+    programs.ssh = {
+      enable = true;
+      enableDefaultConfig = false;
+      settings."*".IdentityFile = "${config.home.homeDirectory}/.ssh/id_ed25519";
     };
 
     programs.t3code = {
