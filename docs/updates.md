@@ -18,7 +18,7 @@ A group that fails is rolled back, and the other group's update still goes ahead
 
 `CI_SIGNING_KEY` supplies the SSH signing key. The workflow uploads Sparkle to the `server` cache and Camellya and Kafka to the `desktop` cache with `ATTIC_TOKEN` before committing and pushing. A missing token or failed upload blocks the push. Temporary signing keys and cache credentials are removed when their steps finish.
 
-The [validation workflow](../.forgejo/workflows/validate.yml) builds the same three systems for every other push to `main` and uploads them the same way, so a desktop that pulls `main` finds it cached once validation finishes. Pushes made with the workflow token, such as the update commit, do not start it. It also checks pull requests from branches in the same repository, and skips pull requests from forks. Forgejo runs a pull request's own workflow changes once its run is approved, so the protection for agent pull requests is to leave their runs unapproved; see [T3 Code](t3-code.md#pull-requests).
+The [validation workflow](../.forgejo/workflows/validate.yml) builds the same three systems for every other push to `main` and uploads them the same way, so a desktop that pulls `main` finds it cached once validation finishes. Pushes made with the workflow token, such as the update commit, do not start it. It also checks pull requests. A pull request run does not build a system that a run on `main` already cached, and skips its checks if the pull request is already in `main` when the run starts, because the run for the merge checks the same code. Runs for pull requests from the `t3` account's forks wait for review and approval; see [T3 Code](t3-code.md#pull-requests).
 
 ## Server upgrades
 

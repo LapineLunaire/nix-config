@@ -6,8 +6,10 @@ Deliver finished work as a pull request on `git.lunaire.moe`. Work on a branch o
 
 1. Fork the repository once: `fj -H git.lunaire.moe repo fork <owner>/<repo>`. If `t3/<repo>` already exists, check that it is a fork of `<owner>/<repo>`.
 2. Add the fork as a remote if it is missing: `git remote add fork forgejo@git-ssh.lunaire.moe:t3/<repo>.git`.
-3. Push your branch: `git push -u fork HEAD`.
-4. Write the description to a file and open the pull request against the original repository: `fj -H git.lunaire.moe pr create --repo t3/<repo> --base '^' --body-file <file> "<title>"`. Always pass a title and body; otherwise `fj` opens an editor and waits.
+3. Find the default branch with `git ls-remote --symref origin HEAD`. Run `git fetch origin` and start your branch from `origin/<default branch>`. Before the first push, fetch again and rebase onto it if it moved.
+   Whenever you push, first run `git fetch origin`, then update the fork's default branch: `git push fork origin/<default branch>:refs/heads/<default branch>`. If `git ls-remote --symref fork HEAD` names a different default branch, or that push is rejected, say so instead of changing the fork's branches yourself.
+4. Push your branch: `git push -u fork HEAD`.
+5. Write the description to a file and open the pull request against the original repository: `fj -H git.lunaire.moe pr create --repo t3/<repo> --base '^' --body-file <file> "<title>"`. Always pass a title and body; otherwise `fj` opens an editor and waits.
 
 To update an open pull request, push to the same branch with `git push fork HEAD`. Do not run `pr create` again.
 
