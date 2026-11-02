@@ -1,0 +1,35 @@
+name: Push to the cache
+description: Upload built systems to the server and desktop caches. A missing token fails the job.
+inputs:
+  token:
+    description: Attic token that can push to both caches
+    required: true
+  server-paths:
+    description: Store paths for the server cache, one per line
+    required: true
+  desktop-paths:
+    description: Store paths for the desktop cache, one per line
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Push to the cache
+      shell: bash
+      env:
+        ATTIC_TOKEN: ${{ inputs.token }}
+        SERVER_PATHS: ${{ inputs.server-paths }}
+        DESKTOP_PATHS: ${{ inputs.desktop-paths }}
+      run: |
+        set -euo pipefail
+        : "${ATTIC_TOKEN:?ATTIC_TOKEN is missing, so the cache cannot be filled}"
+        mapfile -t server < <(printf '%s\n' "$SERVER_PATHS" | sed '/^$/d')
+        mapfile -t desktop < <(printf '%s\n' "$DESKTOP_PATHS" | sed '/^$/d')
+        # Attic stores its token in cleartext. Restrict access and remove it on success or failure.
+        umask 077
+        export XDG_CONFIG_HOME
+        XDG_CONFIG_HOME=$(mktemp -d "$RUNNER_TEMP/attic-config.XXXXXX")
+        trap 'rm -rf -- "$XDG_CONFIG_HOME"' EXIT
+        attic login lunaire https://cache.lunaire.moe/ "$ATTIC_TOKEN"
+        unset ATTIC_TOKEN
+        attic push --ignore-upstream-cache-filter lunaire:server "${server[@]}"
+        attic push --ignore-upstream-cache-filter lunaire:desktop "${desktop[@]}"

@@ -172,26 +172,13 @@ jobs:
 
       - name: Push to the cache
         if: steps.check.outputs.changed == 'true'
-        env:
-          ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
-          SPARKLE_PATH: ${{ steps.build.outputs.sparkle }}
-          CAMELLYA_PATH: ${{ steps.build.outputs.camellya }}
-          KAFKA_PATH: ${{ steps.build.outputs.kafka }}
-        run: |
-          set -euo pipefail
-          if [ -z "$ATTIC_TOKEN" ]; then
-            echo "ATTIC_TOKEN not set, skipping push"
-            exit 0
-          fi
-          # Attic stores its token in cleartext. Restrict access and remove it on success or failure.
-          umask 077
-          export XDG_CONFIG_HOME
-          XDG_CONFIG_HOME=$(mktemp -d "$RUNNER_TEMP/attic-config.XXXXXX")
-          trap 'rm -rf -- "$XDG_CONFIG_HOME"' EXIT
-          attic login lunaire https://cache.lunaire.moe/ "$ATTIC_TOKEN"
-          unset ATTIC_TOKEN
-          attic push --ignore-upstream-cache-filter lunaire:server "$SPARKLE_PATH"
-          attic push --ignore-upstream-cache-filter lunaire:desktop "$CAMELLYA_PATH" "$KAFKA_PATH"
+        uses: ./.forgejo/actions/attic-push
+        with:
+          token: ${{ secrets.ATTIC_TOKEN }}
+          server-paths: ${{ steps.build.outputs.sparkle }}
+          desktop-paths: |
+            ${{ steps.build.outputs.camellya }}
+            ${{ steps.build.outputs.kafka }}
 
       - name: Commit and push
         if: steps.check.outputs.changed == 'true'

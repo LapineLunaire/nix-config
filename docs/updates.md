@@ -16,7 +16,9 @@ On Mondays and manual runs the job refreshes Home Assistant's container digest. 
 
 A group that fails is rolled back, and the other group's update still goes ahead. If anything changed, the job checks all systems again, builds Camellya, Kafka, and Sparkle, including Sparkle's guest runners, and pushes one signed commit with the combined changes. If a group was rolled back, the run then fails and names that group. Sparxie and Silverwolf are evaluated but not built by the x86_64 Linux runner.
 
-`CI_SIGNING_KEY` supplies the SSH signing key. With `ATTIC_TOKEN` set, the workflow uploads Sparkle to the `server` cache and Camellya and Kafka to the `desktop` cache before committing and pushing. An upload failure blocks the push; without a token, uploads are skipped. Temporary signing keys and cache credentials are removed when their steps finish.
+`CI_SIGNING_KEY` supplies the SSH signing key. The workflow uploads Sparkle to the `server` cache and Camellya and Kafka to the `desktop` cache with `ATTIC_TOKEN` before committing and pushing. A missing token or failed upload blocks the push. Temporary signing keys and cache credentials are removed when their steps finish.
+
+The [validation workflow](../.forgejo/workflows/validate.yml) builds the same three systems for every other push to `main` and uploads them the same way, so a desktop that pulls `main` finds it cached once validation finishes. Pushes made with the workflow token, such as the update commit, do not start it.
 
 ## Server upgrades
 

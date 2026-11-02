@@ -30,8 +30,21 @@ jobs:
 
       # The runner cannot build Sparxie or Silverwolf.
       - name: Build systems
+        id: build
         run: |
           set -euo pipefail
           for host in sparkle camellya kafka; do
-            nix build --no-link --no-write-lock-file ".#nixosConfigurations.$host.config.system.build.toplevel"
+            path=$(nix build --no-link --print-out-paths --no-write-lock-file ".#nixosConfigurations.$host.config.system.build.toplevel")
+            echo "$host=$path" >> "$GITHUB_OUTPUT"
           done
+
+      # Every commit on main gets cached, so a desktop that pulls it does not build it locally.
+      - name: Push to the cache
+        if: github.event_name == 'push'
+        uses: ./.forgejo/actions/attic-push
+        with:
+          token: ${{ secrets.ATTIC_TOKEN }}
+          server-paths: ${{ steps.build.outputs.sparkle }}
+          desktop-paths: |
+            ${{ steps.build.outputs.camellya }}
+            ${{ steps.build.outputs.kafka }}
