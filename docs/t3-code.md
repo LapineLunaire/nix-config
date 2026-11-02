@@ -36,7 +36,7 @@ Then add the cloned repositories as projects in the app. Check the service with 
 
 ## Pull requests
 
-Agents follow [their instructions](../users/t3/agents.md): they fork the repository to the `t3` account, push their branch to the fork, and open a pull request against the original. They use targeted local checks while developing and leave the full repository checks to CI.
+Agents follow [their instructions](../users/t3/agents.md): they fork the repository to the `t3` account, keep the fork's default branch up to date with the original, push their branch to the fork, and open a pull request against the original. They use targeted local checks while developing and leave the full repository checks to CI.
 
 Forgejo runs the workflow files from a pull request, including its changes, once the run is approved. Review the changes, including workflows, local actions, and code they execute, before approving a run on the shared runner. Wait for validation to pass on the latest pull request head before merging. If the branch changes, review the new changes and wait for their checks. `t3-land` does not enforce CI status.
 
