@@ -10,7 +10,7 @@ Carmilla's desktop app is a client of the server. A rebuild keeps the app's loca
 
 Quit the app and switch from a normal terminal. Package updates restart the service and interrupt its agents, and an open app can undo its settings when it closes. Threads from the earlier server under Carmilla's `~/.t3` stay there; the `t3` server starts empty.
 
-The `t3` Forgejo account is restricted, so it only sees what it is given: it belongs to the `ReadOnly` team of the `lune` organization, which can read all of the organization's repositories and write to none. Keep it out of the trusted users for Actions, and do not approve its workflow runs (see [pull requests](#pull-requests)). ci-runner is registered for `lune` only, under the organization's **Settings → Actions → Runners**, so workflows in `t3`'s own forks find no runner.
+The `t3` Forgejo account is restricted, so it only sees what it is given: it belongs to the `ReadOnly` team of the `lune` organization, which can read all of the organization's repositories and write to none. Keep it out of the trusted users for Actions, so workflow runs require review and approval (see [pull requests](#pull-requests)). ci-runner is registered for `lune` only, under the organization's **Settings → Actions → Runners**, so workflows in `t3`'s own forks find no runner.
 
 Open a shell as `t3`:
 
@@ -36,9 +36,9 @@ Then add the cloned repositories as projects in the app. Check the service with 
 
 ## Pull requests
 
-Agents follow [their instructions](../users/t3/agents.md): they fork the repository to the `t3` account, push their branch to the fork, and open a pull request against the original. They run checks themselves as `t3`.
+Agents follow [their instructions](../users/t3/agents.md): they fork the repository to the `t3` account, push their branch to the fork, and open a pull request against the original. They use targeted local checks while developing and leave the full repository checks to CI.
 
-Forgejo runs the workflow files from a pull request, including its changes, once the run is approved. A read-only fork's runs wait for approval, and the validation workflow also skips pull requests from forks. Approving a `t3` run would execute the agent's workflows on the shared runner, so leave them unapproved.
+Forgejo runs the workflow files from a pull request, including its changes, once the run is approved. Review the changes, including workflows, local actions, and code they execute, before approving a run on the shared runner. Wait for validation to pass on the latest pull request head before merging. If the branch changes, review the new changes and wait for their checks. `t3-land` does not enforce CI status.
 
 Review the pull request in Forgejo or in a checkout of your own. Do not open the `t3` user's directories or enter a development shell from the pull request as Carmilla, because that runs the agent's code as her.
 
