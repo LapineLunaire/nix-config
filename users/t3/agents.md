@@ -11,6 +11,6 @@ Deliver finished work as a pull request on `git.lunaire.moe`. Work on a branch o
 
 To update an open pull request, push to the same branch with `git push fork HEAD`. Do not run `pr create` again.
 
-Run the repository's own checks before opening the pull request; CI does not run for pull requests from forks.
+Use CI for the full repository checks after Carmilla reviews the changes and approves the workflow run. Run targeted local checks when needed to develop or debug a change; do not repeat the full CI suite before opening the pull request. Report pending CI as pending, not passed.
 
 In the description, say what changed and which checks you ran. If you changed Git hooks, CI workflows, or `.envrc`, say why.
