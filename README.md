@@ -20,6 +20,7 @@ Linux hosts use `/persist/nix-config`; Silverwolf uses `~/projects/nix-config`.
 - [Network access](docs/network.md)
 - [Automated updates](docs/updates.md)
 - [Shared secrets](docs/secrets.md)
+- [T3 Code](docs/t3-code.md)
 
 ## Configuration
 
@@ -31,17 +32,7 @@ Each host imports its upstream modules, system profile, host configuration, and 
 
 Carmilla's entries share Home Manager programs. Camellya and Kafka use entries under `users/carmilla/hosts/` for per-system packages and settings. Both import the shared desktop configuration. Silverwolf shares application settings and also uses Homebrew for its macOS application list.
 
-Camellya and Kafka run T3 Code as a Home Manager user service on port 3773, using the configured Codex and Claude Code packages. User lingering starts the server at boot and keeps it running after logout. The firewall restricts it to the same trusted subnets as SSH; Kafka also requires a trusted NetworkManager connection. Settings remain writable; a rebuild restores declared values.
-
-The desktop app is a client of the server, and both use `~/.t3`. A rebuild keeps the app's local environment off because the server locks that directory.
-
-Quit the app and switch from a normal terminal: package updates restart the service and interrupt its agents, and an open app can undo the setting when it closes. Pair the app once on each host with the token from `t3 pair`. Use the loopback address, because the LAN address in the printed link changes between networks:
-
-```sh
-t3code-desktop "t3code://pair?pairingUrl=http%3A%2F%2F127.0.0.1%3A3773%2Fpair%23token%3D<token>"
-```
-
-The app's native folder picker is off in this mode. Check the service with `systemctl --user status t3code` and its logs with `journalctl --user -u t3code`.
+Camellya and Kafka run the T3 Code server as the separate `t3` user, so coding agents cannot read Carmilla's home, use doas, or reach her YubiKey. Carmilla's desktop app is its client. See [T3 Code](docs/t3-code.md).
 
 Camellya, Kafka, and Silverwolf use unstable packages and Home Manager; Sparkle, Sparxie, and the guests use stable packages. Each host sets its system and home state versions.
 

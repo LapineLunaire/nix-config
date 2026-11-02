@@ -2,11 +2,11 @@
   imports = [
     ./account.nix
     ./home.nix
+    ../t3
   ];
 
   users.users.carmilla.extraGroups = ["wheel" "networkmanager"];
-  users.users.carmilla.linger = true;
-  host.trustedTCPPorts = [3773];
+  users.users.carmilla.linger = false;
 
   home-manager.users.carmilla = {
     config,
