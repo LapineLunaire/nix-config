@@ -7,6 +7,9 @@
 }: let
   dotResolvers = ["1.1.1.1" "1.0.0.1"];
   camellyaAddress = "10.28.64.96";
+  # Kafka uses one of these at a time.
+  kafkaWifiAddress = "10.28.64.92";
+  kafkaVpnAddress = "10.28.96.4";
   proxiedNames = (map (e: e.sub) (lib.attrValues web.endpoints)) ++ ["misc"];
   cnames = lib.concatMapStrings (sub: "${sub} IN CNAME proxy.${web.domain}.\n") proxiedNames;
   # 10.28.x.y becomes y.x in the 28.10.in-addr.arpa zone.
@@ -16,6 +19,8 @@
   records = ''
     sparkle  IN A    ${dmz.hostAddress}
     camellya IN A    ${camellyaAddress}
+    kafka    IN A    ${kafkaWifiAddress}
+    kafka    IN A    ${kafkaVpnAddress}
     git-ssh  IN A    ${net.vmAddress.forgejo}
     unifi    IN A    ${net.vmAddress.unifi}
     vault    IN A    ${net.vmAddress.vault}
@@ -26,6 +31,8 @@
   reverseRecords = ''
     ${ptrLabel dmz.hostAddress}   IN PTR  sparkle.${web.domain}.
     ${ptrLabel camellyaAddress}   IN PTR  camellya.${web.domain}.
+    ${ptrLabel kafkaWifiAddress}   IN PTR  kafka.${web.domain}.
+    ${ptrLabel kafkaVpnAddress}   IN PTR  kafka.${web.domain}.
     ${ptrLabel net.vmAddress.forgejo}   IN PTR  git-ssh.${web.domain}.
     ${ptrLabel net.vmAddress.unifi}   IN PTR  unifi.${web.domain}.
     ${ptrLabel net.vmAddress.vault}   IN PTR  vault.${web.domain}.

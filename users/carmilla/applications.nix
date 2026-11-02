@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   ...
 }: let
@@ -155,7 +156,25 @@ in {
     enable = true;
     enableDefaultConfig = false;
     package = pkgs.openssh;
-    settings."*".IdentityFile = "${config.home.homeDirectory}/.ssh/id_ed25519_sk_rk_carmilla";
+    settings =
+      {
+        "*" = {
+          IdentityFile = "${config.home.homeDirectory}/.ssh/id_ed25519_sk_rk_carmilla";
+          # Not every network sets the lunaire.moe search domain.
+          CanonicalizeHostname = "yes";
+          CanonicalDomains = "lunaire.moe";
+          CanonicalizeMaxDots = 0;
+        };
+        sparxie.HostName = "sparxie.bunny.enterprises";
+        # Kafka's name has an address per network. SSH tries the next one when a connection attempt fails.
+        "kafka kafka.local kafka.lunaire.moe".ConnectTimeout = 3;
+      }
+      # T3 Code opens remote editors at <hostname>.local, which needs mDNS.
+      // lib.listToAttrs (map (host:
+        lib.nameValuePair "${host}.local" {
+          HostName = "${host}.lunaire.moe";
+          HostKeyAlias = "${host}.lunaire.moe";
+        }) ["camellya" "kafka"]);
   };
 
   programs.yazi = {
