@@ -19,6 +19,7 @@ in {
     home = "/var/lib/t3";
     createHome = true;
     homeMode = "700";
+    openssh.authorizedKeys.keys = import ../carmilla/ssh-keys.nix;
     # Starts the server at boot and keeps it running without a login.
     linger = true;
   };
