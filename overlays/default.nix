@@ -1,5 +1,22 @@
 {
   modifications = _final: prev: {
+    # SSH askpass helpers must execute; /tmp is mounted with noexec.
+    zed-editor =
+      if prev.stdenv.hostPlatform.isLinux
+      then
+        prev.symlinkJoin {
+          name = "zed-editor-with-runtime-tmp";
+          paths = [prev.zed-editor];
+          nativeBuildInputs = [prev.makeWrapper];
+          postBuild = ''
+            wrapProgram "$out/bin/zeditor" \
+              --run 'export TMPDIR="''${XDG_RUNTIME_DIR:?}/zed"' \
+              --run '${prev.coreutils}/bin/mkdir -p -m 700 "$TMPDIR"'
+          '';
+          inherit (prev.zed-editor) meta;
+        }
+      else prev.zed-editor;
+
     # Adds SCRAM-SHA-256, SCRAM-SHA-512 and channel binding to Dino 0.5.1. Written for 0.5.1 only.
     # Upstream issue: https://github.com/dino/dino/issues/493
     dino = prev.dino.overrideAttrs (old: {
