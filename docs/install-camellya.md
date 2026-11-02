@@ -70,7 +70,7 @@ The checkout belongs to `carmilla:users` (UID 1000, GID 100). Root password logi
 
 Installation signs the boot entries. Leave Secure Boot enforcement disabled until the signing keys are enrolled; use the LUKS passphrase for the first boot.
 
-Then [enroll Secure Boot keys and TPM2](secure-boot.md#installed-system-enrollment), and restore the [YubiKey SSH and Git signing identity](keys.md#yubikey-ssh-and-git-signing). For routine switches, see the [README quick start](../README.md#quick-start).
+Then [enroll Secure Boot keys and TPM2](secure-boot.md#installed-system-enrollment), restore the [YubiKey SSH and Git signing identity](keys.md#yubikey-ssh-and-git-signing), and [set up T3 Code](t3-code.md#setup). For routine switches, see the [README quick start](../README.md#quick-start).
 
 ## Disk usage
 

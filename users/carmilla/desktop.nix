@@ -2,7 +2,6 @@
   imports = [
     ./account.nix
     ./home.nix
-    ../t3
   ];
 
   users.users.carmilla.extraGroups = ["wheel" "networkmanager"];

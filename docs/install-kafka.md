@@ -96,7 +96,7 @@ Use the LUKS passphrase for the first boot and log in as `carmilla` with the pas
 
 The boot-time passphrase prompt and console use Colemak. Plasma also offers the US layout.
 
-[Enroll and verify Secure Boot](secure-boot.md#installed-system-enrollment), then [enroll TPM2 with a PIN](secure-boot.md#tpm2-enrollment) using `/dev/disk/by-partlabel/kafka-crypt`. Restore the [YubiKey SSH and Git signing identity](keys.md#yubikey-ssh-and-git-signing).
+[Enroll and verify Secure Boot](secure-boot.md#installed-system-enrollment), then [enroll TPM2 with a PIN](secure-boot.md#tpm2-enrollment) using `/dev/disk/by-partlabel/kafka-crypt`. Restore the [YubiKey SSH and Git signing identity](keys.md#yubikey-ssh-and-git-signing), and [set up T3 Code](t3-code.md#setup).
 
 Kafka accepts SSH and T3 Code connections from the trusted subnets only on the NetworkManager connections listed in `host.trustedConnections` in `hosts/kafka/default.nix`, which are the home Wi-Fi and the WireGuard VPN. A recreated connection gets a new UUID. Find it with `nmcli -t -f UUID,TYPE connection show` and update the list.
 

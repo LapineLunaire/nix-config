@@ -204,6 +204,7 @@
               aagl.nixosModules.default
               ./hosts/camellya
               ./users/carmilla/hosts/camellya.nix
+              ./users/t3
             ];
         };
 
@@ -214,6 +215,7 @@
             ++ [
               ./hosts/kafka
               ./users/carmilla/hosts/kafka.nix
+              ./users/t3
             ];
         };
 
