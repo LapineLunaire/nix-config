@@ -2,7 +2,7 @@
   home.packages = [
     (pkgs.writeShellApplication {
       name = "t3-land";
-      runtimeInputs = [pkgs.git];
+      runtimeInputs = [pkgs.git pkgs.curl pkgs.jq];
       text = ''
         # Merges a Forgejo pull request's exact head commit with one signed merge commit, then pushes it.
         if [ $# -lt 1 ] || [ $# -gt 2 ] || ! [[ $1 =~ ^[0-9]+$ ]]; then
@@ -51,10 +51,22 @@
           printf '\nThis pull request changes files that run code later:\n%s\n' "$risky"
         fi
         echo
+        url=$(g remote get-url "$remote")
+        case "$url" in
+          forgejo@git-ssh.lunaire.moe:*) repo=''${url#forgejo@git-ssh.lunaire.moe:} ;;
+          ssh://forgejo@git-ssh.lunaire.moe/*) repo=''${url#ssh://forgejo@git-ssh.lunaire.moe/} ;;
+          https://git.lunaire.moe/*) repo=''${url#https://git.lunaire.moe/} ;;
+          *) die "cannot find the Forgejo API for $url" ;;
+        esac
+        repo=''${repo%.git}
+        title=$(curl --fail --silent --show-error "https://git.lunaire.moe/api/v1/repos/$repo/pulls/$number" |
+          jq -er '.title | select(type == "string" and test("[^[:space:]]"))') || die "cannot read the pull request title; nothing merged"
+        message="Merge pull request #$number: $title"
+        printf '\n%s\n' "$message"
         read -r -p "Merge these commits ($head) into $branch, sign the merge, and push to $remote? [y/N] " answer
         [ "$answer" = y ] || die "nothing merged"
 
-        if ! g merge --no-ff --no-edit -S -m "Merge pull request #$number" "$head"; then
+        if ! g merge --no-ff --no-edit -S -m "$message" "$head"; then
           g merge --abort 2> /dev/null || true
           die "the merge or its signature failed; nothing changed"
         fi

@@ -48,7 +48,7 @@ Land it from a clean checkout of the default branch, on a host with the YubiKey:
 t3-land <pull request number>
 ```
 
-`t3-land` fetches the pull request's head commit, shows its commits, and asks before merging. It names changed files that run code later: the repository's Git hooks, `.forgejo`, and `.envrc`. It then creates one signed merge commit with `--no-ff` and pushes it, with Git hooks disabled throughout. That signature covers the agent's unsigned commits, so Sparkle and Sparxie accept them.
+`t3-land` fetches the pull request's head commit, shows its commits, and reads its title from the Forgejo API at `git.lunaire.moe`. The merge commit subject is `Merge pull request #<number>: <title>`. It shows that subject and asks before merging. It names changed files that run code later: the repository's Git hooks, `.forgejo`, and `.envrc`. It then creates one signed merge commit with `--no-ff` and pushes it, with Git hooks disabled throughout. That signature covers the agent's unsigned commits, so Sparkle and Sparxie accept them.
 
 It refuses to run if the branch is behind its remote or has uncommitted changes. It also refuses if Git filters or merge drivers are configured, or if the repository's own config includes other files or sets SSH, signing, or credential programs, because those could run the pull request's files. Git hooks, fsmonitor, and the pager are off throughout. If the merge conflicts or signing fails, it aborts the merge and changes nothing. A pull request updated after review gets a new head commit, so check the commits it prints.
 
