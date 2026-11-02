@@ -29,3 +29,21 @@ t3code-desktop "t3code://pair?pairingUrl=http%3A%2F%2F127.0.0.1%3A3773%2Fpair%23
 ```
 
 Then add the cloned repositories as projects in the app. Check the service with `doas systemctl --user -M t3@ status t3code` and its logs with `doas journalctl _SYSTEMD_USER_UNIT=t3code.service`.
+
+## Pull requests
+
+Review the pull request in Forgejo or in a checkout of your own. Do not open the `t3` user's directories or enter a development shell from the pull request as Carmilla, because that runs the agent's code as her.
+
+Land it from a clean checkout of the default branch, on a host with the YubiKey:
+
+```sh
+t3-land <pull request number>
+```
+
+`t3-land` fetches the pull request's head commit, shows its commits, and asks before merging. It names changed files that run code later: the repository's Git hooks, `.forgejo`, and `.envrc`. It then creates one signed merge commit with `--no-ff` and pushes it, with Git hooks disabled throughout. That signature covers the agent's unsigned commits, so Sparkle and Sparxie accept them.
+
+It refuses to run if the branch is behind its remote or has uncommitted changes. It also refuses if Git filters or merge drivers are configured, or if the repository's own config includes other files or sets SSH, signing, or credential programs, because those could run the pull request's files. Git hooks, fsmonitor, and the pager are off throughout. If the merge conflicts or signing fails, it aborts the merge and changes nothing. A pull request updated after review gets a new head commit, so check the commits it prints.
+
+Turn on **Autodetect manual merge** under each repository's pull request settings, so Forgejo marks the pull request as merged when the merge reaches the default branch. Without it, use **Manually merged** on the pull request.
+
+Repositories that nothing deploys from can use Forgejo's merge button. In `nix-config`, Forgejo's merge commits are not signed by an `allowedSigners` key, so the servers would refuse them.
