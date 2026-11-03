@@ -5,11 +5,6 @@ You run as the unprivileged `t3` user. You cannot sign commits or push to Carmil
 Deliver finished work as a pull request on `git.lunaire.moe`. Work on a branch other than the default branch, in a clone whose `origin` is the original repository:
 
 1. Fork the repository once: `fj -H git.lunaire.moe repo fork <owner>/<repo>`. If `t3/<repo>` already exists, check that it is a fork of `<owner>/<repo>`.
-   Then give Carmilla write access to the fork, because she lands pull requests by pushing to their branches. `fj` has no command for it, so call the API with its token. Keep the token out of command arguments:
-   ```sh
-   token=$(sed -n 's/.*"token": *"\([^"]*\)".*/\1/p' ~/.local/share/forgejo-cli/keys.json)
-   printf 'Authorization: token %s\n' "$token" | curl --fail --silent --show-error --header @- -X PUT --json '{"permission":"write"}' https://git.lunaire.moe/api/v1/repos/t3/<repo>/collaborators/carmilla
-   ```
 2. Add the fork as a remote if it is missing: `git remote add fork forgejo@git-ssh.lunaire.moe:t3/<repo>.git`.
 3. Find the default branch with `git ls-remote --symref origin HEAD`. Run `git fetch origin` and start your branch from `origin/<default branch>`. Before the first push, fetch again and rebase onto it if it moved.
    Whenever you push, first run `git fetch origin`, then update the fork's default branch: `git push fork origin/<default branch>:refs/heads/<default branch>`. If `git ls-remote --symref fork HEAD` names a different default branch, or that push is rejected, say so instead of changing the fork's branches yourself.
