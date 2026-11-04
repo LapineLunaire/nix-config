@@ -116,7 +116,8 @@
         fi
 
         if commit=$(g rev-parse --verify --quiet "$prepared^{commit}"); then
-          if [ "$commit" = "$head" ] && [ "$(g rev-parse "$commit^")" = "$base" ]; then
+          # The title is checked too, because it becomes the commit message and can be edited after the commit was prepared.
+          if [ "$commit" = "$head" ] && [ "$(g rev-parse "$commit^")" = "$base" ] && [ "$(g log -1 --format=%B "$commit")" = "$title" ]; then
             [ -z "$prepare_only" ] || die "pull request $number is already prepared as $commit; run t3-land $number to land it"
             state=$(ci_state "$commit")
             [ "$state" = success ] || die "CI on the prepared commit $commit is $state, not success. Check its run at $pull; nothing changed."
