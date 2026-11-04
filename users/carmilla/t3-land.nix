@@ -4,9 +4,8 @@
       name = "t3-land";
       runtimeInputs = [pkgs.git pkgs.coreutils pkgs.gawk pkgs.gnused pkgs.curl pkgs.jq pkgs.iconv];
       text = ''
-        # Squashes a Forgejo pull request's exact head commit into one signed commit on the default branch. The commit
-        # is pushed to the pull request's branch first and then to the default branch, so Forgejo sees the pull request's
-        # head on the default branch and marks it as merged.
+        # Squashes a Forgejo pull request's head commit into one signed commit on the default branch. The commit goes to the
+        # pull request's branch first, so Forgejo finds the pull request's head on the default branch and marks it as merged.
         usage() {
           echo "usage: t3-land [--prepare] <pull request number> [remote]" >&2
           exit 2
@@ -25,16 +24,15 @@
           echo "t3-land: $*" >&2
           exit 1
         }
-        # The pull request's files must not run as Carmilla. Git variables such as GIT_SSH_COMMAND or
-        # GIT_CONFIG_PARAMETERS could name them, so none are inherited.
-        # The script's bash has no compgen, so the names come from parameter expansion.
+        # Git variables such as GIT_SSH_COMMAND or GIT_CONFIG_PARAMETERS could run the pull request's files as Carmilla.
+        # This bash has no compgen, so the names come from parameter expansion.
         for name in "''${!GIT_@}"; do
           unset "$name"
         done
         cd "$(git rev-parse --show-toplevel)"
 
-        # Git also skips the system and global config, so their helpers and filters cannot name files in the
-        # work tree; only the identity and signing key are kept. Hooks, fsmonitor, and the pager are off, and new commits are marked as UTF-8.
+        # The system and global config are skipped too, because their helpers and filters could name files in the work tree.
+        # Only the identity and signing settings are kept.
         keep=()
         for key in user.name user.email user.signingkey gpg.format; do
           if value=$(git config "$key"); then
@@ -47,15 +45,15 @@
         }
 
         # Hooks run on Carmilla's next commit. Only hooks inside the work tree can come from the pull request.
-        # Both the path as written and its symlink target are checked, because the pull request can replace either.
+        # The path as written and its symlink target are both checked, because the pull request can replace either.
         hooks=()
         if configured=$(git config --type=path core.hooksPath); then
           for path in "$(realpath -m -s --relative-to=. -- "$configured")" "$(realpath -m --relative-to=. -- "$configured")"; do
             case "$path" in .. | ../*) ;; *) hooks+=("$path") ;; esac
           done
         fi
-        # The repository's config, including worktree config, could run the pull request's files: filters, merge
-        # and diff drivers run on them, and hooks, includes, or programs can name files in the work tree. core.hooksPath does not turn off hooks set in config.
+        # The repository's own and worktree config could run the pull request's files: filters and merge and diff drivers run on them,
+        # and hooks, includes, or programs can name files in the work tree. core.hooksPath does not turn off hooks set in config.
         unsafe=$(
           GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null git config --get-regexp \
             '^(filter\..*\.(clean|smudge|process)|merge\..*\.driver|diff\..*\.(command|textconv)|diff\.external|include\.|includeif\.|hook\.|core\.(sshcommand|askpass|gitproxy)|protocol\.|gpg\.|credential\.)' || true
@@ -78,9 +76,16 @@
         repo=''${repo%.git}
         api=https://git.lunaire.moe/api/v1/repos/$repo/pulls/$number
         pull=https://git.lunaire.moe/$repo/pulls/$number
+        # Forgejo's combined CI state for a commit, such as success, pending, or failure; a cancelled run counts as failure.
+        # The state is empty for a commit with no runs.
+        ci_state() {
+          curl --fail --silent --show-error "https://git.lunaire.moe/api/v1/repos/$repo/commits/$1/status" |
+            jq -r '(.state | select(. != "")) // "missing"' ||
+            echo unknown
+        }
 
         ref=refs/t3-land/$number
-        # A commit made with --prepare. It stays until it lands or goes out of date.
+        # Kept after either mode pushes to the fork, so running again lands the same commit once CI passes.
         prepared=refs/t3-land/prepared/$number
         trap 'g update-ref -d "$ref" 2> /dev/null || true' EXIT
         g fetch --no-tags "$remote" "+refs/heads/$branch:refs/remotes/$remote/$branch" "+refs/pull/$number/head:$ref"
@@ -97,7 +102,7 @@
         if [[ $title =~ [[:cntrl:]] || ! $title =~ [^[:space:]] ]]; then
           die "pull request $number needs a one-line title; it becomes the commit subject"
         fi
-        # Git would run a program for transports such as ext::, so only the Forgejo SSH address is accepted.
+        # Other URLs, such as <transport>::<address>, can make Git run a helper program, so only the Forgejo SSH address is accepted.
         fork=$(jq -r '.head.repo.ssh_url // ""' <<< "$info")
         [[ $fork =~ ^ssh://forgejo@git-ssh\.lunaire\.moe/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\.git$ ]] ||
           die "cannot find the repository of pull request $number's branch"
@@ -109,6 +114,8 @@
         if commit=$(g rev-parse --verify --quiet "$prepared^{commit}"); then
           if [ "$commit" = "$head" ] && [ "$(g rev-parse "$commit^")" = "$(g rev-parse HEAD)" ]; then
             [ -z "$prepare_only" ] || die "pull request $number is already prepared as $commit; run t3-land $number to land it"
+            state=$(ci_state "$commit")
+            [ "$state" = success ] || die "CI on the prepared commit $commit is $state, not success. Check its run at $pull; nothing changed."
             g show --stat --no-textconv --format='%n%h %s%n%an <%ae>' "$commit"
             read -r -p "Push the prepared commit $commit to $remote/$branch? [y/N] " answer
             [ "$answer" = y ] || die "nothing changed"
@@ -122,6 +129,15 @@
         fi
 
         if [ -z "$commit" ]; then
+          # If the pull request contains the default branch, the squashed commit has the head's tree, so CI on the head
+          # checked what lands. Otherwise --prepare runs CI on the squashed commit.
+          if [ -z "$prepare_only" ]; then
+            g merge-base --is-ancestor HEAD "$head" ||
+              die "pull request $number does not contain the latest $branch, so its CI did not check what would land. Run t3-land --prepare $number; nothing changed."
+            state=$(ci_state "$head")
+            [ "$state" = success ] ||
+              die "CI on pull request $number's head $head is $state, not success. Approve and wait for its run at $pull, or run t3-land --prepare $number; nothing changed."
+          fi
           tree=$(g merge-tree --write-tree HEAD "$head") || die "pull request $number conflicts with $branch; nothing changed"
           [ "$tree" != "$(g rev-parse "HEAD^{tree}")" ] || die "$branch already has every change in pull request $number; nothing changed"
           # Commit messages and authors come from the pull request, so control characters are removed before they reach the terminal.
@@ -130,12 +146,12 @@
           iconv -f UTF-8 -t UTF-8 <<< "$log" > /dev/null 2>&1 || die "pull request $number has commit messages or authors that are not valid UTF-8"
           printf '%s\n' "$log" | LC_ALL=C.UTF-8 sed 's/[[:cntrl:]]//g'
           echo
-          # The diff is taken from the tree that lands, which can differ from the pull request's own diff when the merge follows a rename.
+          # The diff is of the tree that lands, which can differ from the pull request's own diff, for example when the merge follows a rename.
           g diff --stat --no-textconv HEAD "$tree"
-          # These act later as Carmilla: hooks on her next commit, workflows on the runner, .envrc with the flake's development shell
-          # when she enters the directory, project settings and instructions of her coding agents and editor, and .sops.yaml when she encrypts secrets.
-          # The development shell sets core.hooksPath to .githooks.
-          # Symlinks are listed too, because they can redirect any of these paths, including the hooks directory or its parents.
+          # These act later: hooks on Carmilla's next commit, workflows on the runner, .envrc with the flake's development shell
+          # when she enters the directory, project settings and instructions of her coding agents and editor, and .sops.yaml when she
+          # encrypts secrets. The development shell sets core.hooksPath to .githooks. Symlinks are listed because they can redirect
+          # any of these paths or their parents.
           risky=$(
             {
               g diff --name-only HEAD "$tree" -- "''${hooks[@]}" .githooks .forgejo .envrc flake.nix flake.lock .sops.yaml .claude .codex .mcp.json .zed "*AGENTS.md" "*CLAUDE.md"
@@ -151,10 +167,10 @@
           read -r -p "Squash pull request $number ($head) into this commit as $(g config user.name), sign it, push it to $source on $fork, and $next? [y/N] " answer
           [ "$answer" = y ] || die "nothing changed"
 
-          # The commit is made, signed, and pushed without touching the work tree, so SSH or signing helpers that
-          # name files there run Carmilla's current files, not the pull request's. The checkout catches up afterwards.
+          # The work tree is not touched until after the push, so SSH or signing helpers that name files there run
+          # Carmilla's current files, not the pull request's.
           commit=$(g commit-tree -S -p HEAD -m "$title" "$tree") || die "signing failed; nothing changed"
-          # The lease fails if the branch moved since the review, so commits pushed after it are never dropped.
+          # The lease fails if the branch moved since the fetch, so later commits are never dropped.
           g push --force-with-lease="refs/heads/$source:$head" "$fork" "$commit:refs/heads/$source" ||
             die "could not replace $source on $fork; if the pull request changed, review it again. Nothing was pushed to $branch."
           g update-ref "$prepared" "$commit"
@@ -164,9 +180,8 @@
           fi
         fi
 
-        # Forgejo updates the pull request's head in the background; it must hold the commit before the default
-        # branch does, or the merge may not be detected. The prepared commit is kept, so running again finishes.
-        # It is checked over HTTPS, because each SSH connection can ask for a YubiKey touch.
+        # Forgejo updates the pull request's head in the background; it must hold the commit before the default branch does,
+        # or the merge may not be detected. It is checked over HTTPS, because each SSH connection can ask for a YubiKey touch.
         synced=
         for _ in $(seq 30); do
           if [ "$(g ls-remote "https://git.lunaire.moe/$repo.git" "refs/pull/$number/head" | cut -f1)" = "$commit" ]; then
@@ -175,8 +190,8 @@
           fi
           sleep 1
         done
-        [ -n "$synced" ] || die "Forgejo has not updated pull request $number to $commit yet, so nothing was pushed to $branch. Run t3-land $number again in a moment."
-        # Not a forced push, so it fails if the default branch moved; the commit's parent is the fetched tip.
+        [ -n "$synced" ] || die "Forgejo has not updated pull request $number to $commit yet, so nothing was pushed to $branch. Once its CI run at $pull passes, run t3-land $number again."
+        # The commit's parent is the fetched tip; a normal push rejects a default branch that diverged.
         g push "$remote" "$commit:refs/heads/$branch" ||
           die "the push to $branch failed. $source on $fork now holds $commit; pull, then run t3-land $number again to make it on top of the new $branch and stop for CI."
         g update-ref -d "$prepared"
