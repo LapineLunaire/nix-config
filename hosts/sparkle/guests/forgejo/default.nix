@@ -7,14 +7,14 @@
   ...
 }: {
   imports = [
-    # Git-over-SSH on port 22 uses the system sshd; open it to git clients on the trusted subnets.
+    # Git over SSH uses the system sshd; open it to trusted subnets.
     ../../../../modules/nixos/networking/trusted-ssh-ingress.nix
     ./sops.nix
   ];
 
   host.trustedSubnets = trustedSubnets.all;
 
-  # Permit Uptime Kuma's SSH availability check as well as trusted Git clients.
+  # Also allow Uptime Kuma's SSH check.
   networking.firewall.extraInputRules = ''
     ip saddr ${net.vmAddress.uptime-kuma} tcp dport 22 accept
   '';

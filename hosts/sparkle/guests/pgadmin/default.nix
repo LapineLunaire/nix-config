@@ -43,7 +43,7 @@
         OAUTH2_CONFIG[0]['OAUTH2_CLIENT_SECRET'] = secret.read().strip()
   '';
 
-  # Match the remote PostgreSQL server for pg_dump/pg_restore on the service PATH.
+  # pgAdmin uses this pg_dump and pg_restore; keep the version in step with the postgres guest.
   services.postgresql.package = pkgs.postgresql_18;
 
   systemd.services.pgadmin.serviceConfig.LoadCredential = [

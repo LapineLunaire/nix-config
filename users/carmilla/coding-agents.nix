@@ -1,4 +1,4 @@
-# Claude Code and Codex, shared by Carmilla and the t3 agent user.
+# Shared by Carmilla and the t3 agent user.
 {pkgs, ...}: let
   # programs.codex names the plugin after the derivation.
   superpowers = pkgs.fetchFromGitHub {

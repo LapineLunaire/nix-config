@@ -64,7 +64,6 @@ in {
         options = ["defaults" "size=25%" "mode=1777" "nosuid" "nodev" "noexec"];
       };
     in {
-      # Replaces microvm.nix's default root.
       "/" = {
         device = "rootfs";
         fsType = "tmpfs";
@@ -93,7 +92,6 @@ in {
       hypervisor = "cloud-hypervisor";
       vcpu = lib.mkDefault 4;
       mem = lib.mkDefault 2048;
-      # microvm.nix manages the overlay on the read-only host store.
       shares = [
         {
           tag = "ro-store";
@@ -153,7 +151,7 @@ in {
       (lib.concatMapStrings (port: "ip saddr ${proxyAddress} tcp dport ${toString port} accept\n") proxiedPorts)
     ];
     networking.useDHCP = false;
-    # Force eth0 naming; all VM configs reference eth0.
+    # Guest networking requires eth0.
     networking.usePredictableInterfaceNames = false;
     networking.nameservers = [net.vmAddress.dns];
     networking.defaultGateway = {

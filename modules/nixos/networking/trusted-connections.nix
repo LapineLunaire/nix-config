@@ -7,7 +7,6 @@
   uuids = config.host.trustedConnections;
   ports = lib.concatMapStringsSep ", " toString (config.services.openssh.ports ++ config.host.trustedTCPPorts);
   nmcli = "${config.networking.networkmanager.package}/bin/nmcli";
-  # Replace the set's contents with the interfaces of the active trusted connections.
   sync = pkgs.writeShellScript "sync-trusted-interfaces" ''
     set -u
     elements=""
@@ -27,7 +26,7 @@ in {
   };
 
   config = {
-    # Drop admin traffic before nixos-fw unless it arrives on a trusted connection's interface, so other networks that reuse the trusted subnets are refused.
+    # Require a trusted connection too: other networks may reuse trusted subnets.
     networking.nftables.tables.trusted-connections = {
       family = "inet";
       content = ''
@@ -44,7 +43,7 @@ in {
 
     networking.networkmanager.dispatcherScripts = [{source = sync;}];
 
-    # Loading the rules empties the set. Ignore failures while NetworkManager is not running yet at boot.
+    # Loading the rules empties the set, so refill it. Ignore failures while NetworkManager is not running yet at boot.
     systemd.services.nftables.serviceConfig = {
       ExecStartPost = lib.mkAfter ["-${sync}"];
       ExecReload = lib.mkAfter ["-${sync}"];

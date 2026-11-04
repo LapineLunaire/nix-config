@@ -17,7 +17,7 @@
       root * /srv/misc
       file_server browse
     '';
-    # Additional callers beyond trusted clients. Uptime Kuma probes through the proxy.
+    # Allow Uptime Kuma to probe services through the proxy.
     uptimeKuma = net.vmAddress.uptime-kuma;
     vmVhosts = lib.mapAttrs (name: _:
       {
@@ -38,7 +38,7 @@
       };
       # Allow server clones, CI and health checks.
       forgejo.extraAllow = [dmz.subnet net.vmAddress.ci-runner uptimeKuma];
-      # Allow cache access from Sparkle and CI; trusted clients already include the desktop.
+      # Allow Sparkle and CI; the desktops are on trusted subnets.
       attic.extraAllow = [dmz.subnet];
     };
     hostVhosts = {

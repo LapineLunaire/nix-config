@@ -21,7 +21,7 @@
       xh
     ])
     ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux (with pkgs; [
-      # GNU commands absent from uutils remain available through the system profile.
+      # The system profile supplies GNU commands missing from uutils.
       uutils-coreutils-noprefix
       uutils-findutils
       uutils-diffutils

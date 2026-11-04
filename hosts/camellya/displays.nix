@@ -1,6 +1,5 @@
 {pkgs, ...}: let
   kwinOutputConfig = let
-    # Both panels: 4K, 160 Hz, 1.25x scale, HDR.
     panel = {
       abmLevel = 0;
       allowDdcCi = true;
@@ -22,7 +21,6 @@
       overscan = 0;
       rgbRange = "Automatic";
       scale = 1.25;
-      # Use the same SDR white level on both panels.
       sdrBrightness = 486;
       sdrGamutWideness = 1;
       sharpness = 0;

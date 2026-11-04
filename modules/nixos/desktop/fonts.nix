@@ -15,7 +15,7 @@
     fontconfig = {
       subpixel.rgba = "rgb";
 
-      # Choose CJK fonts per language below, rather than making one the global default.
+      # CJK fonts are chosen per language, not set as a global default.
       defaultFonts = {
         monospace = ["JetBrainsMono Nerd Font"];
         sansSerif = ["Noto Sans"];

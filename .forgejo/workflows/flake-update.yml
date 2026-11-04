@@ -13,7 +13,7 @@ jobs:
   update:
     runs-on: nixos
     env:
-      # Update server-only inputs separately so a failed update of the other inputs does not hold them back.
+      # Update server inputs separately so failures in the other inputs do not hold them back.
       SERVER_INPUTS: nixpkgs-stable home-manager-stable nixvim-stable microvm unifi-os-server
       CHECK: nix flake check --all-systems --no-build --no-write-lock-file --option allow-import-from-derivation false
     steps:
@@ -58,7 +58,7 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # Jobs start with an empty store, and no cache holds the plugin source, so this build always checks the hash.
+      # This build checks the hash only because no cache holds the plugin source; keep it out of the caches.
       - name: Refresh the caddy plugin hash
         id: caddy
         if: steps.server.outputs.changed == 'true'
@@ -124,7 +124,6 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # Shared inputs also affect sparkle.
       - name: Check remaining inputs
         id: rest-check
         if: steps.rest.outputs.changed == 'true'
@@ -150,12 +149,12 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # Checks the combined result, and a Home Assistant digest change on its own.
+      # Check the combined result, which also covers a Home Assistant digest change on its own.
       - name: Check flake outputs
         if: steps.check.outputs.changed == 'true'
         run: $CHECK
 
-      # Sparkle includes every guest runner. The ARM VPS is evaluated above.
+      # Sparkle includes every guest runner. Sparxie is only evaluated, by $CHECK.
       - name: Build
         id: build
         if: steps.check.outputs.changed == 'true'

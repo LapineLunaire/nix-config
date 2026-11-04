@@ -38,7 +38,7 @@
       }: "${id}:${passwords.${name}}")
       roles;
     };
-    # Let psql quote identifiers and passwords. Keep secret values out of SQL files and argv.
+    # Let psql quote values; keep passwords out of SQL files and argv.
     script =
       lib.concatMapStrings ({
         id,

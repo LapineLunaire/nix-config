@@ -1,4 +1,3 @@
-# The T3 Code desktop app, as a client of the server that the t3 user runs.
 {
   config,
   lib,
@@ -10,7 +9,7 @@
     mutableClientSettings = true;
   };
 
-  # Its local environment would run agents as Carmilla, so a rebuild keeps it off.
+  # Keep local agents off: they would run as Carmilla.
   home.activation.t3codeDesktopClientOnly = lib.hm.dag.entryAfter ["linkGeneration"] (
     lib.hm.generators.mkImpureConfigMerger {
       inherit pkgs;

@@ -27,7 +27,7 @@ in {
     "borg-passphrase" = {};
     "borg-ssh-key" = {};
     "borg-repo" = {};
-    # Full known_hosts line for the storage box, obtained with: ssh-keyscan -p 23 <hostname>
+    # Storage box known_hosts line from: ssh-keyscan -p 23 <hostname>
     "borg-known-hosts" = {};
   };
 
@@ -63,7 +63,7 @@ in {
       ${pkgs.util-linux}/bin/umount /mnt/borg-snapshot 2>/dev/null || true
       ${zfs} destroy ${dataset}@borg-backup 2>/dev/null || true
     '';
-    # The script's last step, reached only after every Borg command succeeds.
+    # Record success only after all Borg commands succeed.
     postPrune = ''
       if [ "$(${pkgs.coreutils}/bin/date +%d)" = 01 ]; then
         borgWrapper check --repository-only

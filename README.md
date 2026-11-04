@@ -28,7 +28,7 @@ The flake exports NixOS desktop and server profiles, a Darwin profile, and reusa
 
 NixOS modules are grouped by purpose under `modules/nixos/`: system settings, networking, services, programs, desktop settings, Nix maintenance, and microVMs. Shared NixOS and Darwin settings live under `modules/shared/`.
 
-Each host imports its upstream modules, system profile, host configuration, and user configuration in that order. Hardware, networking, persistence, and secrets live with each host under `hosts/`.
+Each host imports upstream modules, a system profile, host configuration, and user configuration. Hardware, networking, persistence, and secrets live with each host under `hosts/`.
 
 Carmilla's entries share Home Manager programs. Camellya and Kafka use entries under `users/carmilla/hosts/` for per-system packages and settings. Both import the shared desktop configuration. Silverwolf shares application settings and also uses Homebrew for its macOS application list.
 

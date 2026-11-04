@@ -317,7 +317,7 @@
       "postgresql-passwords.service"
       "redis.service"
     ];
-    # No MemoryDenyWriteExecute: the Erlang JIT needs it.
+    # Check Erlang JIT compatibility before enabling MemoryDenyWriteExecute.
     serviceConfig = {
       NoNewPrivileges = true;
       CapabilityBoundingSet = "";

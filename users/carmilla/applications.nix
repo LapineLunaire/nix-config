@@ -147,7 +147,7 @@
           CanonicalizeMaxDots = 0;
         };
         sparxie.HostName = "sparxie.bunny.enterprises";
-        # Kafka's name has an address per network. SSH tries the next one when a connection attempt fails.
+        # Kafka has an address per network; give up on each after 3 seconds so SSH tries the next.
         "kafka kafka.local kafka.lunaire.moe".ConnectTimeout = 3;
       }
       # T3 Code opens remote editors at <hostname>.local, which needs mDNS.

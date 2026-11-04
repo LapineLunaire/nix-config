@@ -8,7 +8,7 @@ Carmilla's desktop app is a client of the server. A rebuild keeps the app's loca
 
 ## Setup
 
-Quit the app and switch from a normal terminal. Package updates restart the service and interrupt its agents, and an open app can undo its settings when it closes. Threads from the earlier server under Carmilla's `~/.t3` stay there; the `t3` server starts empty.
+Quit the app and switch from a normal terminal. Package updates restart the service and interrupt its agents, and an open app can undo its settings when it closes.
 
 The `t3` Forgejo account is restricted, so it only sees what it is given: it belongs to the `ReadOnly` team of the `lune` organization, which can read all of the organization's repositories and write to none. Keep it out of the trusted users for Actions, so workflow runs require review and approval (see [pull requests](#pull-requests)). ci-runner is registered for `lune` only, under the organization's **Settings → Actions → Runners**, so workflows in `t3`'s own forks find no runner.
 
@@ -45,7 +45,7 @@ Review the pull request in Forgejo or in a checkout of your own. Do not open the
 Land it from a clean checkout of the default branch, on a host with the YubiKey:
 
 ```sh
-t3-land [--prepare] <pull request number>
+t3-land [--prepare] <pull request number> [remote]
 ```
 
 `t3-land` fetches the pull request's head commit and reads the pull request from the Forgejo API at `git.lunaire.moe` without a token, so it works only for public repositories. It shows the commits and the files the squashed commit changes, and names changed files that act later: Git hooks, `.forgejo`, `.envrc`, `flake.nix`, `flake.lock`, `.sops.yaml`, the project settings in `.claude`, `.codex`, `.mcp.json`, and `.zed`, agent instructions in `AGENTS.md` and `CLAUDE.md`, and any symlink. After you confirm, it squashes the pull request into one commit on top of the default branch, with the pull request's title as the subject and you as author and committer, and you sign it. So the default branch stays linear, every commit on it is signed, and each pull request needs one signature.

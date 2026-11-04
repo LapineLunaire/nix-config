@@ -24,7 +24,7 @@ runs:
         : "${ATTIC_TOKEN:?ATTIC_TOKEN is missing, so the cache cannot be filled}"
         mapfile -t server < <(printf '%s\n' "$SERVER_PATHS" | sed '/^$/d')
         mapfile -t desktop < <(printf '%s\n' "$DESKTOP_PATHS" | sed '/^$/d')
-        # Attic stores its token in cleartext. Restrict access and remove it on success or failure.
+        # Protect Attic's cleartext token and remove it even on failure.
         umask 077
         export XDG_CONFIG_HOME
         XDG_CONFIG_HOME=$(mktemp -d "$RUNNER_TEMP/attic-config.XXXXXX")

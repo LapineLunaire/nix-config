@@ -7,10 +7,9 @@
       ];
       # Enable sandboxing on macOS.
       sandbox = true;
-      # Disable the global registry.
       flake-registry = "";
       auto-optimise-store = true;
-      # Build from source if downloading a cached package fails.
+      # Build locally if cache downloads fail.
       fallback = true;
       use-xdg-base-directories = true;
     };

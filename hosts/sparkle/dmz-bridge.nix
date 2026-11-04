@@ -37,11 +37,9 @@ in {
     registry = import ./guest-registry.nix;
     web = import ./guest-web.nix;
     guests = net.tapsNft;
-    # Read each MAC from the guest configuration.
     guestMacsNft = lib.concatStringsSep ", " (lib.mapAttrsToList (name: _: "\"${name}\" . ${(builtins.head guestConfigurations.${name}.config.microvm.interfaces).mac}") registry);
-    # Private, multicast and reserved space, excluded from any flow that names no destination of its own.
+    # Flows without their own destinations exclude these private, multicast and reserved ranges.
     privateSpace = "{ 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, 169.254.0.0/16, 224.0.0.0/3 }";
-    # Unspecified destinations exclude private, multicast and reserved networks.
     renderFlow = tap: flow: let
       destination =
         if flow.destinations == []
@@ -56,7 +54,6 @@ in {
         then " icmp type echo-request"
         else lib.optionalString (flow.ports == [] && flow.sourcePorts == []) " meta l4proto ${flow.proto}";
     in "iifname \"${tap}\" oifname \"sfp0\" ${destination}${match}${sports}${ports} accept";
-    # Read outbound allowances from each service's guest configuration.
     egressRules = lib.concatStringsSep "\n" (lib.concatLists (lib.mapAttrsToList (name: _:
       map (renderFlow name) guestConfigurations.${name}.config.microvmGuest.egress)
     registry));
@@ -90,7 +87,6 @@ in {
         ether type arp iifname . arp saddr ip != @guest-identity goto spoof-drop
       }
 
-      # Log only spoofed frames, with a rate limit.
       chain spoof-drop {
         limit rate 10/second log prefix "guest-spoof-drop "
         drop
@@ -105,7 +101,7 @@ in {
         ct state invalid drop
         ct state established,related accept
 
-        # LAN and VPN: git-over-ssh to forgejo, and ICMP to any guest.
+        # Trusted subnets: Git over SSH to Forgejo, and ICMP to any guest.
         iifname "sfp0" oifname "forgejo" ip saddr { ${trusted} } tcp dport 22 accept
         iifname "sfp0" oifname { ${guests} } ip saddr { ${trusted} } icmp type echo-request accept
 
@@ -118,7 +114,7 @@ in {
         # PostgreSQL, from the client guests listed in guest-net.nix.
         iifname { ${guests} } oifname "postgres" tcp dport ${toString net.postgresPort} ip saddr { ${net.postgresClientsNft} } accept
 
-        # NFSv4 to the vault guest from the clients listed in guest-net.nix. v4-only, so 2049 is the whole surface.
+        # NFSv4 only, so TCP 2049 is enough; allow the client guests listed in guest-net.nix.
         iifname { ${guests} } oifname "vault" tcp dport ${toString net.nfsPort} ip saddr { ${net.nfsClientsNft} } accept
 
         # SMB is for trusted clients; guests use NFS.
@@ -130,12 +126,12 @@ in {
         iifname "sfp0" oifname "vault" ip daddr 224.0.0.251 udp dport 5353 accept
         iifname "sfp0" oifname "vault" ip daddr 239.255.255.250 udp dport 3702 accept
 
-        # UniFi controller reaches the APs on the management network for adoption, provisioning, and firmware pushes.
+        # The UniFi controller manages the APs on the management network.
         iifname "unifi" oifname "sfp0" ip daddr ${dmz.management} accept
-        # UniFi APs reach the controller for L3 inform and adoption and for service traffic.
+        # UniFi APs reach the controller for inform, adoption and other services.
         iifname "sfp0" oifname "unifi" ip saddr ${dmz.management} tcp dport { 8080, 8443, 6789, 8880, 8843, 28082, 5671 } accept
         iifname "sfp0" oifname "unifi" ip saddr ${dmz.management} udp dport { 3478, 10001 } accept
-        # Admins reach the controller web UI directly, with no reverse proxy in front of it.
+        # Trusted clients reach the controller web UI directly, not through the proxy.
         iifname "sfp0" oifname "unifi" ip saddr { ${trusted} } tcp dport 443 accept
         # This guest-to-guest probe needs a rule separate from off-segment egress.
         iifname "uptime-kuma" oifname "unifi" tcp dport 443 accept

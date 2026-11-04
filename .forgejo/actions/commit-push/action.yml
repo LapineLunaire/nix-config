@@ -1,5 +1,5 @@
 name: Commit and push
-description: Stage the given paths, commit signed with the repo git identity, and push
+description: Stage paths, commit as Carmilla with the supplied signing key, and push
 inputs:
   paths:
     description: Literal paths to commit, one per line
@@ -50,7 +50,7 @@ runs:
           -c gpg.format=ssh -c user.signingkey="$key" -c commit.gpgsign=true \
           commit --only -m "$MESSAGE $(date +%Y-%m-%d)" -- "${paths[@]}"
 
-        # Authenticate this command without storing a token in the checkout or putting it in argv.
+        # Keep the push token out of the checkout and argv.
         GIT_CONFIG_COUNT=1 \
           GIT_CONFIG_KEY_0="http.${SERVER_URL%/}/.extraheader" \
           GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$PUSH_TOKEN" | base64 | tr -d '\n')" \

@@ -14,7 +14,6 @@
   ];
   boot.kernelModules = ["kvm-amd"];
 
-  # LUKS -> btrfs subvolumes for /nix, /persist and /home.
   # Use the enrolled TPM token; the LUKS passphrase remains available for recovery.
   # Unlocking extends PCR 15. The TPM token is bound to its initial value, so it cannot be unsealed after any volume is unlocked.
   boot.initrd.luks.devices.cryptroot = {

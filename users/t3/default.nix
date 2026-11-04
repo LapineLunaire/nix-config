@@ -1,4 +1,4 @@
-# The t3 user runs the T3 Code server, so agents cannot read Carmilla's home, use doas, or reach her YubiKey.
+# Isolate agents from Carmilla's home, doas, and YubiKey.
 {
   config,
   lib,
@@ -9,22 +9,22 @@
 in {
   users.groups.t3 = {};
   users.users.t3 = {
-    # A system account gets a UID below 1000, so the login screen and Plasma's user list leave it out.
+    # Keep the account out of the desktop user lists.
     isSystemUser = true;
     description = "T3 Code agents";
     group = "t3";
-    # For `machinectl shell t3@`; system accounts default to nologin.
+    # Allow `machinectl shell t3@`; system accounts default to nologin.
     useDefaultShell = true;
     # /var/lib is persisted on the desktops.
     home = "/var/lib/t3";
     createHome = true;
     homeMode = "700";
     openssh.authorizedKeys.keys = import ../carmilla/ssh-keys.nix;
-    # Starts the server at boot and keeps it running without a login.
+    # Run the server without a login.
     linger = true;
   };
 
-  # Agents can write to their home, so sshd reads only the keys declared here.
+  # Do not trust authorized keys in the agent-writable home.
   services.openssh.extraConfig = lib.mkAfter ''
     Match User t3
       AuthorizedKeysFile /etc/ssh/authorized_keys.d/%u
@@ -33,7 +33,7 @@ in {
   nix.settings.allowed-users = ["t3"];
   host.trustedTCPPorts = [3773];
 
-  # Agents can read anything world-readable. Keep the configuration checkout private to Carmilla.
+  # Keep the checkout private: agents can read world-readable files.
   systemd.tmpfiles.rules = ["z ${config.host.flakePath} 0700 - - -"];
 
   home-manager.users.t3 = {config, ...}: {
@@ -51,7 +51,7 @@ in {
     xdg.enable = true;
     systemd.user.startServices = "sd-switch";
 
-    # Agents commit as T3 Code and never sign. Carmilla signs when she lands their work.
+    # Carmilla signs when she lands agent work.
     programs.git = {
       enable = true;
       settings = {

@@ -5,7 +5,7 @@
 | 03:00 | Sparkle and Sparxie backups |
 | 04:00 | Server upgrades, with up to 15 minutes of jitter |
 | 05:00 | Forgejo update and build workflow |
-| 12:00 | Borg freshness check |
+| 12:00 | Borg freshness check; Sparkle and Sparxie email daily while a reboot is pending |
 
 The [update workflow](../.forgejo/workflows/flake-update.yml) also supports manual runs. Updates queue per branch, and each run checks out the latest branch to include earlier update commits.
 

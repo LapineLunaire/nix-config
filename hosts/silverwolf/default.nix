@@ -1,7 +1,7 @@
 {
   nixpkgs.hostPlatform = "aarch64-darwin";
   nixpkgs.config.allowUnfree = true;
-  # nix-darwin's own state version counter, unrelated to the nixpkgs release below it.
+  # nix-darwin's own state version counter, not a nixpkgs release.
   system.stateVersion = 6;
   home-manager.users.carmilla.home.stateVersion = "26.11";
 

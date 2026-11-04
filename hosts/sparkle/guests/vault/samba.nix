@@ -52,7 +52,7 @@
         "force group" = "users";
         "create mask" = "0644";
         "directory mask" = "0755";
-        # Fruit VFS module: macOS compatibility for extended attributes and metadata.
+        # macOS compatibility for extended attributes and metadata.
         "vfs objects" = "catia fruit streams_xattr";
       };
       misc = {

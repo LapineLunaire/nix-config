@@ -20,7 +20,6 @@ in {
     # CI signing key (Forgejo Actions)
     * ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPVAUGIq89EoX6Edi6iE8tghHeRqbmUmQJJJXcWfa5Nm
   '';
-  # Values the flake update workflow refreshes besides flake.lock.
   host.autoUpdate.ciPins = {
     "modules/nixos/services/caddy.nix" = ''^      hash = "sha256-[A-Za-z0-9+/]{43}=";$'';
     "hosts/sparkle/guests/homeassistant/default.nix" = "home-assistant/home-assistant@sha256:[a-f0-9]{64}";
@@ -37,7 +36,7 @@ in {
     persistent = true;
   };
 
-  # Holds the last deployed commit, which only root can change.
+  # Keep the deployed commit writable only by root.
   systemd.services.nixos-upgrade.serviceConfig.StateDirectory = "nixos-upgrade";
   systemd.services.nixos-upgrade.script = let
     inherit (config.host.autoUpdate) owner branch;
@@ -49,9 +48,9 @@ in {
     ciPinCases =
       lib.concatStringsSep "\n      " (lib.mapAttrsToList (path: pattern: ''${lib.escapeShellArg path}) same_except "''${parents[1]}" "$1" "$path" ${lib.escapeShellArg pattern} ;;'')
         config.host.autoUpdate.ciPins);
-    # origin/${branch} must contain the deployed commit, so history cannot be rewritten or rolled back.
-    # From the tip, CI-signed commits are walked back to a trusted commit or the deployed one; a trusted signature covers the commit's whole history.
-    # A CI commit may only move flake inputs forward on their existing sources, or change the values in host.autoUpdate.ciPins.
+    # Require the deployed commit in origin/${branch} to prevent rollbacks.
+    # Walk CI-signed commits back to a trusted or deployed commit; a trusted signature covers its whole history.
+    # CI may only move locked versions forward on unchanged sources, or change the values in host.autoUpdate.ciPins.
     verifyOriginBranch = pkgs.writeShellScript "verify-origin-${branch}" ''
       set -euo pipefail
       export HOME=/home/${owner}
@@ -67,7 +66,7 @@ in {
         git -c gpg.format=ssh -c gpg.ssh.allowedSignersFile="$2" -c gpg.ssh.program=${pkgs.openssh}/bin/ssh-keygen verify-commit "$1" 2> /dev/null
       }
 
-      # Fails unless the file differs between the commits only in text matching the pattern.
+      # Allow only changes matching the pattern.
       # awk reads the pattern from the environment so backslashes reach it unchanged.
       same_except() {
         local before after
@@ -76,7 +75,7 @@ in {
         [ "$before" = "$after" ] || refuse "CI commit $2 changes $3 beyond its pinned value"
       }
 
-      # Keep the dependency graph and sources fixed; only locked versions may advance.
+      # Keep the dependency graph and sources fixed.
       check_lock() {
         ${jq} -e -n --slurpfile old <(git show "$1:flake.lock") --slurpfile new <(git show "$2:flake.lock") '
           def structure: del(.nodes) + {nodes: (.nodes | map_values(del(.locked)))};
@@ -156,7 +155,6 @@ in {
     '';
   };
 
-  # The same comparison nixos-upgrade uses to decide on a reboot.
   systemd.services.reboot-pending = {
     description = "Mail when the running kernel differs from the installed one";
     serviceConfig.Type = "oneshot";
