@@ -76,11 +76,13 @@
         repo=''${repo%.git}
         api=https://git.lunaire.moe/api/v1/repos/$repo/pulls/$number
         pull=https://git.lunaire.moe/$repo/pulls/$number
-        # Forgejo's combined CI state for a commit, such as success, pending, or failure; a cancelled run counts as failure.
-        # The state is empty for a commit with no runs.
+        # The CI state of a commit, such as success, pending, or failure; a cancelled run counts as failure. The validation job
+        # must have passed, because any other workflow the pull request adds could pass without checking anything, and every
+        # other run must have passed too.
         ci_state() {
           curl --fail --silent --show-error "https://git.lunaire.moe/api/v1/repos/$repo/commits/$1/status" |
-            jq -r '(.state | select(. != "")) // "missing"' ||
+            jq -r '([.statuses[]? | select(.context == "Validate / validate (pull_request)") | .status] | first) as $validation
+              | if $validation == null then "missing the Validate run" elif $validation != "success" then $validation else .state end' ||
             echo unknown
         }
 
