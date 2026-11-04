@@ -91,8 +91,10 @@
         g fetch --no-tags "$remote" "+refs/heads/$branch:refs/remotes/$remote/$branch" "+refs/pull/$number/head:$ref"
         head=$(g rev-parse --verify "$ref^{commit}")
         # Otherwise local commits would be pushed with the pull request without being shown.
-        [ "$(g rev-parse HEAD)" = "$(g rev-parse "$remote/$branch")" ] || die "$branch does not match $remote/$branch; pull or push first"
-        ! g merge-base --is-ancestor "$head" HEAD || die "pull request $number is already in $branch"
+        # Later steps use this commit instead of HEAD, so a commit made elsewhere during the prompt is not undone.
+        base=$(g rev-parse "$remote/$branch")
+        [ "$(g rev-parse HEAD)" = "$base" ] || die "$branch does not match $remote/$branch; pull or push first"
+        ! g merge-base --is-ancestor "$head" "$base" || die "pull request $number is already in $branch"
 
         info=$(curl --fail --silent --show-error "$api") || die "cannot read pull request $number from Forgejo; nothing changed"
         jq -e '.state == "open"' <<< "$info" > /dev/null || die "pull request $number is not open"
@@ -112,7 +114,7 @@
         fi
 
         if commit=$(g rev-parse --verify --quiet "$prepared^{commit}"); then
-          if [ "$commit" = "$head" ] && [ "$(g rev-parse "$commit^")" = "$(g rev-parse HEAD)" ]; then
+          if [ "$commit" = "$head" ] && [ "$(g rev-parse "$commit^")" = "$base" ]; then
             [ -z "$prepare_only" ] || die "pull request $number is already prepared as $commit; run t3-land $number to land it"
             state=$(ci_state "$commit")
             [ "$state" = success ] || die "CI on the prepared commit $commit is $state, not success. Check its run at $pull; nothing changed."
@@ -132,30 +134,30 @@
           # If the pull request contains the default branch, the squashed commit has the head's tree, so CI on the head
           # checked what lands. Otherwise --prepare runs CI on the squashed commit.
           if [ -z "$prepare_only" ]; then
-            g merge-base --is-ancestor HEAD "$head" ||
+            g merge-base --is-ancestor "$base" "$head" ||
               die "pull request $number does not contain the latest $branch, so its CI did not check what would land. Run t3-land --prepare $number; nothing changed."
             state=$(ci_state "$head")
             [ "$state" = success ] ||
               die "CI on pull request $number's head $head is $state, not success. Approve and wait for its run at $pull, or run t3-land --prepare $number; nothing changed."
           fi
-          tree=$(g merge-tree --write-tree HEAD "$head") || die "pull request $number conflicts with $branch; nothing changed"
-          [ "$tree" != "$(g rev-parse "HEAD^{tree}")" ] || die "$branch already has every change in pull request $number; nothing changed"
+          tree=$(g merge-tree --write-tree "$base" "$head") || die "pull request $number conflicts with $branch; nothing changed"
+          [ "$tree" != "$(g rev-parse "$base^{tree}")" ] || die "$branch already has every change in pull request $number; nothing changed"
           # Commit messages and authors come from the pull request, so control characters are removed before they reach the terminal.
           # sed does not match bytes that are not valid UTF-8, so those are refused first.
-          log=$(g log --reverse --no-textconv --format='%h %s  %an <%ae>' "HEAD..$head")
+          log=$(g log --reverse --no-textconv --format='%h %s  %an <%ae>' "$base..$head")
           iconv -f UTF-8 -t UTF-8 <<< "$log" > /dev/null 2>&1 || die "pull request $number has commit messages or authors that are not valid UTF-8"
           printf '%s\n' "$log" | LC_ALL=C.UTF-8 sed 's/[[:cntrl:]]//g'
           echo
           # The diff is of the tree that lands, which can differ from the pull request's own diff, for example when the merge follows a rename.
-          g diff --stat --no-textconv HEAD "$tree"
+          g diff --stat --no-textconv "$base" "$tree"
           # These act later: hooks on Carmilla's next commit, workflows on the runner, .envrc with the flake's development shell
           # when she enters the directory, project settings and instructions of her coding agents and editor, and .sops.yaml when she
           # encrypts secrets. The development shell sets core.hooksPath to .githooks. Symlinks are listed because they can redirect
           # any of these paths or their parents.
           risky=$(
             {
-              g diff --name-only HEAD "$tree" -- "''${hooks[@]}" .githooks .forgejo .envrc flake.nix flake.lock .sops.yaml .claude .codex .mcp.json .zed "*AGENTS.md" "*CLAUDE.md"
-              g diff --raw --no-renames HEAD "$tree" | awk -F '\t' '$1 ~ /(^:| )120000 / { print $2 }'
+              g diff --name-only "$base" "$tree" -- "''${hooks[@]}" .githooks .forgejo .envrc flake.nix flake.lock .sops.yaml .claude .codex .mcp.json .zed "*AGENTS.md" "*CLAUDE.md"
+              g diff --raw --no-renames "$base" "$tree" | awk -F '\t' '$1 ~ /(^:| )120000 / { print $2 }'
             } | sort -u
           )
           if [ -n "$risky" ]; then
@@ -169,7 +171,7 @@
 
           # The work tree is not touched until after the push, so SSH or signing helpers that name files there run
           # Carmilla's current files, not the pull request's.
-          commit=$(g commit-tree -S -p HEAD -m "$title" "$tree") || die "signing failed; nothing changed"
+          commit=$(g commit-tree -S -p "$base" -m "$title" "$tree") || die "signing failed; nothing changed"
           # The lease fails if the branch moved since the fetch, so later commits are never dropped.
           g push --force-with-lease="refs/heads/$source:$head" "$fork" "$commit:refs/heads/$source" ||
             die "could not replace $source on $fork; if the pull request changed, review it again. Nothing was pushed to $branch."
