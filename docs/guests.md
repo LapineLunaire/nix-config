@@ -31,7 +31,7 @@ Stage new files with `git add` before evaluating or switching, because a Git-bac
 
 The ci-runner guest runs each `nixos` Forgejo Actions job in a fresh Docker container. [image.nix](../hosts/sparkle/guests/ci-runner/image.nix) builds the job image from locked Nixpkgs. The image is part of Sparkle's build and needs no registry. Its fixed `localhost/nix-ci:current` tag avoids re-registering the runner when the image changes.
 
-The runner takes one job at a time, so a job can use all 8 CPUs, 20 GiB RAM, and the swap for large builds; other jobs queue. Nix runs three builds at once. Both workflows queue runs for the same branch.
+The runner takes one job at a time, so a job can use all 8 CPUs, 20 GiB RAM, and the swap for large builds. Nix runs up to three builds at once. Update runs queue per branch; a new push to a pull request cancels its older validation runs.
 
 Jobs have separate Nix stores, databases, checkouts, and credentials, removed when they finish. Nix runs without a daemon or its build sandbox; Docker and the microVM provide isolation. Builds run as unprivileged `nixbld` users, so builders cannot create `/homeless-shelter`, which makes unsandboxed Nix refuse to build. Jobs are not privileged and get no host mounts or daemon sockets. They download or build paths absent from the image, using the [read-only cache token](secrets.md). Signing and publishing credentials come from Forgejo workflow secrets.
 

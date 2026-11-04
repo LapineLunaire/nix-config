@@ -1,14 +1,14 @@
 name: Validate
 
+# Pushes to main are not validated: pull requests are checked before they land, and hosts build what the caches lack.
 on:
-  push:
-    branches: [main]
   pull_request: {}
   workflow_dispatch: {}
 
+# Cancelling includes older runs still waiting for approval.
 concurrency:
   group: validation-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   validate:
@@ -19,22 +19,21 @@ jobs:
         with:
           persist-credentials: false
 
-      # A pull request merged into main before its run starts is checked again by the run for the merge, which also fills the caches.
+      # Landing can reach main before this run starts.
       - name: Check whether the pull request is merged
         id: merged
         if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
         env:
           REPOSITORY: ${{ github.server_url }}/${{ github.repository }}.git
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        # The checkout is shallow and has the pull request's commits, so a fetch into it would skip main's history.
-        # A separate repository fetches only that history's commits. If the fetch fails, validation goes ahead.
+        # A failed fetch leaves validation enabled.
         run: |
           set -euo pipefail
           history=$(mktemp -d "$RUNNER_TEMP/history.XXXXXX")
           git init --quiet --bare "$history"
           if git -C "$history" fetch --quiet --no-tags --filter=tree:0 "$REPOSITORY" "+refs/heads/main:refs/heads/main" &&
             git -C "$history" merge-base --is-ancestor "$HEAD_SHA" main 2> /dev/null; then
-            echo "The pull request is already in main, so its run there checks it."
+            echo "The pull request has already landed in main, so it is not checked again."
             echo "skip=true" >> "$GITHUB_OUTPUT"
           fi
 
@@ -50,37 +49,19 @@ jobs:
         if: steps.merged.outputs.skip != 'true'
         run: nix flake check --all-systems --no-build --no-write-lock-file --option allow-import-from-derivation false
 
-      # The runner cannot build Sparxie or Silverwolf. A pull request does not build a system that a run on main
-      # already built and cached. Runs on main always build and upload, which repairs and keeps the cache entries.
+      # The runner cannot build Sparxie or Silverwolf.
       - name: Build systems
-        id: build
         if: steps.merged.outputs.skip != 'true'
-        env:
-          EVENT: ${{ github.event_name }}
         run: |
           set -euo pipefail
           for host in sparkle camellya kafka; do
             cache=desktop
             [ "$host" != sparkle ] || cache=server
             attr=".#nixosConfigurations.$host.config.system.build.toplevel"
-            if [ "$EVENT" = pull_request ]; then
-              out=$(nix eval --raw --no-write-lock-file "$attr.outPath")
-              if nix path-info --store "https://cache.lunaire.moe/$cache" "$out" > /dev/null 2>&1; then
-                echo "$host is unchanged from a system built on main: $out"
-                continue
-              fi
+            out=$(nix eval --raw --no-write-lock-file "$attr.outPath")
+            if nix path-info --store "https://cache.lunaire.moe/$cache" "$out" > /dev/null 2>&1; then
+              echo "$host is unchanged from a cached system: $out"
+              continue
             fi
-            path=$(nix build --no-link --print-out-paths --no-write-lock-file "$attr")
-            echo "$host=$path" >> "$GITHUB_OUTPUT"
+            nix build --no-link --no-write-lock-file "$attr"
           done
-
-      # Every commit on main gets cached, so a desktop that pulls it does not build it locally.
-      - name: Push to the cache
-        if: github.event_name == 'push'
-        uses: ./.forgejo/actions/attic-push
-        with:
-          token: ${{ secrets.ATTIC_TOKEN }}
-          server-paths: ${{ steps.build.outputs.sparkle }}
-          desktop-paths: |
-            ${{ steps.build.outputs.camellya }}
-            ${{ steps.build.outputs.kafka }}
