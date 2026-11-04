@@ -13,7 +13,7 @@
               --run 'export TMPDIR="''${XDG_RUNTIME_DIR:?}/zed"' \
               --run '${prev.coreutils}/bin/mkdir -p -m 700 "$TMPDIR"'
           '';
-          inherit (prev.zed-editor) meta;
+          inherit (prev.zed-editor) version meta passthru;
         }
       else prev.zed-editor;
 

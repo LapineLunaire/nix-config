@@ -2,7 +2,7 @@
   home.packages = [
     (pkgs.writeShellApplication {
       name = "t3-land";
-      runtimeInputs = [pkgs.git pkgs.coreutils pkgs.gawk pkgs.gnused pkgs.curl pkgs.jq];
+      runtimeInputs = [pkgs.git pkgs.coreutils pkgs.gawk pkgs.gnused pkgs.curl pkgs.jq pkgs.iconv];
       text = ''
         # Squashes a Forgejo pull request's exact head commit into one signed commit on the default branch. The commit
         # is pushed to the pull request's branch first and then to the default branch, so Forgejo sees the pull request's
@@ -27,9 +27,10 @@
         }
         # The pull request's files must not run as Carmilla. Git variables such as GIT_SSH_COMMAND or
         # GIT_CONFIG_PARAMETERS could name them, so none are inherited.
-        while IFS= read -r name; do
-          [[ $name != GIT_* ]] || unset "$name"
-        done < <(compgen -e)
+        # The script's bash has no compgen, so the names come from parameter expansion.
+        for name in "''${!GIT_@}"; do
+          unset "$name"
+        done
         cd "$(git rev-parse --show-toplevel)"
 
         # Git also skips the system and global config, so their helpers and filters cannot name files in the
@@ -108,33 +109,42 @@
         if commit=$(g rev-parse --verify --quiet "$prepared^{commit}"); then
           if [ "$commit" = "$head" ] && [ "$(g rev-parse "$commit^")" = "$(g rev-parse HEAD)" ]; then
             [ -z "$prepare_only" ] || die "pull request $number is already prepared as $commit; run t3-land $number to land it"
-            g show --stat --no-textconv --format='%n%C(yellow)%h%Creset %s%n%an <%ae>' "$commit"
+            g show --stat --no-textconv --format='%n%h %s%n%an <%ae>' "$commit"
             read -r -p "Push the prepared commit $commit to $remote/$branch? [y/N] " answer
             [ "$answer" = y ] || die "nothing changed"
           else
-            echo "The commit prepared for pull request $number is out of date, so it is made again."
+            # A new commit has not passed CI, so it stops for CI again.
+            echo "The commit prepared for pull request $number is out of date, so it is made again for CI."
             g update-ref -d "$prepared"
             commit=
+            prepare_only=1
           fi
         fi
 
         if [ -z "$commit" ]; then
-          g log --reverse --no-textconv --format='%C(yellow)%h%Creset %s  %C(dim)%an <%ae>%Creset' "HEAD..$head"
+          tree=$(g merge-tree --write-tree HEAD "$head") || die "pull request $number conflicts with $branch; nothing changed"
+          [ "$tree" != "$(g rev-parse "HEAD^{tree}")" ] || die "$branch already has every change in pull request $number; nothing changed"
+          # Commit messages and authors come from the pull request, so control characters are removed before they reach the terminal.
+          # sed does not match bytes that are not valid UTF-8, so those are refused first.
+          log=$(g log --reverse --no-textconv --format='%h %s  %an <%ae>' "HEAD..$head")
+          iconv -f UTF-8 -t UTF-8 <<< "$log" > /dev/null 2>&1 || die "pull request $number has commit messages or authors that are not valid UTF-8"
+          printf '%s\n' "$log" | LC_ALL=C.UTF-8 sed 's/[[:cntrl:]]//g'
           echo
-          g diff --stat --no-textconv "HEAD...$head"
-          # These run later as Carmilla: hooks on her next commit, workflows on the runner, and .envrc with the flake's development shell when she enters the directory.
+          # The diff is taken from the tree that lands, which can differ from the pull request's own diff when the merge follows a rename.
+          g diff --stat --no-textconv HEAD "$tree"
+          # These act later as Carmilla: hooks on her next commit, workflows on the runner, .envrc with the flake's development shell
+          # when she enters the directory, project settings and instructions of her coding agents and editor, and .sops.yaml when she encrypts secrets.
+          # The development shell sets core.hooksPath to .githooks.
           # Symlinks are listed too, because they can redirect any of these paths, including the hooks directory or its parents.
           risky=$(
             {
-              g diff --name-only "HEAD...$head" -- "''${hooks[@]}" .forgejo .envrc flake.nix flake.lock
-              g diff --raw --no-renames "HEAD...$head" | awk -F '\t' '$1 ~ /(^:| )120000 / { print $2 }'
+              g diff --name-only HEAD "$tree" -- "''${hooks[@]}" .githooks .forgejo .envrc flake.nix flake.lock .sops.yaml .claude .codex .mcp.json .zed "*AGENTS.md" "*CLAUDE.md"
+              g diff --raw --no-renames HEAD "$tree" | awk -F '\t' '$1 ~ /(^:| )120000 / { print $2 }'
             } | sort -u
           )
           if [ -n "$risky" ]; then
-            printf '\nThis pull request changes files that run code later:\n%s\n' "$risky"
+            printf '\nThis pull request changes files that act later:\n%s\n' "$risky"
           fi
-          tree=$(g merge-tree --write-tree HEAD "$head") || die "pull request $number conflicts with $branch; nothing changed"
-          [ "$tree" != "$(g rev-parse "HEAD^{tree}")" ] || die "$branch already has every change in pull request $number; nothing changed"
           next="push it to $remote/$branch"
           [ -z "$prepare_only" ] || next="stop for CI"
           printf '\n%s\n' "$title"
@@ -149,16 +159,17 @@
             die "could not replace $source on $fork; if the pull request changed, review it again. Nothing was pushed to $branch."
           g update-ref "$prepared" "$commit"
           if [ -n "$prepare_only" ]; then
-            echo "Pushed $commit to $source. Approve its CI run at $pull, and once it passes, run t3-land $number again."
+            echo "Pushed $commit to $source. Once its CI run at $pull passes, run t3-land $number again."
             exit 0
           fi
         fi
 
         # Forgejo updates the pull request's head in the background; it must hold the commit before the default
         # branch does, or the merge may not be detected. The prepared commit is kept, so running again finishes.
+        # It is checked over HTTPS, because each SSH connection can ask for a YubiKey touch.
         synced=
         for _ in $(seq 30); do
-          if [ "$(g ls-remote "$remote" "refs/pull/$number/head" | cut -f1)" = "$commit" ]; then
+          if [ "$(g ls-remote "https://git.lunaire.moe/$repo.git" "refs/pull/$number/head" | cut -f1)" = "$commit" ]; then
             synced=1
             break
           fi
@@ -167,13 +178,12 @@
         [ -n "$synced" ] || die "Forgejo has not updated pull request $number to $commit yet, so nothing was pushed to $branch. Run t3-land $number again in a moment."
         # Not a forced push, so it fails if the default branch moved; the commit's parent is the fetched tip.
         g push "$remote" "$commit:refs/heads/$branch" ||
-          die "the push to $branch failed. $source on $fork now holds $commit; pull, then run t3-land $number again to make it on top of the new $branch."
+          die "the push to $branch failed. $source on $fork now holds $commit; pull, then run t3-land $number again to make it on top of the new $branch and stop for CI."
         g update-ref -d "$prepared"
 
-        # These run before the checkout takes the pull request's files, because ls-remote uses SSH.
         merged=
         for _ in $(seq 15); do
-          if curl --fail --silent "$api" | jq -e '.merged == true' > /dev/null; then
+          if info=$(curl --fail --silent "$api") && jq -e '.merged == true' <<< "$info" > /dev/null; then
             merged=1
             break
           fi
@@ -181,7 +191,12 @@
         done
         # The checkout catches up either way, because the default branch already holds the commit.
         g merge --ff-only --quiet "$commit" || die "pushed $commit, but $branch could not fast-forward to it; run git pull"
-        [ -n "$merged" ] || die "pushed $commit, but Forgejo has not marked $pull as merged. Check that the repository has \"Autodetect manual merge\" on; otherwise mark it as manually merged at $commit."
+        if [ -z "$merged" ]; then
+          if [ -n "$info" ] && [ "$(jq -r '.head.sha' <<< "$info")" != "$commit" ]; then
+            die "pushed $commit, but $pull now has commits pushed after it; review them, or close the pull request if they are not wanted."
+          fi
+          die "pushed $commit, but Forgejo has not marked $pull as merged. Check that the repository has \"Autodetect manual merge\" on; otherwise mark it as manually merged at $commit."
+        fi
         echo "Pushed $commit. Forgejo marked $pull as merged."
       '';
     })

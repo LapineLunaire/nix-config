@@ -24,6 +24,12 @@ in {
     linger = true;
   };
 
+  # Agents can write to their home, so sshd reads only the keys declared here.
+  services.openssh.extraConfig = lib.mkAfter ''
+    Match User t3
+      AuthorizedKeysFile /etc/ssh/authorized_keys.d/%u
+  '';
+
   nix.settings.allowed-users = ["t3"];
   host.trustedTCPPorts = [3773];
 

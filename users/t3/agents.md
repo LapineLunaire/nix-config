@@ -11,7 +11,7 @@ Deliver finished work as a pull request on `git.lunaire.moe`. Work on a branch o
 4. Push your branch: `git push -u fork HEAD`.
 5. Write the description to a file and open the pull request against the original repository: `fj -H git.lunaire.moe pr create --repo t3/<repo> --base '^' --body-file <file> "<title>"`. Always pass a title and body; otherwise `fj` opens an editor and waits.
 
-To update an open pull request, push to the same branch with `git push fork HEAD`. Do not run `pr create` again.
+To update an open pull request, push to the same branch with `git push fork HEAD`. Do not run `pr create` again. If the newest commit of the branch on the fork is by Carmilla, she is landing it: do not push to it, and say so.
 
 Carmilla lands a pull request as one commit with her as author and the pull request's title as its subject, so write the title like a commit subject in the repository's style, and keep each pull request to one change. She pushes that commit to your branch on the fork and then to the default branch. After that, the branch is finished: do not push to it again, and start follow-up work on a new branch from the default branch.
 
