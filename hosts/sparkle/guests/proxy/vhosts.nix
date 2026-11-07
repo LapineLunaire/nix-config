@@ -36,7 +36,7 @@
           }
         '';
       };
-      # Allow server clones, CI and health checks.
+      # Allow Sparkle's clone, CI and health checks.
       forgejo.extraAllow = [dmz.subnet net.vmAddress.ci-runner uptimeKuma];
       # Allow Sparkle and CI; the desktops are on trusted subnets.
       attic.extraAllow = [dmz.subnet];

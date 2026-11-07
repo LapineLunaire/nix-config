@@ -49,7 +49,7 @@ cd /mnt/persist/nix-config
 blkid /dev/nvme0n1p1
 ```
 
-Forgejo runs on Sparkle. Keep a mirror or local clone available for recovery while Sparkle is offline. After cloning from it, point `origin` back to this repository on Forgejo before enabling nightly upgrades.
+Forgejo runs on Sparkle. Keep a mirror or local clone available for recovery while Sparkle is offline. After cloning from it, point `origin` to this repository before enabling nightly upgrades: Forgejo on Sparkle, and the GitHub mirror `https://github.com/LapineLunaire/nix-config` on Sparxie, which cannot reach Forgejo.
 
 Update the EFI UUID in `hosts/<hostname>/hardware-configuration.nix`, and the dataset names only if the pool name differs from the hostname. If you generated a new host ID, set `networking.hostId` in `hosts/<hostname>/default.nix`. Keep the tmpfs root, `neededForBoot` on `/persist`, and the mount options.
 

@@ -22,11 +22,11 @@ The [validation workflow](../.forgejo/workflows/validate.yml) checks pushes to `
 
 ## Server upgrades
 
-Sparkle and Sparxie check `origin/main` as described below, then reset `/persist/nix-config` to it. This discards uncommitted tracked changes and unpushed commits on the checked-out branch. Commit and push from Camellya, Kafka, or Silverwolf with its configured signing identity.
+Sparkle and Sparxie check `origin/main` as described below, then reset `/persist/nix-config` to it. Sparkle's `origin` is Forgejo. Sparxie's is the GitHub mirror `https://github.com/LapineLunaire/nix-config`, so it deploys only what the mirror holds at upgrade time; the same signature checks apply. This discards uncommitted tracked changes and unpushed commits on the checked-out branch. Commit and push from Camellya, Kafka, or Silverwolf with its configured signing identity.
 
 - `origin/main` must contain the last deployed commit, stored in `/var/lib/nixos-upgrade/deployed-rev` after each successful rebuild. A force push or rollback is refused. The first upgrade on a new host has no stored commit and skips this check.
 - From the tip, commits signed with a `host.autoUpdate.ciSigners` key are walked back to a commit signed with a `host.autoUpdate.allowedSigners` key or the deployed commit. A signature from `allowedSigners` covers the commit's whole history.
-- A CI commit must have one parent and change only flake input versions or text matching the patterns in `host.autoUpdate.ciPins`. Flake inputs keep their sources and dependency wiring and cannot move back in time. File modes cannot change. Add new inputs with their lock entries in a signed commit. When the workflow starts refreshing another pinned value, add its file and pattern to `ciPins`.
+- A CI commit must have one parent and change only flake input versions or text matching the patterns in `host.autoUpdate.ciPins`. Flake inputs keep their sources and dependency wiring, and their `lastModified` dates cannot go back. The check does not prove that a new revision is on the input's branch, and GitHub serves commits from forks through the parent repository, so `CI_SIGNING_KEY` can point an input at any code with a later date. Guard it like root access to the servers. File modes cannot change. Add new inputs with their lock entries in a signed commit. When the workflow starts refreshing another pinned value, add its file and pattern to `ciPins`.
 
 After a deliberate force push, run `doas rm /var/lib/nixos-upgrade/deployed-rev` on each affected host to accept the rewritten history. The next upgrade still checks commit signatures and CI changes.
 
