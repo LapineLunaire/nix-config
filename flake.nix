@@ -4,7 +4,6 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable-small";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-26.05";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
     home-manager = {
       url = "github:nix-community/home-manager/master";
@@ -51,9 +50,8 @@
 
     lanzaboote = {
       url = "github:nix-community/lanzaboote/master";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-      inputs.rust-overlay.url = "github:oxalica/rust-overlay/master";
-      inputs.rust-overlay.inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.rust-overlay.follows = "rust-overlay";
       inputs.pre-commit.inputs.flake-compat.follows = "flake-compat";
     };
 
@@ -69,7 +67,7 @@
 
     unifi-os-server = {
       url = "github:rcambrj/unifi-os-server";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     aagl = {
