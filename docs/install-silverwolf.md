@@ -1,6 +1,6 @@
 # Install Silverwolf
 
-Silverwolf uses the existing `carmilla` account at `/Users/carmilla` on Apple Silicon. Nix and Home Manager provide the shared desktop programs, IINA, mtr, and UTM. [Homebrew](../modules/darwin/homebrew.nix) manages the other applications, including all three Proton apps and the Mac App Store list.
+Silverwolf uses the existing `carmilla` account at `/Users/carmilla` on Apple Silicon. Nix and Home Manager provide the shared desktop programs, IINA, mtr, and UTM. Homebrew manages the [other applications](../users/carmilla/darwin.nix), including all three Proton apps and the Mac App Store list.
 
 Install [Homebrew](https://brew.sh/) and sign in to the Mac App Store before switching. The `container` formula requires [macOS 26 or later](https://formulae.brew.sh/formula/container). Grant the terminal App Management permission if macOS requests it while installing applications.
 
