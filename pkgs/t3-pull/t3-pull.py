@@ -19,9 +19,12 @@ NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._/-]*")
 HOST = re.compile(r"[A-Za-z0-9][A-Za-z0-9.-]*")
 PATH = re.compile(r"/[A-Za-z0-9._/-]+")
 # These act later: hooks on the next commit, workflows on the runner, .envrc with the flake's development shell, which
-# also sets core.hooksPath to .githooks, settings and instructions of coding agents and editors, and .sops.yaml when
-# secrets are encrypted.
-RISKY = [".githooks", ".forgejo", ".envrc", "flake.nix", "flake.lock", ".sops.yaml", ".claude", ".codex", ".mcp.json", ".zed", "*AGENTS.md", "*CLAUDE.md"]
+# also sets core.hooksPath to .githooks, settings and instructions of coding agents and editors, .sops.yaml when secrets
+# are encrypted, and .gitattributes on how later diffs are shown.
+RISKY = [".githooks", ".forgejo", ".envrc", "flake.nix", "flake.lock", ".sops.yaml", ".claude", ".codex", ".mcp.json", ".zed", "*AGENTS.md", "*CLAUDE.md", "*.gitattributes"]
+# SOPS metadata keys in YAML, JSON, dotenv, and INI files, and the ciphertext SOPS writes. Escapes in YAML or JSON can
+# still hide both.
+SOPS = r"""ENC\[AES256_GCM,|^["']?sops["']?[[:space:]]*:|"sops"[[:space:]]*:|^sops_mac=|^\[sops\]"""
 HIDDEN_CATEGORIES = {"Cc", "Cf", "Cs", "Co", "Cn", "Zl", "Zp"}
 # Default_Ignorable_Code_Point characters that are not in HIDDEN_CATEGORIES, such as variation selectors.
 IGNORABLE = re.compile(r"[\u034f\u115f\u1160\u17b4\u17b5\u180b-\u180f\u3164\ufe00-\ufe0f\uffa0\U000e0100-\U000e01ef]")
@@ -149,7 +152,7 @@ def output(*args):
 
 def show_diff(base, commit):
     pager = output("var", "GIT_PAGER") if sys.stdout.isatty() else ""
-    diff = start(git_command("diff", "--no-color", "--no-ext-diff", "--no-textconv", base, commit), subprocess.STDOUT)
+    diff = start(git_command("diff", "--no-color", "--no-ext-diff", "--no-textconv", "--text", base, commit), subprocess.STDOUT)
     proc = None
     quit = False
     try:
@@ -194,6 +197,20 @@ def risky_files(base, commit):
     raw = git("diff", "--raw", "-z", "--no-renames", base, commit).stdout.split(b"\0")
     names += [path for info, path in zip(raw[::2], raw[1::2]) if b"120000" in info[1:].split(b" ")[:2]]
     return sorted(set(name for name in names if name))
+
+
+def encrypted_files(base, commit):
+    # Anyone can encrypt a SOPS file to the public keys in .sops.yaml, and its diff shows only ciphertext.
+    changed = set(git("diff", "--name-only", "-z", "--no-renames", base, commit).stdout.split(b"\0"))
+    names = set()
+    for rev in (base, commit):
+        status, out, err = run("git grep", git_command("grep", "-l", "-z", "--text", "-E", SOPS, rev))
+        if status not in (0, 1):
+            Visible(sys.stderr.buffer).write(err, final=True)
+            die("git grep failed")
+        prefix = f"{rev}:".encode()
+        names |= {name.removeprefix(prefix) for name in out.split(b"\0") if name}
+    return sorted(names & changed)
 
 
 class Parser(argparse.ArgumentParser):
@@ -279,10 +296,14 @@ def main():
             show_diff(base, commit)
             shown = Visible(sys.stdout.buffer)
             shown.write(header + b"\n")
-            shown.write(git("diff", "--stat", "--no-color", "--no-ext-diff", "--no-textconv", base, commit).stdout)
+            shown.write(git("diff", "--stat", "--no-color", "--no-ext-diff", "--no-textconv", "--text", base, commit).stdout)
             risky = risky_files(base, commit)
             if risky:
-                shown.write(b"\nThis commit changes files that act later:\n" + b"\n".join(risky) + b"\n", final=True)
+                shown.write(b"\nThis commit changes files that act later:\n" + b"\n".join(risky) + b"\n")
+            encrypted = encrypted_files(base, commit)
+            if encrypted:
+                shown.write(b"\nThis commit changes encrypted files, whose diff shows only ciphertext:\n" + b"\n".join(encrypted) + b"\n")
+            shown.write(b"", final=True)
             print(f"Pull {commit} from {branch} onto {current} and sign it? [y/N] ", end="", file=sys.stderr, flush=True)
             if sys.stdin.readline().strip() != "y":
                 die("nothing changed")
