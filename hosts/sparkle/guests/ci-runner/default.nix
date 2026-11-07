@@ -52,9 +52,11 @@ in {
   # Use disk swap after zram. Labels survive changes in disk declaration order.
   swapDevices = [{label = "ci-swap";}];
 
-  nix.settings = {
-    extra-substituters = lib.mkAfter ["https://cache.lunaire.moe/desktop?priority=10"];
-    extra-trusted-public-keys = lib.mkAfter ["desktop:QBHQfUrDyPKWwQolz4KiaJ1NlC+dGZLP4m29qgvkYs4="];
+  nix.settings = let
+    inherit ((import ../../../../modules/nixos/nix/caches.nix).desktop) url publicKey;
+  in {
+    extra-substituters = lib.mkAfter [url];
+    extra-trusted-public-keys = lib.mkAfter [publicKey];
   };
 
   virtualisation.docker.enable = true;

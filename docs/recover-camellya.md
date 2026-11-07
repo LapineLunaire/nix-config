@@ -23,4 +23,4 @@ cryptsetup open /dev/disk/by-partlabel/camellya-crypt cryptroot
 
 ## Backups for recovery
 
-Keep secure copies of `/home`, the needed [`/persist` data](../hosts/camellya/persistence.nix), the SSH host key, and `/var/lib/sbctl`. Persistence alone is not a backup. Keep secret values, the TPM PIN, and the LUKS recovery passphrase in the password manager.
+Keep secure copies of `/home`, the needed [`/persist` data](../modules/nixos/system/persistence.nix), the SSH host key, and `/var/lib/sbctl`. Persistence alone is not a backup. Keep secret values, the TPM PIN, and the LUKS recovery passphrase in the password manager.

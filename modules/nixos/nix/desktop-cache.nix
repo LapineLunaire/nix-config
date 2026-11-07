@@ -1,5 +1,4 @@
 import ./attic-client.nix {
-  cache = "desktop";
-  publicKey = "desktop:QBHQfUrDyPKWwQolz4KiaJ1NlC+dGZLP4m29qgvkYs4=";
+  cache = (import ./caches.nix).desktop;
   sopsFile = ../../../profiles/desktop/secrets.yaml;
 }

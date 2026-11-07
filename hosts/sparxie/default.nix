@@ -1,8 +1,4 @@
-{
-  lib,
-  pkgs,
-  ...
-}: let
+{pkgs, ...}: let
   wan = import ./wan-net.nix;
 in {
   imports = [
@@ -14,7 +10,7 @@ in {
     ../../modules/nixos/networking/wireguard-tunnel.nix
     ../../modules/nixos/services/caddy.nix
     ./hardware-configuration.nix
-    ./persistence.nix
+    ../../modules/nixos/system/persistence.nix
     ./sops.nix
     ./auto-update.nix
     ./services/database.nix
@@ -44,10 +40,8 @@ in {
     };
   };
 
-  nixpkgs.config.allowUnfree = true;
-
   services.borgbackup.jobs.hetzner.startAt = "03:00";
-  services.fwupd.enable = lib.mkForce false;
+  services.fwupd.enable = false;
 
   # Hetzner's IPv4 gateway is outside the /32, so it needs GatewayOnLink.
   systemd.network.networks."30-wan" = {

@@ -54,7 +54,7 @@ SOPS_AGE_KEY_CMD='ssh-to-age -private-key -i <old-private-key>' \
   -c sops updatekeys -y hosts/<hostname>/secrets.yaml
 ```
 
-For a new Sparkle identity, set `consoleKey` in `flake.nix` to the new SSH public key, and repeat the command for each guest secret file whose creation rule includes `sparkle_host`, using either the old Sparkle key or that guest's key. If the old host key is lost, recreate `hosts/<hostname>/secrets.yaml` from the password manager with every secret that the host's configuration declares. If a guest file has neither key, recreate it too.
+For a new Sparkle identity, set the new SSH public key in `hosts/sparkle/console-key.nix`, and repeat the command for each guest secret file whose creation rule includes `sparkle_host`, using either the old Sparkle key or that guest's key. If the old host key is lost, recreate `hosts/<hostname>/secrets.yaml` from the password manager with every secret that the host's configuration declares. If a guest file has neither key, recreate it too.
 
 Restore guest keys and application state under `/mnt/persist/vms/` before the first boot. For a fresh Sparkle installation, create each guest's SSH key as in [guest provisioning](guests.md#add-a-guest), using `/mnt/persist/vms/<name>/etc/ssh/` in the installer. For guests with SOPS files, update their `vm_*` recipients in `.sops.yaml` and re-encrypt their secret files; both the guest and Sparkle must remain recipients.
 

@@ -125,9 +125,9 @@
         system = "x86_64-linux";
         specialArgs = {
           inherit dmz net web guestRegistry;
-          trustedSubnets = import ./hosts/sparkle/trusted-subnets.nix;
+          trustedSubnets = import ./hosts/trusted-subnets.nix;
           tunnelWeb = import ./hosts/sparkle/tunnel-web.nix;
-          consoleKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMJ+Zb08V2BIx3TnFgha04A55Vo9d0ftNpNvnRgfO3Gk";
+          consoleKey = import ./hosts/sparkle/console-key.nix;
         };
         modules =
           [
@@ -139,10 +139,7 @@
           ++ [
             ./modules/nixos/microvm/guest.nix
             ./modules/nixos/microvm/identity.nix
-            {
-              networking.hostName = name;
-              nixpkgs.config.allowUnfree = true;
-            }
+            {networking.hostName = name;}
             (./hosts/sparkle/guests + "/${name}")
           ];
       })

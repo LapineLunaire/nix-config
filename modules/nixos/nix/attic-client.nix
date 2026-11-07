@@ -1,6 +1,5 @@
 {
   cache,
-  publicKey,
   sopsFile,
 }: {
   config,
@@ -16,8 +15,8 @@
   };
 
   nix.settings = {
-    extra-substituters = ["https://cache.lunaire.moe/${cache}?priority=10"];
-    extra-trusted-public-keys = [publicKey];
+    extra-substituters = [cache.url];
+    extra-trusted-public-keys = [cache.publicKey];
     netrc-file = config.sops.templates."nix-netrc".path;
   };
 }

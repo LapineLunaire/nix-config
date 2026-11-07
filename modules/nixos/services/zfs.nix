@@ -1,9 +1,11 @@
-{
+{config, ...}: {
+  imports = [../../shared/host.nix];
+
   # Refuse to import a root pool still held by another system.
   boot.zfs.forceImportRoot = false;
 
   services.zfs = {
-    zed.settings.ZED_EMAIL_ADDR = ["carmilla@lunaire.eu"];
+    zed.settings.ZED_EMAIL_ADDR = [config.host.alertEmail];
     autoScrub.enable = true;
     trim.enable = true;
     autoSnapshot = {

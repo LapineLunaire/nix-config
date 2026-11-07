@@ -1,4 +1,6 @@
-{pkgs, ...}: {
+{pkgs, ...}: let
+  trustedSubnets = import ../trusted-subnets.nix;
+in {
   imports = [
     ../../modules/nixos/system/boot.nix
     ../../modules/nixos/system/secure-boot.nix
@@ -10,7 +12,7 @@
     ../../modules/nixos/networking/trusted-ssh-ingress.nix
     ../../modules/nixos/networking/wireless-regulatory-domain.nix
     ./hardware-configuration.nix
-    ./persistence.nix
+    ../../modules/nixos/system/persistence.nix
     ./sops.nix
     ./displays.nix
     ./pipewire.nix
@@ -21,9 +23,8 @@
 
   host.flakePath = "/persist/nix-config";
   host.wirelessRegulatoryDomain = "NL";
-  host.trustedSubnets = ["10.28.64.0/24" "10.28.96.0/24" "10.100.0.0/24" "10.1.0.0/24"];
-  hardware.steamFrame.lanSubnets = ["10.28.64.0/24"];
-  nixpkgs.config.allowUnfree = true;
+  host.trustedSubnets = trustedSubnets.all;
+  hardware.steamFrame.lanSubnets = [trustedSubnets.lan];
 
   host.kernel = {
     packages = pkgs.linuxPackages_7_3;
@@ -37,7 +38,7 @@
 
   # WinBox discovery is LAN-only.
   networking.firewall.extraInputRules = ''
-    ip saddr 10.28.64.0/24 udp dport 5678 accept
+    ip saddr ${trustedSubnets.lan} udp dport 5678 accept
   '';
 
   services.udev.packages = [pkgs.wooting-udev-rules];

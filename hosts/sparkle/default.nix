@@ -11,7 +11,7 @@ in {
     ../../modules/nixos/services/borg-backup.nix
     ../../modules/nixos/microvm/host.nix
     ./hardware-configuration.nix
-    ./persistence.nix
+    ../../modules/nixos/system/persistence.nix
     ./sops.nix
     ./dmz-bridge.nix
     ../../modules/nixos/nix/server-cache.nix
@@ -19,7 +19,7 @@ in {
     ./telemetry.nix
   ];
 
-  host.trustedSubnets = (import ./trusted-subnets.nix).all;
+  host.trustedSubnets = (import ../trusted-subnets.nix).all;
 
   host.flakePath = "/persist/nix-config";
   host.smtp.passwordSecret = "smtp-password";
@@ -27,8 +27,6 @@ in {
     packages = pkgs.linuxPackages_6_18;
     cpu = "alderlake";
   };
-
-  nixpkgs.config.allowUnfree = true;
 
   services.borgbackup.jobs.hetzner = {
     startAt = "03:00";

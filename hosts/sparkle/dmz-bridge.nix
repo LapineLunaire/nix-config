@@ -30,7 +30,7 @@ in {
   # Filter traffic between taps and sfp0. Traffic to Sparkle itself uses its input firewall.
   networking.nftables.tables.dmz = let
     trusted = config.host.trustedSubnetsNft;
-    trustedSubnets = import ./trusted-subnets.nix;
+    trustedSubnets = import ../trusted-subnets.nix;
     # Include the router that repeats LAN discovery.
     discoverySources = "${trustedSubnets.lan}, ${dmz.gateway}";
     net = import ./guest-net.nix;

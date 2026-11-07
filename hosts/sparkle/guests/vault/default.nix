@@ -98,14 +98,6 @@ in {
     }
   ];
 
-  services.smartd = {
-    notifications.mail = {
-      enable = true;
-      sender = config.host.smtp.user;
-      recipient = "carmilla@lunaire.eu";
-    };
-  };
-
   users.groups.torrents.gid = 3000;
   users.users.torrents = {
     isSystemUser = true;

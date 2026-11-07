@@ -117,7 +117,7 @@ in {
       {
         printf 'Subject: ${config.networking.hostName}: Borg backup failed\n\n'
         ${config.systemd.package}/bin/journalctl -u borgbackup-job-hetzner -n 50 --no-pager
-      } | ${config.programs.msmtp.package}/bin/sendmail carmilla@lunaire.eu
+      } | ${config.programs.msmtp.package}/bin/sendmail ${config.host.alertEmail}
     '';
   };
 
@@ -129,7 +129,7 @@ in {
       set -euo pipefail
       if [[ -z "$(${pkgs.findutils}/bin/find ${lastSuccess} -mmin -1440 2>/dev/null)" ]]; then
         printf 'Subject: ${config.networking.hostName}: Borg backup overdue\n\nNo successful backup in the last 24 hours.\n' \
-          | ${config.programs.msmtp.package}/bin/sendmail carmilla@lunaire.eu
+          | ${config.programs.msmtp.package}/bin/sendmail ${config.host.alertEmail}
       fi
     '';
   };

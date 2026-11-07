@@ -24,13 +24,13 @@ Linux hosts use `/persist/nix-config`; Silverwolf uses `~/projects/nix-config`.
 
 ## Configuration
 
-The flake exports NixOS desktop and server profiles, a Darwin profile, and reusable NixOS modules. Desktop and server profiles live in `profiles/desktop/` and `profiles/server/`, with shared Attic credentials beside each `default.nix`. The server cache is enabled on Sparkle; ci-runner keeps its own token for both caches. Profiles keep simple settings in place and import modules for larger features.
+The flake exports NixOS desktop and server profiles, a Darwin profile, and reusable NixOS modules. Desktop and server profiles live in `profiles/desktop/` and `profiles/server/`, with shared Attic credentials beside each `default.nix`. Both build on the NixOS base in `profiles/nixos.nix`. The server cache is enabled on Sparkle; ci-runner keeps its own token for both caches. Profiles keep simple settings in place and import modules for larger features.
 
 NixOS modules are grouped by purpose under `modules/nixos/`: system settings, networking, services, programs, desktop settings, Nix maintenance, and microVMs. Shared NixOS and Darwin settings live under `modules/shared/`.
 
 Packages from this repository live under `pkgs/`. The desktop and server profiles add them to `pkgs` with the `additions` overlay in `overlays/`.
 
-Each host imports upstream modules, a system profile, host configuration, and user configuration. Hardware, networking, persistence, and secrets live with each host under `hosts/`.
+Each host imports upstream modules, a system profile, host configuration, and user configuration. Hardware, networking, and secrets live with each host under `hosts/`; the trusted client subnets are in `hosts/trusted-subnets.nix`.
 
 Carmilla's entries share Home Manager programs. Camellya and Kafka use entries under `users/carmilla/hosts/` for per-system packages and settings. Both import the shared desktop configuration. Silverwolf shares application settings and also uses Homebrew for its macOS application list.
 

@@ -1,5 +1,4 @@
 import ./attic-client.nix {
-  cache = "server";
-  publicKey = "server:oFkIrocLJr2oRVgeOqJ1TUUPwTYLWKm0Lpg9aRKU5zU=";
+  cache = (import ./caches.nix).server;
   sopsFile = ../../../profiles/server/secrets.yaml;
 }

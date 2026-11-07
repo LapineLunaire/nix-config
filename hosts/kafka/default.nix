@@ -10,7 +10,7 @@
     ../../modules/nixos/networking/trusted-connections.nix
     ../../modules/nixos/networking/wireless-regulatory-domain.nix
     ./hardware-configuration.nix
-    ./persistence.nix
+    ../../modules/nixos/system/persistence.nix
     ./sops.nix
   ];
 
@@ -19,14 +19,13 @@
   host = {
     flakePath = "/persist/nix-config";
     wirelessRegulatoryDomain = "NL";
-    trustedSubnets = ["10.28.64.0/24" "10.28.96.0/24" "10.100.0.0/24" "10.1.0.0/24"];
+    trustedSubnets = (import ../trusted-subnets.nix).all;
     trustedConnections = [
       "ea502939-2dee-417c-929e-6bd1a1c7b794"
       "6949919a-dabb-4937-9737-e60014ff13c8"
     ];
   };
 
-  nixpkgs.config.allowUnfree = true;
   host.kernel = {
     packages = pkgs.linuxPackages_7_3;
     cpu = "tigerlake";

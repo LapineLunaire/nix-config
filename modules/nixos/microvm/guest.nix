@@ -16,7 +16,9 @@ in {
     ../../shared/host.nix
     ../../shared/nix-settings.nix
     ../system/security.nix
+    ../system/zram.nix
     ../networking/firewall.nix
+    ../services/openssh.nix
     ../programs/ghostty-terminfo.nix
     ./host-clock.nix
   ];
@@ -106,15 +108,6 @@ in {
       deflateOnOOM = true;
     };
 
-    zramSwap = {
-      enable = lib.mkDefault true;
-      algorithm = "zstd";
-      memoryPercent = 30;
-      priority = 100;
-    };
-
-    boot.kernel.sysctl."vm.swappiness" = lib.mkDefault 100;
-
     # The guest overlay cannot hardlink into the read-only host store.
     nix.settings.auto-optimise-store = lib.mkForce false;
 
@@ -126,20 +119,9 @@ in {
     };
 
     services.openssh = {
-      enable = true;
       openFirewall = false;
-      settings = {
-        PermitRootLogin = "prohibit-password";
-        PasswordAuthentication = false;
-        KbdInteractiveAuthentication = false;
-        AuthenticationMethods = "publickey";
-      };
-      hostKeys = [
-        {
-          path = "/etc/ssh/ssh_host_ed25519_key";
-          type = "ed25519";
-        }
-      ];
+      # Sparkle's console key logs in as root.
+      settings.PermitRootLogin = lib.mkForce "prohibit-password";
     };
     microvm.vsock.ssh.enable = true;
     users.users.root.openssh.authorizedKeys.keys = [consoleKey];
