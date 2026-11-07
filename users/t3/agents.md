@@ -2,19 +2,13 @@
 
 You run as the unprivileged `t3` user. You cannot sign commits or push to Carmilla's repositories. Do not try to work around either.
 
-Deliver finished work as a pull request on `git.lunaire.moe`. Work on a branch other than the default branch, in a clone whose `origin` is the original repository:
+Deliver finished work as one commit on a local branch of your clone, whose `origin` is the original repository. Do not fork, push, or open pull requests. Carmilla runs `t3-pull <branch>` on this host or another desktop: it fetches the branch over SSH, shows her the commit, and signs a copy of it on top of the default branch. She pushes it herself.
 
-1. Fork the repository once: `fj -H git.lunaire.moe repo fork <owner>/<repo>`. If `t3/<repo>` already exists, check that it is a fork of `<owner>/<repo>`.
-2. Add the fork as a remote if it is missing: `git remote add fork forgejo@git-ssh.lunaire.moe:t3/<repo>.git`.
-3. Find the default branch with `git ls-remote --symref origin HEAD`. Run `git fetch origin` and start your branch from `origin/<default branch>`. Before the first push, fetch again and rebase onto it if it moved.
-   Whenever you push, first run `git fetch origin`, then update the fork's default branch: `git push fork origin/<default branch>:refs/heads/<default branch>`. If `git ls-remote --symref fork HEAD` names a different default branch, or that push is rejected, say so instead of changing the fork's branches yourself.
-4. Push your branch: `git push -u fork HEAD`.
-5. Write the description to a file and open the pull request against the original repository: `fj -H git.lunaire.moe pr create --repo t3/<repo> --base '^' --body-file <file> "<title>"`. Always pass a title and body; otherwise `fj` opens an editor and waits.
+1. Find the default branch with `git ls-remote --symref origin HEAD`. Run `git fetch origin` and start your branch from `origin/<default branch>`.
+2. Keep each change to one commit. Its message lands unchanged, so write it like the repository's `git log`.
+3. Before you hand it over, fetch again and rebase onto `origin/<default branch>` if it moved. `t3-pull` refuses a branch that is not exactly one commit on top of the default branch. Redo the checks the rebase may affect.
+4. Run the repository's checks that cover your change, such as formatting, evaluation, tests, or builds of what you changed.
 
-To update an open pull request, push to the same branch with `git push fork HEAD`. Do not run `pr create` again. If the newest commit of the branch on the fork is by Carmilla, she is landing it: do not push to it, and say so.
+When you hand it over, report the host name (`hostname`), the clone's path (`git rev-parse --path-format=absolute --git-common-dir`), the branch name, the commit SHA, what changed, and which checks you ran and their results. Say which checks you could not run. If you changed Git hooks, CI workflows, `.envrc`, or the development shell, say why.
 
-Carmilla lands a pull request as one commit with her as author and the pull request's title as its subject, so write the title like a commit subject in the repository's style, and keep each pull request to one change. She pushes that commit to your branch on the fork and then to the default branch. After that, the branch is finished: do not push to it again, and start follow-up work on a new branch from the default branch.
-
-Use CI for the full repository checks after Carmilla reviews the changes and approves the workflow run. Run targeted local checks when needed to develop or debug a change; do not repeat the full CI suite before opening the pull request. Report pending CI as pending, not passed.
-
-In the description, say what changed and which checks you ran. If you changed Git hooks, CI workflows, or `.envrc`, say why.
+To change a branch Carmilla has not pulled yet, amend the commit and report the new SHA. Once its change is on the default branch, the branch is finished: delete it, and start follow-up work on a new branch from the default branch.

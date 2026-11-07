@@ -18,6 +18,7 @@
   ];
 
   time.timeZone = lib.mkDefault "UTC";
+  nixpkgs.overlays = [(import ../../overlays).additions];
   services.fwupd.enable = true;
   programs.mtr.enable = true;
   programs.zsh.enable = true;

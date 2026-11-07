@@ -21,7 +21,6 @@
     inherit (config.caddy) securityHeaders tlsDns;
     wg = config.host.wireguardTunnel;
     sparkleTunnelWeb = import ../../sparkle/tunnel-web.nix;
-    bunny-web = pkgs.callPackage ../../../pkgs/bunny-web {};
     mkVhost = body: {
       extraConfig =
         ''
@@ -36,7 +35,7 @@
     '';
   in {
     "bunny.enterprises" = mkVhost ''
-      root * ${bunny-web}
+      root * ${pkgs.bunny-web}
 
       @hostMeta path /.well-known/host-meta
       header @hostMeta Content-Type "application/xrd+xml"

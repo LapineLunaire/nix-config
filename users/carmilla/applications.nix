@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: {
-  imports = [./coding-agents.nix ./t3-land.nix];
+  imports = [./coding-agents.nix];
 
   home.packages = with pkgs; [
     alejandra

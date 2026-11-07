@@ -1,4 +1,9 @@
 {
+  additions = final: _prev: {
+    bunny-web = final.callPackage ../pkgs/bunny-web {};
+    t3-pull = final.callPackage ../pkgs/t3-pull {};
+  };
+
   modifications = _final: prev: {
     # SSH askpass helpers must execute; /tmp is mounted with noexec.
     zed-editor =

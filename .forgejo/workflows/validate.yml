@@ -1,11 +1,13 @@
 name: Validate
 
-# Pushes to main are not validated: pull requests are checked before they land, and hosts build what the caches lack.
+# The update workflow pushes with the workflow token, which starts no workflows; it checks and builds the same systems
+# before it pushes.
 on:
-  pull_request: {}
+  push:
+    branches: [main]
   workflow_dispatch: {}
 
-# Cancelling includes older runs still waiting for approval.
+# Only the newest commit on main deploys, so older runs are cancelled.
 concurrency:
   group: validation-${{ github.ref }}
   cancel-in-progress: true
@@ -19,39 +21,17 @@ jobs:
         with:
           persist-credentials: false
 
-      # Landing can reach main before this run starts.
-      - name: Check whether the pull request is merged
-        id: merged
-        if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
-        env:
-          REPOSITORY: ${{ github.server_url }}/${{ github.repository }}.git
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        # A failed fetch leaves validation enabled.
-        run: |
-          set -euo pipefail
-          history=$(mktemp -d "$RUNNER_TEMP/history.XXXXXX")
-          git init --quiet --bare "$history"
-          if git -C "$history" fetch --quiet --no-tags --filter=tree:0 "$REPOSITORY" "+refs/heads/main:refs/heads/main" &&
-            git -C "$history" merge-base --is-ancestor "$HEAD_SHA" main 2> /dev/null; then
-            echo "The pull request has already landed in main, so it is not checked again."
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Configure Nix caches
-        if: steps.merged.outputs.skip != 'true'
         uses: ./.forgejo/actions/configure-nix
 
       - name: Check formatting
-        if: steps.merged.outputs.skip != 'true'
         run: nix fmt --no-write-lock-file -- --check .
 
       - name: Evaluate all systems
-        if: steps.merged.outputs.skip != 'true'
         run: nix flake check --all-systems --no-build --no-write-lock-file --option allow-import-from-derivation false
 
       # The runner cannot build Sparxie or Silverwolf.
       - name: Build systems
-        if: steps.merged.outputs.skip != 'true'
         run: |
           set -euo pipefail
           for host in sparkle camellya kafka; do

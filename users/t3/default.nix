@@ -46,7 +46,6 @@ in {
       username = "t3";
       homeDirectory = "/var/lib/t3";
       inherit (nixosConfig.home-manager.users.carmilla.home) stateVersion;
-      packages = [pkgs.forgejo-cli];
     };
     xdg.enable = true;
     systemd.user.startServices = "sd-switch";
@@ -60,7 +59,6 @@ in {
           email = "t3@lunaire.moe";
         };
         init.defaultBranch = "main";
-        push.autoSetupRemote = true;
         commit.gpgsign = false;
         tag.gpgsign = false;
       };
