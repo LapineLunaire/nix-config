@@ -4,9 +4,6 @@
   pkgs,
   ...
 }: {
-  networking.firewall.allowedTCPPorts = [8448];
-  networking.firewall.allowedUDPPorts = [8448];
-
   sops.templates."caddy-pub-bnnuy-basicauth" = {
     owner = "caddy";
     reloadUnits = ["caddy.service"];
@@ -30,9 +27,6 @@
         + body;
     };
     tuwunelPort = lib.head config.services.matrix-tuwunel.settings.global.port;
-    matrixVhost = mkVhost ''
-      reverse_proxy [::1]:${toString tuwunelPort}
-    '';
   in {
     "bunny.enterprises" = mkVhost ''
       root * ${pkgs.bunny-web}
@@ -65,8 +59,9 @@
         root * ${element-web}
         file_server
       '';
-    "matrix.bunny.enterprises" = matrixVhost;
-    "matrix.bunny.enterprises:8448" = matrixVhost;
+    "matrix.bunny.enterprises" = mkVhost ''
+      reverse_proxy [::1]:${toString tuwunelPort}
+    '';
     "pub.bunny.enterprises" = mkVhost ''
       import ${config.sops.templates."caddy-pub-bnnuy-basicauth".path}
       reverse_proxy ${wg.peer.ip}:${toString sparkleTunnelWeb.port} {

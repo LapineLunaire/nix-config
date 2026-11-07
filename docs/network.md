@@ -76,7 +76,6 @@ Proton assigns qBittorrent's incoming port over NAT-PMP, so its WireGuard config
 | Service | Ports |
 |---|---|
 | Caddy HTTP and HTTPS | TCP 80; TCP/UDP 443 |
-| Matrix federation | TCP/UDP 8448 |
 | ejabberd XMPP, uploads, file transfers, and TURN | TCP 5222, 5223, 5269, 5443, 7777; UDP 3478, 49152-49500 |
 | WireGuard | UDP 47329 |
 | SSH | TCP 22 |
@@ -87,6 +86,6 @@ The ejabberd HTTP API also requires the admin account, even through the SSH tunn
 
 HTTP uploads expire after 180 days. TURN refuses to relay to loopback and private addresses.
 
-Sparxie's Caddy serves `bunny.enterprises`, `chat.bunny.enterprises`, `matrix.bunny.enterprises` (also on TCP/UDP 8448), and `pub.bunny.enterprises`; ejabberd serves XMPP for `bunny.enterprises`. `pub.bunny.enterprises` requires basic auth and is reverse-proxied over `wg0` to the proxy guest at `10.73.212.0:9000`, where Caddy serves `/srv/misc`, a read-only NFS mount of the vault guest's `/vault/misc`. The proxy firewall allows port 9000 only on `wg0`.
+Sparxie's Caddy serves `bunny.enterprises`, `chat.bunny.enterprises`, `matrix.bunny.enterprises`, and `pub.bunny.enterprises`; ejabberd serves XMPP for `bunny.enterprises`. `pub.bunny.enterprises` requires basic auth and is reverse-proxied over `wg0` to the proxy guest at `10.73.212.0:9000`, where Caddy serves `/srv/misc`, a read-only NFS mount of the vault guest's `/vault/misc`. The proxy firewall allows port 9000 only on `wg0`.
 
 The proxy guest initiates WireGuard to `46.225.108.230:47329` with a 25-second keepalive. Sparxie's tunnel address is `10.73.212.1`, and each peer allows only the other's `/32`. Requests to port 9000 travel inside the tunnel, so the bridge sees only the WireGuard UDP flow and needs no TCP 9000 rule.
