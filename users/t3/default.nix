@@ -48,7 +48,6 @@ in {
       inherit (nixosConfig.home-manager.users.carmilla.home) stateVersion;
     };
     xdg.enable = true;
-    systemd.user.startServices = "sd-switch";
 
     # Carmilla signs when she lands agent work.
     programs.git = {

@@ -1,9 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: {
+{config, ...}: {
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
@@ -20,7 +15,6 @@
       xdg.enable = true;
 
       programs.home-manager.enable = true;
-      systemd.user.startServices = lib.mkIf pkgs.stdenv.hostPlatform.isLinux "sd-switch";
     };
   };
 }
