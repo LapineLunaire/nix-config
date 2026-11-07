@@ -8,6 +8,13 @@
   v6 = config.sops.secrets."ssh-allowed-ips-v6".path;
   ports = lib.concatMapStringsSep ", " toString config.services.openssh.ports;
 in {
+  assertions = [
+    {
+      assertion = config.networking.nftables.enable;
+      message = "The SSH IP whitelist is an nftables table and needs networking.nftables.enable.";
+    }
+  ];
+
   sops.secrets."ssh-allowed-ips-v4".reloadUnits = ["nftables.service"];
   sops.secrets."ssh-allowed-ips-v6".reloadUnits = ["nftables.service"];
 

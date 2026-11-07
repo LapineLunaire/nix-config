@@ -20,6 +20,14 @@ in {
   };
 
   config = {
+    # Only the nftables firewall reads extraInputRules.
+    assertions = [
+      {
+        assertion = config.networking.firewall.enable && config.networking.firewall.backend == "nftables" && config.networking.nftables.enable;
+        message = "Steam Frame firewall rules need the nftables firewall.";
+      }
+    ];
+
     systemd.network.links."10-steam-frame" = {
       matchConfig.Property = ["ID_VENDOR_ID=28de" "ID_MODEL_ID=2432"];
       linkConfig.Name = "wlframe";
