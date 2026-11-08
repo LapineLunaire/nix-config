@@ -30,6 +30,8 @@ HIDDEN_CATEGORIES = {"Cc", "Cf", "Cs", "Co", "Cn", "Zl", "Zp"}
 IGNORABLE = re.compile(r"[\u034f\u115f\u1160\u17b4\u17b5\u180b-\u180f\u3164\ufe00-\ufe0f\uffa0\U000e0100-\U000e01ef]")
 SAFE = re.compile(r"[\t\n]")
 PR_SET_CHILD_SUBREAPER = 36
+# Diffs of agent changes show every file as text, without programs or attributes from the agent changing the output.
+DIFF = ["--no-color", "--no-ext-diff", "--no-textconv", "--text"]
 
 
 def escape_bytes(error):
@@ -81,8 +83,8 @@ def git_command(*args):
     return [GIT, "-c", "core.hooksPath=/dev/null", "-c", "core.packedGitLimit=1g", "-c", "core.packedGitWindowSize=64m", "-c", "maintenance.auto=false", *args]
 
 
-def start(command, stderr, limited=True, env=None):
-    return subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=stderr, env=env, preexec_fn=limit_resources if limited else None)
+def start(command, stderr, limited=True, env=None, stdin=subprocess.DEVNULL):
+    return subprocess.Popen(command, stdin=stdin, stdout=subprocess.PIPE, stderr=stderr, env=env, preexec_fn=limit_resources if limited else None)
 
 
 def stop(proc):
@@ -103,9 +105,9 @@ def stop(proc):
                 pass
 
 
-def run(label, command, show=False, timeout=None, limit=16 << 20, limited=True, env=None):
+def run(label, command, show=False, timeout=None, limit=16 << 20, limited=True, env=None, stdin=subprocess.DEVNULL):
     """Runs command and returns its status, stdout, and stderr. With show, its output goes through Visible to stderr."""
-    proc = start(command, subprocess.STDOUT if show else subprocess.PIPE, limited, env)
+    proc = start(command, subprocess.STDOUT if show else subprocess.PIPE, limited, env, stdin)
     pipes = [proc.stdout] if show else [proc.stdout, proc.stderr]
     data = {pipe: bytearray() for pipe in pipes}
     shown = Visible(sys.stderr.buffer)
@@ -152,7 +154,7 @@ def output(*args):
 
 def show_diff(base, commit):
     pager = output("var", "GIT_PAGER") if sys.stdout.isatty() else ""
-    diff = start(git_command("diff", "--no-color", "--no-ext-diff", "--no-textconv", "--text", base, commit), subprocess.STDOUT)
+    diff = start(git_command("diff", *DIFF, base, commit), subprocess.STDOUT)
     proc = None
     quit = False
     try:
@@ -189,6 +191,32 @@ def show_diff(base, commit):
         die("the pager failed; nothing changed")
     if diff.returncode and not quit:
         die("showing the diff failed; nothing changed")
+
+
+def merge(parent, base, commit):
+    """Returns the tree that cherry-picking commit onto base gives, without touching the work tree."""
+    status, out, err = run("git merge-tree", git_command("merge-tree", "--write-tree", "-z", "--name-only", "--no-messages", f"--merge-base={parent}", base, commit))
+    if status not in (0, 1):
+        Visible(sys.stderr.buffer).write(err, final=True)
+        die("git merge-tree failed")
+    tree, *conflicts = out.split(b"\0")
+    conflicts = sorted(set(name for name in conflicts if name))
+    if status or conflicts:
+        die("the commit conflicts with the default branch in these files; ask the agent to rebase it. Nothing changed.\n" + b"\n".join(conflicts).decode("utf-8", "t3-pull"))
+    return output("rev-parse", "--verify", f"{tree.decode()}^{{tree}}")
+
+
+def patch_id(old, new):
+    # --verbatim keeps whitespace in the ID. A failed diff only makes the IDs differ.
+    diff = start(git_command("diff", *DIFF, old, new), subprocess.DEVNULL)
+    try:
+        status, out, err = run("git patch-id", git_command("patch-id", "--verbatim"), stdin=diff.stdout)
+    finally:
+        stop(diff)
+    if status:
+        Visible(sys.stderr.buffer).write(err, final=True)
+        die("git patch-id failed")
+    return out.split(b" ")[0]
 
 
 def risky_files(base, commit):
@@ -284,33 +312,52 @@ def main():
             if int(output("cat-file", "-s", commit)) > 65536:
                 die(f"{branch} has a commit message or author over 64 KiB")
 
-            # A single commit on the reviewed base lands with exactly the tree that was reviewed.
-            if output("rev-list", "--parents", "-n", "1", commit) != f"{commit} {base}":
-                die(f"{branch} must be one commit on top of {upstream} ({base}); ask the agent to rebase it")
-            if output("rev-parse", f"{commit}^{{tree}}") == output("rev-parse", f"{base}^{{tree}}"):
-                die(f"{branch} changes nothing")
+            # One commit with one parent from the default branch's history. The tree it gives on the reviewed base is
+            # computed first, so what is shown is the tree that lands, even when the default branch moved.
+            parents = output("rev-list", "--parents", "-n", "1", commit).split()
+            if len(parents) != 2:
+                die(f"{branch} must be one commit with one parent; ask the agent to squash it")
+            parent = parents[1]
+            if git("merge-base", "--is-ancestor", parent, base, check=False).returncode:
+                die(f"{branch} must be one commit on a commit of {upstream}; ask the agent to rebase it")
             header = git("log", "-1", "--format=fuller", commit).stdout
             if visible_text(header.decode("utf-8", "t3-pull")).encode() != header:
                 die(f"{branch} has control characters, invalid UTF-8, or invisible characters in its message or author")
+            tree = merge(parent, base, commit)
+            if tree == output("rev-parse", f"{base}^{{tree}}"):
+                die(f"{branch} changes nothing on {upstream}")
 
-            show_diff(base, commit)
+            moved = int(output("rev-list", "--count", f"{parent}..{base}"))
+            # A merge can put a change in another place than the agent did, for example into a file that was renamed.
+            differs = moved and patch_id(parent, commit) != patch_id(base, tree)
+            if differs:
+                print(f"{upstream} moved since the agent's commit, and the change that lands differs from the agent's diff. This is the agent's diff:", file=sys.stderr)
+                show_diff(parent, commit)
+                print("This is the change that lands:", file=sys.stderr)
+            show_diff(base, tree)
             shown = Visible(sys.stdout.buffer)
             shown.write(header + b"\n")
-            shown.write(git("diff", "--stat", "--no-color", "--no-ext-diff", "--no-textconv", "--text", base, commit).stdout)
-            risky = risky_files(base, commit)
+            shown.write(git("diff", "--stat", *DIFF, base, tree).stdout)
+            risky = risky_files(base, tree)
             if risky:
                 shown.write(b"\nThis commit changes files that act later:\n" + b"\n".join(risky) + b"\n")
-            encrypted = encrypted_files(base, commit)
+            encrypted = encrypted_files(base, tree)
             if encrypted:
                 shown.write(b"\nThis commit changes encrypted files, whose diff shows only ciphertext:\n" + b"\n".join(encrypted) + b"\n")
             shown.write(b"", final=True)
+            if moved:
+                same = "differs from the agent's diff; compare both diffs above" if differs else "is the same as the agent's diff"
+                print(f"\n{upstream} moved {moved} commit{'s' * (moved != 1)} past the agent's commit, which applies without conflicts. The change that lands {same}.", file=sys.stderr)
             print(f"Pull {commit} from {branch} onto {current} and sign it? [y/N] ", end="", file=sys.stderr, flush=True)
             if sys.stdin.readline().strip() != "y":
                 die("nothing changed")
 
+            # The review holds only for the base it was computed on.
+            if output("rev-parse", "HEAD") != base or git("diff", "--quiet", check=False).returncode or git("diff", "--cached", "--quiet", check=False).returncode:
+                die(f"{current} changed during the review; nothing changed")
             if run("git cherry-pick", git_command("cherry-pick", "-S", commit), show=True)[0]:
                 die("the cherry-pick failed; run git cherry-pick --abort")
-            if output("rev-parse", "HEAD^") != base or output("rev-parse", "HEAD^{tree}") != output("rev-parse", f"{commit}^{{tree}}"):
+            if output("rev-parse", "HEAD^") != base or output("rev-parse", "HEAD^{tree}") != tree:
                 die(f"HEAD does not hold the reviewed tree; undo it with git reset --keep {base}")
         finally:
             git("update-ref", "-d", ref, check=False)
