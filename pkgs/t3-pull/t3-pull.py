@@ -2,64 +2,63 @@ import argparse
 import codecs
 import ctypes
 import glob
+import io
 import os
+import pathlib
 import re
 import resource
 import select
+import shlex
 import signal
 import subprocess
 import sys
 import tempfile
 import time
-import unicodedata
 
 GIT = "@git@"
+LESS = "@less@"
 UPLOAD_PACK = "/etc/profiles/per-user/t3/bin/git-upload-pack"
 NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._/-]*")
 HOST = re.compile(r"[A-Za-z0-9][A-Za-z0-9.-]*")
 PATH = re.compile(r"/[A-Za-z0-9._/-]+")
-# These act later: hooks in .githooks when core.hooksPath points there, workflows on the runner, .envrc when direnv
-# enters the directory, the flake and its development shell, settings and instructions of coding agents and editors,
-# .sops.yaml when secrets are encrypted, .gitattributes on how later diffs are shown, and .gitmodules on where submodules
-# are fetched from.
-RISKY = [".githooks", ".forgejo", ".envrc", "flake.nix", "flake.lock", ".sops.yaml", ".claude", ".codex", ".mcp.json", ".zed", "*AGENTS.md", "*CLAUDE.md", "*.gitattributes", ".gitmodules"]
+# These act later: Git hooks and the files of hook runners, CI workflows, .envrc when direnv enters its directory, the
+# flake and its development shell, settings and instructions of coding agents and editors, .sops.yaml when secrets are
+# encrypted, .lfsconfig, .gitattributes on how checkouts rewrite files and how diffs are shown, and .gitmodules on where
+# submodules come from. RISKY holds top-level paths, RISKY_STARTS starts of paths, such as lefthook's many config file
+# names, and RISKY_NAMES names of files or directories anywhere.
+RISKY = {b".githooks", b".husky", b".pre-commit-config.yaml", b".forgejo", b".gitea", b".github", b"flake.nix", b"flake.lock", b".codex", b".mcp.json", b".vscode", b".zed", b".lfsconfig", b".gitmodules"}
+RISKY_STARTS = (b"lefthook", b".lefthook", b".config/lefthook")
+RISKY_NAMES = {b".envrc", b".sops.yaml", b".agents", b".claude", b"AGENTS.md", b"AGENTS.override.md", b"CLAUDE.md", b"CLAUDE.local.md", b".gitattributes"}
 # SOPS metadata keys in YAML, JSON, dotenv, and INI files, and the ciphertext SOPS writes. Escapes in YAML or JSON can
 # still hide both.
 SOPS = r"""ENC\[AES256_GCM,|^["']?sops["']?[[:space:]]*:|"sops"[[:space:]]*:|^sops_mac=|^\[sops\]"""
-HIDDEN_CATEGORIES = {"Cc", "Cf", "Cs", "Co", "Cn", "Zl", "Zp"}
-# Default_Ignorable_Code_Point characters that are not in HIDDEN_CATEGORIES, such as variation selectors.
-IGNORABLE = re.compile(r"[\u034f\u115f\u1160\u17b4\u17b5\u180b-\u180f\u3164\ufe00-\ufe0f\uffa0\U000e0100-\U000e01ef]")
-SAFE = re.compile(r"[\t\n]")
+# Default_Ignorable_Code_Point characters that isprintable() accepts, such as variation selectors, and the blank
+# Braille pattern, which looks like a space.
+IGNORABLE = re.compile(r"[\u034f\u115f\u1160\u17b4\u17b5\u180b-\u180f\u2800\u3164\ufe00-\ufe0f\uffa0\U000e0100-\U000e01ef]")
 PR_SET_CHILD_SUBREAPER = 36
-# Diffs of agent changes show every file as text and every submodule, whatever the agent's attributes or the user's
-# diff settings say.
-DIFF = ["--no-color", "--no-ext-diff", "--no-textconv", "--text", "--ignore-submodules=none", "--submodule=short"]
+# Diffs show every file as text and every submodule, whatever the agent's attributes or the user's diff settings say.
+# Without renames, a file moved somewhere it acts, such as into the hooks, shows in full.
+DIFF = ["--no-color", "--no-ext-diff", "--no-textconv", "--text", "--ignore-submodules=none", "--submodule=short", "--no-renames"]
 # More would be too much to review, and escapes make hostile data up to six times as long when shown.
 REVIEW_LIMIT = 16 << 20
 
-
-def escape_bytes(error):
-    bad = error.object[error.start:error.end]
-    return "".join(f"\\x{{{byte:02X}}}" for byte in bad), error.end
+codecs.register_error("t3-pull", lambda error: ("".join(f"\\x{{{byte:02X}}}" for byte in error.object[error.start:error.end]), error.end))
 
 
-codecs.register_error("t3-pull", escape_bytes)
-
-
-def escape(char):
-    hidden = unicodedata.category(char) in HIDDEN_CATEGORIES or IGNORABLE.match(char)
-    return f"\\x{{{ord(char):X}}}" if hidden and char not in "\t\n" else char
+def hidden(char):
+    return char not in "\t\n" and (not char.isprintable() or IGNORABLE.match(char))
 
 
 def visible_text(text):
-    # isprintable() is False for every hidden category, so most text skips the loop.
-    if SAFE.sub("", text).isprintable() and not IGNORABLE.search(text):
+    """Shows control, invisible, and invalid characters, and spaces other than the plain one, as \\x{..} escapes."""
+    # Most text is printable, which isprintable() checks quickly for the whole string.
+    if text.replace("\t", "").replace("\n", "").isprintable() and not IGNORABLE.search(text):
         return text
-    return "".join(map(escape, text))
+    return "".join(f"\\x{{{ord(char):X}}}" if hidden(char) else char for char in text)
 
 
 class Visible:
-    """Writes agent output with control, invisible, and invalid characters shown as \\x{..} escapes."""
+    """Writes agent output through visible_text."""
 
     def __init__(self, out):
         self.decoder = codecs.getincrementaldecoder("utf-8")("t3-pull")
@@ -70,9 +69,14 @@ class Visible:
         self.out.flush()
 
 
-def die(message):
-    Visible(sys.stderr.buffer).write(f"t3-pull: {message}\n".encode(), final=True)
+def die(message, err=b""):
+    Visible(sys.stderr.buffer).write(err + f"t3-pull: {message}\n".encode(), final=True)
     sys.exit(1)
+
+
+def lines(paths):
+    """Joins paths into lines. visible_text leaves tabs and newlines alone, so they are escaped here."""
+    return b"".join(path.replace(b"\t", b"\\x{9}").replace(b"\n", b"\\x{A}") + b"\n" for path in paths)
 
 
 def limit_resources():
@@ -82,10 +86,10 @@ def limit_resources():
 
 
 def git_command(*args):
-    # Smaller pack windows keep Git's memory maps within the address space limit. Background maintenance would become a
-    # child of t3-pull, and stop() would kill it and leave its lock behind. Renormalizing would run filters on the agent's
+    # Smaller pack windows keep Git's memory maps within the address space limit. Background maintenance would be killed
+    # with its lock held, and an fsmonitor daemon would keep the limits. Renormalizing would run filters on the agent's
     # files while merging, before the review.
-    return [GIT, "-c", "core.hooksPath=/dev/null", "-c", "core.packedGitLimit=1g", "-c", "core.packedGitWindowSize=64m", "-c", "maintenance.auto=false", "-c", "merge.renormalize=false", *args]
+    return [GIT, "-c", "core.fsmonitor=false", "-c", "core.hooksPath=/dev/null", "-c", "core.packedGitLimit=1g", "-c", "core.packedGitWindowSize=64m", "-c", "maintenance.auto=false", "-c", "merge.renormalize=false", *args]
 
 
 def stop(proc):
@@ -95,8 +99,8 @@ def stop(proc):
     for pipe in (proc.stdout, proc.stderr):
         if pipe:
             pipe.close()
-    # Descendants such as SSH can outlive Git. t3-pull is their subreaper, so they become its children, and reaping one
-    # can hand over its own descendants.
+    # Descendants such as SSH can outlive Git. During the agent fetch, t3-pull is their subreaper, so they become its
+    # children, and reaping one can hand over its own descendants.
     while pids := [int(pid) for path in glob.glob("/proc/self/task/*/children") for pid in open(path).read().split()]:
         for pid in pids:
             try:
@@ -108,8 +112,7 @@ def stop(proc):
 
 def run(label, command, show=False, timeout=None, limit=16 << 20, limited=True, env=None):
     """Runs command and returns its status, stdout, and stderr. With show, its output goes through Visible to stderr."""
-    stderr = subprocess.STDOUT if show else subprocess.PIPE
-    proc = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=stderr, env=env, preexec_fn=limit_resources if limited else None)
+    proc = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT if show else subprocess.PIPE, env=env, preexec_fn=limit_resources if limited else None)
     pipes = [proc.stdout] if show else [proc.stdout, proc.stderr]
     data = {pipe: bytearray() for pipe in pipes}
     shown = Visible(sys.stderr.buffer)
@@ -122,13 +125,12 @@ def run(label, command, show=False, timeout=None, limit=16 << 20, limited=True, 
                 die(f"{label} took longer than {timeout} seconds")
             for pipe in select.select(pipes, [], [], wait)[0]:
                 block = os.read(pipe.fileno(), 65536)
+                total += len(block)
                 if not block:
                     pipes.remove(pipe)
-                    continue
-                total += len(block)
-                if total > limit:
+                elif total > limit:
                     die(f"{label} wrote more than {limit} bytes")
-                if show:
+                elif show:
                     shown.write(block)
                 else:
                     data[pipe] += block
@@ -145,44 +147,52 @@ def run(label, command, show=False, timeout=None, limit=16 << 20, limited=True, 
 def git(*args, check=True):
     status, out, err = run(f"git {args[0]}", git_command(*args))
     if check and status:
-        Visible(sys.stderr.buffer).write(err, final=True)
-        die(f"git {args[0]} failed")
+        die(f"git {args[0]} failed", err)
     return subprocess.CompletedProcess(args, status, out, err)
 
 
-def output(*args):
-    return git(*args).stdout.decode("utf-8", "t3-pull").strip()
+def output(*args, check=True):
+    return git(*args, check=check).stdout.decode("utf-8", "t3-pull").strip()
 
 
-def show_diff(base, commit):
-    status, out, err = run("git diff", git_command("diff", *DIFF, base, commit), limit=REVIEW_LIMIT)
+def checked_out():
+    return output("symbolic-ref", "--quiet", "--short", "HEAD", check=False)
+
+
+def dirty():
+    return git("diff", "--quiet", check=False).returncode or git("diff", "--cached", "--quiet", check=False).returncode
+
+
+def show_diff(base, tree):
+    """Shows the diff and returns whether it escaped anything."""
+    status, out, err = run("git diff", git_command("diff", *DIFF, base, tree), limit=REVIEW_LIMIT)
     if status:
-        Visible(sys.stderr.buffer).write(err, final=True)
-        die("showing the diff failed; nothing changed")
+        die("showing the diff failed; nothing changed", err)
     # Escaping in blocks keeps memory use near the limit.
-    decoder = codecs.getincrementaldecoder("utf-8")("t3-pull")
-    blocks, size = [], 0
-    for at in range(0, max(len(out), 1), 65536):
-        blocks.append(visible_text(decoder.decode(out[at:at + 65536], at + 65536 >= len(out))).encode())
-        size += len(blocks[-1])
-        if size > REVIEW_LIMIT:
+    text = io.BytesIO()
+    shown = Visible(text)
+    for at in range(0, len(out), 65536):
+        shown.write(out[at:at + 65536], at + 65536 >= len(out))
+        if text.tell() > REVIEW_LIMIT:
             die(f"the diff is over {REVIEW_LIMIT >> 20} MiB when shown; nothing changed")
-    text = b"".join(blocks)
-    pager = output("var", "GIT_PAGER") if sys.stdout.isatty() else ""
-    if pager in ("", "cat"):
-        sys.stdout.buffer.write(text)
-        sys.stdout.buffer.flush()
-        return
-    # Git sets these for its pager too. communicate() ignores a pager that quits before reading everything.
-    proc = subprocess.Popen(pager, shell=True, stdin=subprocess.PIPE, env={"LESS": "FRX", "LV": "-c", **os.environ})
+    # The user's pager could act on the agent's text: nvimpager, for one, follows Vim modelines unless Git started it.
+    # LESSSECURE turns off LESSOPEN, lesskey files, and commands that run programs or write files, and other LESS
+    # variables such as LESSSECURE_ALLOW could turn them back on. Without a terminal, less copies the text. With K, less
+    # quits on Ctrl-C and restores the terminal, as it does on SIGTERM, which t3-pull passes on when it stops otherwise.
+    env = {key: value for key, value in os.environ.items() if not key.startswith("LESS")}
+    proc = subprocess.Popen([LESS], stdin=subprocess.PIPE, env={**env, "LESS": "FKX", "LESSSECURE": "1"})
     try:
-        proc.communicate(text)
+        # communicate() ignores a pager that quits before reading everything.
+        proc.communicate(text.getvalue())
+    except BaseException:
+        proc.terminate()
+        raise
     finally:
-        if proc.poll() is None:
-            proc.kill()
-            proc.wait()
+        proc.wait()
     if proc.returncode:
         die("the pager failed; nothing changed")
+    # Escapes only ever make the text longer.
+    return text.tell() != len(out)
 
 
 def landing(raw):
@@ -194,40 +204,99 @@ def landing(raw):
 def merge(parent, base, commit):
     """Returns the tree that cherry-picking commit onto base gives, without touching the work tree."""
     status, out, err = run("git merge-tree", git_command("merge-tree", "--write-tree", "-z", "--name-only", "--no-messages", f"--merge-base={parent}", base, commit))
-    if status not in (0, 1):
-        Visible(sys.stderr.buffer).write(err, final=True)
-        die("git merge-tree failed")
     tree, *conflicts = out.split(b"\0")
-    conflicts = sorted(set(name for name in conflicts if name))
-    if status or conflicts:
-        die("the commit conflicts with the default branch in these files; ask the agent to rebase it. Nothing changed.\n" + b"\n".join(conflicts).decode("utf-8", "t3-pull"))
-    return output("rev-parse", "--verify", f"{tree.decode()}^{{tree}}")
+    if status not in (0, 1):
+        die("git merge-tree failed", err)
+    if status:
+        die("the commit conflicts with the default branch in these files; ask the agent to rebase it. Nothing changed.\n" + lines(sorted(set(filter(None, conflicts)))).decode("utf-8", "t3-pull").removesuffix("\n"))
+    return tree.decode()
 
 
-def changes(base, commit):
+def changes(base, tree):
     """Returns the changed paths with their old and new modes."""
-    raw = git("diff", *DIFF, "--raw", "-z", "--no-renames", base, commit).stdout.split(b"\0")
+    raw = git("diff", *DIFF, "--raw", "-z", base, tree).stdout.split(b"\0")
     return {path: set(info[1:].split(b" ")[:2]) for info, path in zip(raw[::2], raw[1::2])}
 
 
-def risky_files(base, commit, changed):
-    names = git("diff", *DIFF, "--name-only", "-z", "--no-renames", base, commit, "--", *RISKY).stdout.split(b"\0")
-    # Symlinks can redirect any of the risky paths or their parents. Submodules fetch and check out other repositories.
-    names += [path for path, modes in changed.items() if {b"120000", b"160000"} & modes]
-    return sorted(set(name for name in names if name))
+def configured_paths():
+    """Returns the paths in the work tree that the user's Git config takes hooks or more config from, b"" for its top."""
+    # git_command() points core.hooksPath at /dev/null, so this asks Git without it.
+    status, hooks, err = run("git rev-parse", [GIT, "rev-parse", "--git-path", "hooks"])
+    if status:
+        die("git rev-parse failed", err)
+    paths = [os.fsdecode(hooks).removesuffix("\n")]
+    found = git("config", "-z", "--show-origin", "--get-regexp", r"^include(if\..*)?\.path$", check=False).stdout.split(b"\0")
+    for origin, entry in zip(found[::2], found[1::2]):
+        # Git reads a relative include path from the directory of the file that has it.
+        paths.append(os.path.join(os.path.dirname(os.fsdecode(origin).removeprefix("file:")), os.path.expanduser(os.fsdecode(entry.partition(b"\n")[2]))))
+    # The path with each of its ancestors resolved in turn: the work tree may be reached through a symlink, and the
+    # agent's commit can replace a symlink inside it with a directory. Joining keeps ".." where it is, since a symlink
+    # before it changes where it leads.
+    found = set()
+    for path in (os.path.join(os.getcwd(), path) for path in paths):
+        for head in [path, *map(str, pathlib.PurePath(path).parents)]:
+            found.add(os.path.relpath(os.path.join(os.path.realpath(head), os.path.relpath(path, head))))
+    return {b"" if path == "." else os.fsencode(path) for path in found if path != ".." and not path.startswith(("../", ".git/"))}
 
 
-def encrypted_files(base, commit, changed):
+def risky_files(changed, configured):
+    # Git runs hooks from files directly in the hooks directory, which the dirname test covers when that is the top of the
+    # work tree. Symlinks can redirect any of the risky paths or their parents. Submodules fetch other repositories.
+    def risky(path, modes):
+        parts = path.split(b"/")
+        under = any(path == top or path.startswith(top + b"/") or os.path.dirname(path) == top for top in configured)
+        return under or parts[0] in RISKY or path.startswith(RISKY_STARTS) or RISKY_NAMES & set(parts) or {b"120000", b"160000"} & modes
+
+    return sorted(path for path, modes in changed.items() if risky(path, modes))
+
+
+def in_the_way(changed):
+    """Returns the untracked and ignored paths, with a / after directories, that the cherry-pick would overwrite or delete."""
+    # Git treats ignored files as expendable, so the cherry-pick would replace them without asking. One path is in the
+    # way of another when either is the other or a directory above it.
+    found = git("ls-files", "-z", "--others", "--directory").stdout.split(b"\0")
+
+    def blocks(other, path):
+        other, path = other.rstrip(b"/") + b"/", path + b"/"
+        return other.startswith(path) or path.startswith(other)
+
+    return sorted(other for other in found if other and any(blocks(other, path) for path in changed))
+
+
+def encrypted_files(base, tree, changed):
     # Anyone can encrypt a SOPS file to the public keys in .sops.yaml, and its diff shows only ciphertext.
     names = set()
-    for rev in (base, commit):
+    for rev in (base, tree):
         status, out, err = run("git grep", git_command("grep", "--no-color", "-l", "-z", "--text", "-E", SOPS, rev))
         if status not in (0, 1):
-            Visible(sys.stderr.buffer).write(err, final=True)
-            die("git grep failed")
-        prefix = f"{rev}:".encode()
-        names |= {name.removeprefix(prefix) for name in out.split(b"\0") if name}
+            die("git grep failed", err)
+        names |= {name.removeprefix(f"{rev}:".encode()) for name in out.split(b"\0") if name}
     return sorted(names & changed.keys())
+
+
+def fetch_agent(command, ssh):
+    """Runs the fetch from the t3 side and returns whether it worked."""
+    # t3-pull is the subreaper of this fetch only, so that stop() also ends what SSH leaves behind. The user's own
+    # commands can leave agents such as gpg-agent or an SSH control master that should keep running.
+    libc = ctypes.CDLL(None, use_errno=True)
+    if libc.prctl(PR_SET_CHILD_SUBREAPER, 1):
+        die("cannot become a subreaper, which t3-pull needs to stop SSH and its descendants")
+    # Git keeps a fetched pack with a .keep file until the fetch ends, and a fetch the t3 side stalls ends only when
+    # t3-pull stops it. The .keep would then protect the pack from gc for good.
+    packs = glob.escape(output("rev-parse", "--git-path", "objects/pack"))
+    kept = set(glob.glob(f"{packs}/*.keep"))
+    fetched = False
+    try:
+        # GIT_SSH_COMMAND overrides core.sshCommand, so an inherited one would replace this command.
+        fetched = not run("git fetch", command, show=True, timeout=600, limit=1 << 20, env={**os.environ, "GIT_SSH_COMMAND": ssh})[0]
+        return fetched
+    finally:
+        libc.prctl(PR_SET_CHILD_SUBREAPER, 0)
+        if not fetched:
+            for path in set(glob.glob(f"{packs}/*.keep")) - kept:
+                with open(path, "rb") as keep:
+                    if keep.read().startswith(b"fetch-pack "):
+                        os.remove(path)
 
 
 class Parser(argparse.ArgumentParser):
@@ -236,10 +305,13 @@ class Parser(argparse.ArgumentParser):
 
 
 def main():
-    if sys.platform != "linux" or ctypes.CDLL(None, use_errno=True).prctl(PR_SET_CHILD_SUBREAPER, 1):
-        die("cannot become a subreaper, which t3-pull needs to stop SSH and other descendants of Git")
+    # SIGTERM and SIGHUP, such as from closing the terminal, stop t3-pull through the same cleanup as errors.
+    for number, code in [(signal.SIGTERM, 143), (signal.SIGHUP, 129)]:
+        signal.signal(number, lambda *_, code=code: sys.exit(code))
+    if not glob.glob("/proc/self/task/*/children"):
+        die("t3-pull needs Linux with /proc/<pid>/task/<tid>/children, to find what SSH leaves behind")
     parser = Parser(prog="t3-pull", description="Pulls one commit from a branch in the t3 user's clone, shows it, and cherry-picks it as a signed commit.")
-    parser.add_argument("--check", action="store_true", help="run the formatting and flake checks afterwards")
+    parser.add_argument("--check", action="store_true", help="run nix fmt -- --check and nix flake check afterwards")
     parser.add_argument("--host", help="pull from the t3 user on another host")
     parser.add_argument("branch")
     parser.add_argument("source", nargs="?", metavar="t3 repository path")
@@ -255,22 +327,27 @@ def main():
         die(f"not a repository path: {source}")
     where = host or "this host"
 
-    current = git("symbolic-ref", "--quiet", "--short", "HEAD", check=False).stdout.decode().strip()
+    current = checked_out()
     if not current:
         die("check out a branch first")
-    upstream = git("rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}", check=False).stdout.decode().strip()
-    remote = git("config", f"branch.{current}.remote", check=False).stdout.decode().strip()
+    upstream = output("rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}", check=False)
+    remote = output("config", f"branch.{current}.remote", check=False)
     if not upstream or not remote:
         die(f"{current} has no upstream branch")
-    if git("diff", "--quiet", check=False).returncode or git("diff", "--cached", "--quiet", check=False).returncode:
+    if dirty():
         die("commit or stash your changes first")
-    # Merge drivers would run on the agent's files while merging, before the review.
-    if git("config", "--get-regexp", r"^merge\..*\.driver$", check=False).stdout:
-        die("a merge driver is configured; t3-pull does not run with one")
-    # followRemoteHEAD updates the remote's HEAD in the same fetch, in case the default branch changed.
-    if run("git fetch", git_command("-c", f"remote.{remote}.followRemoteHEAD=always", "fetch", "--quiet", remote), show=True)[0]:
+    # Merge drivers would run on the agent's files while merging, before the review. Hooks set in Git config ignore
+    # core.hooksPath, and would run while fetching and cherry-picking. fetch.fsck settings would let malformed objects
+    # through the fetch. fetch.uriProtocols and promisor.acceptFromServer would let the t3 side send Git to other URLs,
+    # and promisor.acceptFromServer add remotes to the user's config.
+    if unsafe := output("config", "--name-only", "--get-regexp", r"^(merge\..*\.driver|hook\..*\.command|fetch\.fsck\..*|fetch\.uriprotocols|promisor\.acceptfromserver(url)?)$", check=False):
+        die(f"t3-pull does not run while Git config sets merge drivers, hooks, fetch.fsck, fetch.uriProtocols, or promisor.acceptFromServer:\n{unsafe}")
+    # followRemoteHEAD updates the remote's HEAD in the same fetch, in case the default branch changed. This fetch and the
+    # fast-forward only read the user's own repository and remote, and can leave agents such as an SSH control master or
+    # a credential cache, which should not keep t3-pull's limits.
+    if run("git fetch", git_command("-c", f"remote.{remote}.followRemoteHEAD=always", "fetch", "--quiet", remote), show=True, limited=False)[0]:
         die(f"cannot fetch {remote}")
-    default = git("rev-parse", "--abbrev-ref", f"{remote}/HEAD", check=False).stdout.decode().strip()
+    default = output("rev-parse", "--abbrev-ref", f"{remote}/HEAD", check=False)
     if upstream != default:
         die(f"{current} tracks {upstream}, not the default branch {default or 'of ' + remote}")
     # The default branch can move while agents work, so a branch that is only behind is fast-forwarded.
@@ -278,7 +355,7 @@ def main():
     if output("rev-parse", "HEAD") != base:
         if git("merge-base", "--is-ancestor", "HEAD", base, check=False).returncode:
             die(f"{current} has commits that {upstream} lacks; push or drop them first")
-        if run("git merge", git_command("merge", "--ff-only", "--quiet", base), show=True)[0]:
+        if run("git merge", git_command("merge", "--ff-only", "--quiet", base), show=True, limited=False)[0]:
             die(f"cannot fast-forward {current} to {upstream}")
 
     ref = f"refs/t3-pull/{branch}"
@@ -286,30 +363,34 @@ def main():
         try:
             # Everything on the t3 side, including upload-pack, runs as t3 and is under the agent's control. On this host,
             # the host key is pinned to the one in /etc/ssh. Another host must already be in the user's known hosts.
-            ssh = "ssh -o StrictHostKeyChecking=yes -o ForwardAgent=no -o ForwardX11=no -o ClearAllForwardings=yes -o PermitLocalCommand=no"
+            ssh = "ssh -o StrictHostKeyChecking=yes -o ForwardAgent=no -o ForwardX11=no -o ClearAllForwardings=yes -o PermitLocalCommand=no -o ControlMaster=no -o ControlPath=none -o GSSAPIDelegateCredentials=no"
             if host is None:
                 for name in os.listdir("/etc/ssh"):
                     if re.fullmatch(r"ssh_host_.*_key\.pub", name):
                         with open(f"/etc/ssh/{name}") as key:
                             known.write("127.0.0.1 " + " ".join(key.read().split()[:2]) + "\n")
                 known.flush()
-                ssh += f" -o UserKnownHostsFile={known.name} -o GlobalKnownHostsFile=/dev/null -o CanonicalizeHostname=no"
+                ssh += f" -o UserKnownHostsFile={shlex.quote(known.name)} -o GlobalKnownHostsFile=/dev/null -o CanonicalizeHostname=no"
             print(f"Fetching {branch} from {source} on {where}.", file=sys.stderr)
-            url = f"ssh://t3@{host or '127.0.0.1'}{source}"
-            fetch = git_command("fetch", "--quiet", "--no-tags", "--no-write-fetch-head", f"--upload-pack={UPLOAD_PACK}", url, f"+refs/heads/{branch}:{ref}")
-            # GIT_SSH_COMMAND overrides core.sshCommand, so an inherited one would replace this command.
-            if run("git fetch", fetch, show=True, timeout=600, limit=1 << 20, env={**os.environ, "GIT_SSH_COMMAND": ssh})[0]:
+            # fsck refuses malformed objects, such as trees with one path twice, whose diff would differ from what lands.
+            # Keeping the pack as it arrives stops small deltas from expanding into many huge loose objects on disk.
+            fetch = git_command("-c", "fetch.fsckObjects=true", "-c", "fetch.unpackLimit=1", "fetch", "--quiet", "--no-tags", "--no-recurse-submodules", "--no-write-fetch-head", f"--upload-pack={UPLOAD_PACK}", f"ssh://t3@{host or '127.0.0.1'}{source}", f"+refs/heads/{branch}:{ref}")
+            if not fetch_agent(fetch, ssh):
                 die(f"cannot fetch {branch} from {source} on {where}")
             commit = output("rev-parse", "--verify", f"{ref}^{{commit}}")
             # The commit object is what lands, while Git settings such as mailmap and the log encoding change what log shows.
-            # An encoding header would let the cherry-pick turn bytes that look harmless here into other characters.
+            # An encoding header would let the cherry-pick turn bytes that look harmless here into other characters, and
+            # the cherry-pick drops blank lines at the start of a message.
             raw = git("cat-file", "commit", commit).stdout
+            headers, message = landing(raw)
             if len(raw) > 65536:
-                die(f"{branch} has a commit message or author over 64 KiB")
+                die(f"{branch} has a commit over 64 KiB")
             if visible_text(raw.decode("utf-8", "t3-pull")).encode() != raw:
-                die(f"{branch} has control characters, invalid UTF-8, or invisible characters in its message or author")
-            if any(line.startswith(b"encoding ") for line in landing(raw)[0]):
+                die(f"{branch} has control characters, invalid UTF-8, invisible characters, or spaces other than the plain space in its message or headers")
+            if any(line.startswith(b"encoding ") for line in headers):
                 die(f"{branch} has an encoding header; ask the agent to commit in UTF-8 without one")
+            if not message.split(b"\n", 1)[0].strip():
+                die(f"{branch} has an empty message or one that starts with a blank line")
 
             # One commit with one parent from the default branch's history. The tree it gives on the reviewed base is
             # computed first, so what is shown is the tree that lands, even when the default branch moved.
@@ -319,39 +400,51 @@ def main():
             parent = parents[1]
             if git("merge-base", "--is-ancestor", parent, base, check=False).returncode:
                 die(f"{branch} must be one commit on a commit of {upstream}; ask the agent to rebase it")
-            header = git("log", "-1", "--no-color", "--no-decorate", "--no-show-signature", "--no-mailmap", "--encoding=UTF-8", "--format=fuller", commit).stdout
             tree = merge(parent, base, commit)
             if tree == output("rev-parse", f"{base}^{{tree}}"):
                 die(f"{branch} changes nothing on {upstream}")
-
-            show_diff(base, tree)
-            shown = Visible(sys.stdout.buffer)
-            shown.write(header + b"\n")
-            shown.write(git("diff", "--stat", *DIFF, base, tree).stdout)
             changed = changes(base, tree)
-            risky = risky_files(base, tree, changed)
-            if risky:
-                shown.write(b"\nThis commit changes files that act later:\n" + b"\n".join(risky) + b"\n")
-            encrypted = encrypted_files(base, tree, changed)
-            if encrypted:
-                shown.write(b"\nThis commit changes encrypted files, whose diff shows only ciphertext:\n" + b"\n".join(encrypted) + b"\n")
+            if blocking := in_the_way(changed):
+                die("files that Git does not track, some perhaps ignored, are where the commit puts its files; move them first. Nothing changed.\n" + lines(blocking).decode("utf-8", "t3-pull").removesuffix("\n"))
+
+            escaped = show_diff(base, tree)
+            shown = Visible(sys.stdout.buffer)
+            shown.write(git("log", "-1", "--no-color", "--no-decorate", "--no-show-signature", "--no-abbrev-commit", "--no-mailmap", "--encoding=UTF-8", "--format=fuller", commit).stdout + b"\n")
+            shown.write(git("diff", "--stat", *DIFF, base, tree).stdout)
+            if risky := risky_files(changed, configured_paths()):
+                shown.write(b"\nThis commit changes files that act later:\n" + lines(risky))
+            if encrypted := encrypted_files(base, tree, changed):
+                shown.write(b"\nThis commit changes encrypted files, whose diff shows only ciphertext:\n" + lines(encrypted))
+            if escaped:
+                shown.write(b"\nThe diff has control, invisible, or invalid characters, shown as \\x{..} escapes.\n")
             shown.write(b"", final=True)
             if moved := int(output("rev-list", "--count", f"{parent}..{base}")):
                 print(f"\n{upstream} moved {moved} commit{'s' * (moved != 1)} past the agent's commit. What is shown is what lands on it.", file=sys.stderr)
             print(f"Pull {commit} from {branch} onto {current} and sign it? [y/N] ", end="", file=sys.stderr, flush=True)
             if sys.stdin.readline().strip() != "y":
                 die("nothing changed")
-
-            # The review holds only for the base it was computed on.
-            if output("rev-parse", "HEAD") != base or git("diff", "--quiet", check=False).returncode or git("diff", "--cached", "--quiet", check=False).returncode:
-                die(f"{current} changed during the review; nothing changed")
-            # The user's commit encoding and message cleanup would otherwise change the author and message that were checked.
-            if run("git cherry-pick", git_command("-c", "i18n.commitEncoding=UTF-8", "cherry-pick", "--cleanup=verbatim", "-S", commit), show=True)[0]:
-                die("the cherry-pick failed; run git cherry-pick --abort")
-            if output("rev-parse", "HEAD^") != base or output("rev-parse", "HEAD^{tree}") != tree or landing(git("cat-file", "commit", "HEAD").stdout) != landing(raw):
-                die(f"HEAD does not hold the reviewed tree, author, and message; undo it with git reset --keep {base}")
         finally:
-            git("update-ref", "-d", ref, check=False)
+            # This runs before the cherry-pick: once the agent's files are checked out, a file that the user's Git config
+            # includes can add hooks to the Git commands that follow.
+            git("update-ref", "-d", ref)
+
+    # The review holds only for the branch, base, and untracked files it was computed with.
+    if checked_out() != current or output("rev-parse", "HEAD") != base or dirty() or in_the_way(changed):
+        die(f"{current} or its untracked files changed during the review; nothing changed")
+    # The user's commit encoding and message cleanup would otherwise change the author and message that were checked.
+    # merge-tree already did this merge within the limits, which agents that signing starts would keep.
+    checked = None
+    try:
+        if not run("git cherry-pick", git_command("-c", "i18n.commitEncoding=UTF-8", "cherry-pick", "--cleanup=verbatim", "-S", commit), show=True, limited=False)[0]:
+            checked = checked_out() == current and output("rev-parse", "HEAD^") == base and output("rev-parse", "HEAD^{tree}") == tree and landing(git("cat-file", "commit", "HEAD").stdout) == (headers, message)
+    finally:
+        # A failure or a stop, such as Ctrl-C while signing waits for a key, can come before or after the commit.
+        if checked is None:
+            print(f"t3-pull: the cherry-pick or its check did not finish; if git status shows a cherry-pick in progress, run git cherry-pick --abort, and otherwise check HEAD, or undo it with git reset --keep {base}", file=sys.stderr)
+    if checked is None:
+        sys.exit(1)
+    if not checked:
+        die(f"HEAD does not hold the reviewed tree, author, and message; undo it with git reset --keep {base}")
 
     if args.check:
         checks = [
