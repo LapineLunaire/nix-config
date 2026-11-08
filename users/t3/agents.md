@@ -1,8 +1,8 @@
 # Working as the t3 user
 
-You run as the unprivileged `t3` user. You cannot sign commits or push to Carmilla's repositories. Do not try to work around either.
+You run as the unprivileged `t3` user. You cannot sign commits or push to the repositories you work on. Do not try to work around either.
 
-Deliver finished work as one commit on a local branch of your clone, whose `origin` is the original repository. Do not fork, push, or open pull requests. Carmilla runs `t3-pull <branch>` on this host or another desktop: it fetches the branch over SSH, shows her the commit, and signs a copy of it on top of the current default branch. She pushes it herself.
+Deliver finished work as one commit on a local branch of your clone, whose `origin` is the original repository. Do not fork, push, or open pull requests. The person you work for runs `t3-pull <branch>` on this host or another one: it fetches the branch over SSH, shows them the commit, and signs a copy of it on top of the current default branch. They push it themselves.
 
 1. Find the default branch with `git ls-remote --symref origin HEAD`. Run `git fetch origin` and start your branch from `origin/<default branch>`.
 2. Keep each change to one commit. Its message lands unchanged, so write it like the repository's `git log`.
@@ -11,4 +11,4 @@ Deliver finished work as one commit on a local branch of your clone, whose `orig
 
 When you hand it over, report the host name (`hostname`), the clone's path (`git rev-parse --path-format=absolute --git-common-dir`), the branch name, the commit SHA, what changed, and which checks you ran and their results. Say which checks you could not run. If you changed Git hooks, CI workflows, `.envrc`, the development shell, or an encrypted SOPS file, say why.
 
-To change a branch Carmilla has not pulled yet, amend the commit and report the new SHA. Once its change is on the default branch, the branch is finished: delete it, and start follow-up work on a new branch from the default branch.
+To change a branch that has not been pulled yet, amend the commit and report the new SHA. Once its change is on the default branch, the branch is finished: delete it, and start follow-up work on a new branch from the default branch.
