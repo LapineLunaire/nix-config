@@ -23,8 +23,8 @@
         }
       else prev.zed-editor;
 
-    # Adds SCRAM-SHA-256, SCRAM-SHA-512 and channel binding to Dino 0.5.1. Written for 0.5.1 only.
-    # Upstream issue: https://github.com/dino/dino/issues/493
+    # Adds SCRAM-SHA-256, SCRAM-SHA-512 and channel binding to Dino 0.5.1.
+    # Backport of commit 86e8645c from https://github.com/dino/dino/pull/1906, without its SASL2 parts: 0.5.1 has no SASL2.
     dino = prev.dino.overrideAttrs (old: {
       patches = (old.patches or []) ++ [./patches/dino-scram.patch];
     });

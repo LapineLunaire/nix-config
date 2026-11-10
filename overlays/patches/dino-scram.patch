@@ -1,11 +1,23 @@
+diff --git a/xmpp-vala/meson.build b/xmpp-vala/meson.build
+index 0fdfb65..9914e37 100644
+--- a/xmpp-vala/meson.build
++++ b/xmpp-vala/meson.build
+@@ -156,6 +156,7 @@ test_sources = [
+     'tests/stanza.vala',
+     'tests/color.vala',
+     'tests/util.vala',
++    'tests/sasl.vala',
+ ]
+ exe_xmpp_vala_test = executable('xmpp-vala-test', test_sources, c_args: c_args, vala_args: vala_args, dependencies: dependencies + dep_xmpp_vala, install: false)
+ test('Tests for xmpp-vala', exe_xmpp_vala_test)
 diff --git a/xmpp-vala/src/module/sasl.vala b/xmpp-vala/src/module/sasl.vala
-index 3f3eca5..fedcfc0 100644
+index 3f3eca5..8b94e3d 100644
 --- a/xmpp-vala/src/module/sasl.vala
 +++ b/xmpp-vala/src/module/sasl.vala
 @@ -1,12 +1,20 @@
  namespace Xmpp.Sasl {
      private const string NS_URI = "urn:ietf:params:xml:ns:xmpp-sasl";
-
+ 
 +    public errordomain SaslError {
 +        INVALID_CHALLENGE,
 +        CHANNEL_BINDING,
@@ -22,7 +34,7 @@ index 3f3eca5..fedcfc0 100644
 +        public uint8[] channel_binding;
          public uint8[] server_signature;
          public bool finished = false;
-
+ 
 @@ -18,6 +26,32 @@ namespace Xmpp.Sasl {
          public const string PLAIN = "PLAIN";
          public const string SCRAM_SHA_1 = "SCRAM-SHA-1";
@@ -54,12 +66,12 @@ index 3f3eca5..fedcfc0 100644
 +            return null;
 +        }
      }
-
+ 
      public class Module : XmppStreamNegotiationModule {
 @@ -44,70 +78,16 @@ namespace Xmpp.Sasl {
              stream.received_nonza.disconnect(this.received_nonza);
          }
-
+ 
 -        private static size_t SHA1_SIZE = 20;
 -
 -        private static uint8[] sha1(uint8[] data) {
@@ -188,7 +200,7 @@ index 3f3eca5..fedcfc0 100644
 +            string client_first_message;
 +            Flag? scram_flag;
 +            try {
-+                scram_flag = start_scram(stream, supported_mechanisms, name, password, out client_first_message);
++                scram_flag = start_scram(stream, supported_mechanisms, name, password, false, out client_first_message);
 +            } catch (SaslError e) {
 +                fail_authentication(stream);
 +                return;
@@ -212,7 +224,7 @@ index 3f3eca5..fedcfc0 100644
 @@ -217,6 +179,16 @@ namespace Xmpp.Sasl {
              return res;
          }
-
+ 
 +        private void fail_authentication(XmppStream stream) {
 +            Flag? flag = stream.get_flag(Flag.IDENTITY);
 +            if (flag != null) {
@@ -226,33 +238,39 @@ index 3f3eca5..fedcfc0 100644
          public override bool mandatory_outstanding(XmppStream stream) {
              return !stream.has_flag(Flag.IDENTITY) || !stream.get_flag(Flag.IDENTITY).finished;
          }
-@@ -228,4 +200,242 @@ namespace Xmpp.Sasl {
+@@ -228,4 +200,250 @@ namespace Xmpp.Sasl {
          public override string get_ns() { return NS_URI; }
          public override string get_id() { return IDENTITY.id; }
      }
 +
 +    private const string CHANNEL_BINDING_NS_URI = "urn:xmpp:sasl-cb:0";
 +
-+    public static Flag? start_scram(XmppStream stream, string[] supported_mechanisms, string name, string password, out string client_first_message) throws SaslError {
++    public delegate uint8[]? ChannelBindingProvider(TlsChannelBindingType type);
++
++    public static Flag? start_scram(XmppStream stream, string[] supported_mechanisms, string name, string password, bool require_announcement, out string client_first_message, ChannelBindingProvider? binding_provider = null) throws SaslError {
 +        client_first_message = "";
++        bool server_offers_scram = false;
 +        bool server_offers_plus = false;
 +        foreach (string mechanism in supported_mechanisms) {
++            if (Mechanism.is_scram(mechanism)) server_offers_scram = true;
 +            if (Mechanism.is_plus(mechanism)) server_offers_plus = true;
 +        }
++        // Servers without SCRAM (e.g. PLAIN-only LDAP setups) may still announce XEP-0440, there is nothing to bind then.
++        if (!server_offers_scram) return null;
 +        StanzaNode? binding_node = stream.features.get_subnode("sasl-channel-binding", CHANNEL_BINDING_NS_URI);
-+        // Only relax the checks for servers without XEP-0440, so an announcement is always enforced.
-+        bool strict_binding = binding_node != null;
++        // Only relax the checks for SASL1 servers without XEP-0440, so an announcement is always enforced.
++        bool strict_binding = require_announcement || binding_node != null;
 +        if (strict_binding && server_offers_plus != (binding_node != null)) {
 +            throw new SaslError.CHANNEL_BINDING("Incomplete channel-binding announcement");
 +        }
 +
 +        uint8[]? channel_binding_data = null;
 +        string? binding_type = null;
-+        foreach (string candidate in new string[] { "tls-exporter", "tls-server-end-point" }) {
++        foreach (string candidate in new string[] { "tls-exporter", "tls-unique", "tls-server-end-point" }) {
 +            if (binding_node == null) break;
 +            foreach (StanzaNode type_node in binding_node.get_subnodes("channel-binding", CHANNEL_BINDING_NS_URI)) {
 +                if (type_node.get_attribute("type") != candidate) continue;
-+                channel_binding_data = get_channel_binding_data(stream, candidate == "tls-exporter" ? TlsChannelBindingType.EXPORTER : TlsChannelBindingType.SERVER_END_POINT);
++                channel_binding_data = get_channel_binding_data(stream, candidate == "tls-exporter" ? TlsChannelBindingType.EXPORTER : candidate == "tls-unique" ? TlsChannelBindingType.UNIQUE : TlsChannelBindingType.SERVER_END_POINT, binding_provider);
 +                if (channel_binding_data != null) {
 +                    binding_type = candidate;
 +                    break;
@@ -263,7 +281,7 @@ index 3f3eca5..fedcfc0 100644
 +        if (binding_node == null) {
 +            // Use the RFC 9266 default, trying tls-unique first because TLS 1.3 connections refuse it.
 +            foreach (string candidate in new string[] { "tls-unique", "tls-exporter" }) {
-+                channel_binding_data = get_channel_binding_data(stream, candidate == "tls-unique" ? TlsChannelBindingType.UNIQUE : TlsChannelBindingType.EXPORTER);
++                channel_binding_data = get_channel_binding_data(stream, candidate == "tls-unique" ? TlsChannelBindingType.UNIQUE : TlsChannelBindingType.EXPORTER, binding_provider);
 +                if (channel_binding_data != null) {
 +                    binding_type = candidate;
 +                    break;
@@ -283,8 +301,9 @@ index 3f3eca5..fedcfc0 100644
 +        string gs2_header = "n,,";
 +        if (Mechanism.is_plus(mechanism)) {
 +            gs2_header = @"p=$(binding_type),,";
-+        } else if (!server_offers_plus && (get_channel_binding_data(stream, TlsChannelBindingType.EXPORTER) != null ||
-+                   get_channel_binding_data(stream, TlsChannelBindingType.SERVER_END_POINT) != null)) {
++        } else if (!server_offers_plus && (get_channel_binding_data(stream, TlsChannelBindingType.EXPORTER, binding_provider) != null ||
++                   get_channel_binding_data(stream, TlsChannelBindingType.UNIQUE, binding_provider) != null ||
++                   get_channel_binding_data(stream, TlsChannelBindingType.SERVER_END_POINT, binding_provider) != null)) {
 +            gs2_header = "y,,";
 +        }
 +
@@ -319,7 +338,8 @@ index 3f3eca5..fedcfc0 100644
 +        return io_stream.get_stream() as TlsConnection;
 +    }
 +
-+    private static uint8[]? get_channel_binding_data(XmppStream stream, TlsChannelBindingType type) {
++    private static uint8[]? get_channel_binding_data(XmppStream stream, TlsChannelBindingType type, ChannelBindingProvider? provider) {
++        if (provider != null) return provider(type);
 +        TlsConnection? tls_connection = get_tls_connection(stream);
 +        if (tls_connection == null) return null;
 +        var data = new ByteArray();
@@ -469,3 +489,360 @@ index 3f3eca5..fedcfc0 100644
 +        return mix;
 +    }
  }
+diff --git a/xmpp-vala/tests/common.vala b/xmpp-vala/tests/common.vala
+index 5bd7bbb..932f078 100644
+--- a/xmpp-vala/tests/common.vala
++++ b/xmpp-vala/tests/common.vala
+@@ -7,6 +7,7 @@ int main(string[] args) {
+     TestSuite.get_root().add_suite(new Xmpp.Test.UtilTest().get_suite());
+     TestSuite.get_root().add_suite(new Xmpp.Test.JidTest().get_suite());
+     TestSuite.get_root().add_suite(new Xmpp.Test.ColorTest().get_suite());
++    TestSuite.get_root().add_suite(new Xmpp.Test.SaslTest().get_suite());
+     return GLib.Test.run();
+ }
+ 
+diff --git a/xmpp-vala/tests/sasl.vala b/xmpp-vala/tests/sasl.vala
+new file mode 100644
+index 0000000..5102095
+--- /dev/null
++++ b/xmpp-vala/tests/sasl.vala
+@@ -0,0 +1,339 @@
++using Xmpp.Sasl;
++
++namespace Xmpp.Test {
++
++class SaslTest : Gee.TestCase {
++    public SaslTest() {
++        base("sasl");
++        add_test("reject-mandatory-extension", () => {
++            expect_invalid("m=unknown,r=clientserver,s=c2FsdA==,i=1");
++        });
++        add_test("reject-invalid-challenge", () => { expect_invalid("invalid"); });
++        add_test("reject-duplicate-attribute", () => {
++            expect_invalid("r=clientserver,s=c2FsdA==,i=1,i=2");
++        });
++        add_test("reject-unextended-nonce", () => { expect_invalid("r=client,s=c2FsdA==,i=1"); });
++        add_test("reject-iteration-suffix", () => { expect_invalid("r=clientserver,s=c2FsdA==,i=1junk"); });
++        add_test("reject-unsupported-binding", () => {
++            var stream = new SaslTestStream();
++            stream.features.put_node(new StanzaNode.build("sasl-channel-binding", "urn:xmpp:sasl-cb:0")
++                .put_node(new StanzaNode.build("channel-binding", "urn:xmpp:sasl-cb:0").put_attribute("type", "unknown")));
++            try {
++                string first;
++                start_scram(stream, { "SCRAM-SHA-256-PLUS", "SCRAM-SHA-256", "PLAIN" }, "user", "password", true, out first);
++                fail_if_reached("Unsupported binding must stop authentication");
++            } catch (Error e) {}
++        });
++        foreach (string iterations in new string[] { "-1", "0", "01", "1000001", "4294967296", "18446744073709551616" }) {
++            string value = iterations;
++            add_test("reject-iterations-" + value, () => { expect_invalid("r=clientserver,s=c2FsdA==,i=" + value); });
++        }
++        add_test("reject-invalid-salt", () => { expect_invalid("r=clientserver,s=!!!,i=1"); });
++        add_test("reject-stripped-binding-types", () => {
++            try {
++                string first;
++                start_scram(new SaslTestStream(), { "SCRAM-SHA-256-PLUS", "SCRAM-SHA-256" }, "user", "password", true, out first);
++                fail_if_reached("Missing binding types accepted");
++            } catch (Error e) {}
++        });
++        add_test("reject-stripped-plus", () => {
++            var stream = new SaslTestStream();
++            stream.features.put_node(new StanzaNode.build("sasl-channel-binding", "urn:xmpp:sasl-cb:0")
++                .put_node(new StanzaNode.build("channel-binding", "urn:xmpp:sasl-cb:0").put_attribute("type", "tls-exporter")));
++            try {
++                string first;
++                start_scram(stream, { "SCRAM-SHA-256", "PLAIN" }, "user", "password", true, out first);
++                fail_if_reached("Stripped PLUS accepted");
++            } catch (Error e) {}
++        });
++        add_test("plain-only-with-announcement", () => {
++            var stream = new SaslTestStream();
++            stream.features.put_node(new StanzaNode.build("sasl-channel-binding", "urn:xmpp:sasl-cb:0")
++                .put_node(new StanzaNode.build("channel-binding", "urn:xmpp:sasl-cb:0").put_attribute("type", "tls-exporter")));
++            foreach (bool require_announcement in new bool[] { false, true }) {
++                try {
++                    string first;
++                    fail_if(start_scram(stream, { "PLAIN" }, "user", "password", require_announcement, out first) != null);
++                } catch (Error e) { fail_if_reached(e.message); }
++            }
++        });
++        add_test("escape-username", () => {
++            try {
++                string first;
++                var flag = start_scram(new SaslTestStream(), { "SCRAM-SHA-256" }, "a=b,c", "password", false, out first);
++                fail_if_not(first.has_prefix("n,,n=a=3Db=2Cc,r="));
++                fail_if_not_eq_str(flag.name, "a=3Db=2Cc");
++            } catch (Error e) { fail_if_reached(e.message); }
++        });
++        add_test("sha1-plain-proof", () => {
++            try {
++                var response = compute_challenge_response("cj1jbGllbnRzZXJ2ZXIscz1jMkZzZEE9PSxpPTQwOTY=", "pencil", "client", "user", ChecksumType.SHA1, Base64.decode("biws"));
++                fail_if_not_eq_str(response.response, "c=biws,r=clientserver,p=4+FHWqvtQ3w06HqnWGqSJgzxmjk=");
++                fail_if_not_eq_str(Base64.encode(response.expected_server_signature), "9HKf506Wy7dimDIpbS1Us9voiaw=");
++                verify_server_signature(Base64.encode("v=9HKf506Wy7dimDIpbS1Us9voiaw=".data), response.expected_server_signature);
++            } catch (Error e) { fail_if_reached(e.message); }
++        });
++        add_test("sha1-exporter-proof", () => {
++            try {
++                var response = compute_challenge_response("cj1jbGllbnRzZXJ2ZXIscz1jMkZzZEE9PSxpPTQwOTY=", "pencil", "client", "user", ChecksumType.SHA1, Base64.decode("cD10bHMtZXhwb3J0ZXIsLAABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4f"));
++                fail_if_not_eq_str(response.response, "c=cD10bHMtZXhwb3J0ZXIsLAABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4f,r=clientserver,p=NnLkvdabwI9LET05dsLtXrrxInQ=");
++                fail_if_not_eq_str(Base64.encode(response.expected_server_signature), "e84TigsFGyLo3YtyIMdzmOe0q28=");
++                verify_server_signature(Base64.encode("v=e84TigsFGyLo3YtyIMdzmOe0q28=".data), response.expected_server_signature);
++            } catch (Error e) { fail_if_reached(e.message); }
++        });
++        add_test("sha256-plain-proof", () => {
++            try {
++                var response = compute_challenge_response("cj1jbGllbnRzZXJ2ZXIscz1jMkZzZEE9PSxpPTQwOTY=", "pencil", "client", "user", ChecksumType.SHA256, Base64.decode("biws"));
++                fail_if_not_eq_str(response.response, "c=biws,r=clientserver,p=CFQgWvxVZUYSi1mqsHDXP722uJHKDtyvcbmFOCc757A=");
++                fail_if_not_eq_str(Base64.encode(response.expected_server_signature), "U796hJH+W+NKXETWiomkC9FpsLHJPykLpJJtSzkgu/I=");
++                verify_server_signature(Base64.encode("v=U796hJH+W+NKXETWiomkC9FpsLHJPykLpJJtSzkgu/I=".data), response.expected_server_signature);
++            } catch (Error e) { fail_if_reached(e.message); }
++        });
++        add_test("sha256-exporter-proof", () => {
++            try {
++                var response = compute_challenge_response("cj1jbGllbnRzZXJ2ZXIscz1jMkZzZEE9PSxpPTQwOTY=", "pencil", "client", "user", ChecksumType.SHA256, Base64.decode("cD10bHMtZXhwb3J0ZXIsLAABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4f"));
++                fail_if_not_eq_str(response.response, "c=cD10bHMtZXhwb3J0ZXIsLAABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4f,r=clientserver,p=eIYgJXF3jMR7eyITb4fuWEwgrOggxWH1ddTDPcJko8o=");
++                fail_if_not_eq_str(Base64.encode(response.expected_server_signature), "YZ5Ck5fqPdDQqOX7JRZ+1ldIqxbTPU5PDh98PMb4EP8=");
++                verify_server_signature(Base64.encode("v=YZ5Ck5fqPdDQqOX7JRZ+1ldIqxbTPU5PDh98PMb4EP8=".data), response.expected_server_signature);
++            } catch (Error e) { fail_if_reached(e.message); }
++        });
++        add_test("sha512-plain-proof", () => {
++            try {
++                var response = compute_challenge_response("cj1jbGllbnRzZXJ2ZXIscz1jMkZzZEE9PSxpPTQwOTY=", "pencil", "client", "user", ChecksumType.SHA512, Base64.decode("biws"));
++                fail_if_not_eq_str(response.response, "c=biws,r=clientserver,p=sBr56Sn9FJQBipY6vDhajWOmQ/7IarAj/UjwqQOBdImPjFEJzDxN7LVVHcD1i5dzIH5WMwv8HHJbWifbUsHavw==");
++                fail_if_not_eq_str(Base64.encode(response.expected_server_signature), "rMgtReTMOe52Vs9dd1uMvIiU1gQ9f5sQwdaWm3cnZIfh3YA+eJ/cZezty6iYDM/jhRH61RFkqT/j9h90TnPrkg==");
++                verify_server_signature(Base64.encode("v=rMgtReTMOe52Vs9dd1uMvIiU1gQ9f5sQwdaWm3cnZIfh3YA+eJ/cZezty6iYDM/jhRH61RFkqT/j9h90TnPrkg==".data), response.expected_server_signature);
++            } catch (Error e) { fail_if_reached(e.message); }
++        });
++        add_test("sha512-exporter-proof", () => {
++            try {
++                var response = compute_challenge_response("cj1jbGllbnRzZXJ2ZXIscz1jMkZzZEE9PSxpPTQwOTY=", "pencil", "client", "user", ChecksumType.SHA512, Base64.decode("cD10bHMtZXhwb3J0ZXIsLAABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4f"));
++                fail_if_not_eq_str(response.response, "c=cD10bHMtZXhwb3J0ZXIsLAABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4f,r=clientserver,p=bifK5rJvNOXV0v/gj9kJPtnP354Ia76yASiNkmptsPxb0BiGh9dqo40VuBW6tuSoiCnV3iTYopSoN5oCRFQvjA==");
++                fail_if_not_eq_str(Base64.encode(response.expected_server_signature), "W654O28SMvjsZfNTuFWgzuZvu3svjqIPhxVvUJDjZ2Kid7Q3bTrL2BnlvV8RJNotMkS2DkqvcJesJ/wffGXL5g==");
++                verify_server_signature(Base64.encode("v=W654O28SMvjsZfNTuFWgzuZvu3svjqIPhxVvUJDjZ2Kid7Q3bTrL2BnlvV8RJNotMkS2DkqvcJesJ/wffGXL5g==".data), response.expected_server_signature);
++            } catch (Error e) { fail_if_reached(e.message); }
++        });
++        foreach (string final_message in new string[] { "v=YmFk", "e=invalid-proof", "v=c2ln,v=c2ln", "v=c2ln,e=invalid-proof" }) {
++            string message = final_message;
++            add_test("reject-server-final-" + message, () => {
++                try {
++                    verify_server_signature(Base64.encode(message.data), "sig".data);
++                    fail_if_reached("Invalid server signature accepted");
++                } catch (Error e) {}
++            });
++        }
++        add_test("sasl1-no-plain-fallback", () => { no_plain_fallback(false); });
++        add_test("sasl1-reject-stripped-plus", () => {
++            var stream = new SaslTestStream();
++            stream.features.put_node(new StanzaNode.build("sasl-channel-binding", "urn:xmpp:sasl-cb:0")
++                .put_node(new StanzaNode.build("channel-binding", "urn:xmpp:sasl-cb:0").put_attribute("type", "tls-exporter")));
++            try {
++                string first;
++                start_scram(stream, { "SCRAM-SHA-256", "PLAIN" }, "user", "password", false, out first);
++                fail_if_reached("Stripped PLUS accepted");
++            } catch (Error e) {}
++        });
++        add_test("sasl1-plus-without-announcement", () => {
++            var stream = new SaslTestStream();
++            var mechanisms = new StanzaNode.build("mechanisms", "urn:ietf:params:xml:ns:xmpp-sasl");
++            foreach (string mechanism in new string[] { "SCRAM-SHA-512-PLUS", "SCRAM-SHA-512", "SCRAM-SHA-256-PLUS", "SCRAM-SHA-256", "PLAIN" }) {
++                mechanisms.put_node(new StanzaNode.build("mechanism", "urn:ietf:params:xml:ns:xmpp-sasl").put_node(new StanzaNode.text(mechanism)));
++            }
++            stream.features.put_node(mechanisms);
++            new Sasl.Module("user", "password").received_features_node(stream);
++            fail_if_not_eq_str(stream.sent.get_attribute("mechanism"), "SCRAM-SHA-512");
++        });
++        add_test("binding-prefers-exporter", () => {
++            expect_binding({ "tls-server-end-point", "tls-unique", "tls-exporter" }, { "tls-exporter", "tls-unique", "tls-server-end-point" }, true, "tls-exporter");
++        });
++        add_test("binding-unique", () => {
++            expect_binding({ "tls-unique" }, { "tls-exporter", "tls-unique", "tls-server-end-point" }, true, "tls-unique");
++        });
++        add_test("binding-unique-over-end-point", () => {
++            expect_binding({ "tls-server-end-point", "tls-unique" }, { "tls-unique", "tls-server-end-point" }, true, "tls-unique");
++        });
++        add_test("binding-end-point", () => {
++            expect_binding({ "tls-exporter", "tls-server-end-point" }, { "tls-unique", "tls-server-end-point" }, true, "tls-server-end-point");
++        });
++        add_test("binding-skips-unavailable-unique", () => {
++            expect_binding({ "tls-unique", "tls-server-end-point" }, { "tls-exporter", "tls-server-end-point" }, true, "tls-server-end-point");
++        });
++        add_test("binding-reject-unavailable", () => {
++            expect_binding({ "tls-unique" }, { "tls-exporter", "tls-server-end-point" }, true, null);
++        });
++        add_test("binding-default-unique", () => {
++            expect_binding(null, { "tls-exporter", "tls-unique", "tls-server-end-point" }, false, "tls-unique");
++        });
++        add_test("binding-default-exporter", () => {
++            expect_binding(null, { "tls-exporter", "tls-server-end-point" }, false, "tls-exporter");
++        });
++        add_test("binding-default-ignores-end-point", () => {
++            try {
++                string first;
++                var flag = start_scram(new SaslTestStream(), { "SCRAM-SHA-256-PLUS", "SCRAM-SHA-256" }, "user", "password", false, out first, binding_provider({ "tls-server-end-point" }));
++                fail_if_not_eq_str(flag.mechanism, "SCRAM-SHA-256");
++                fail_if_not(first.has_prefix("n,,n=user,r="));
++            } catch (Error e) { fail_if_reached(e.message); }
++        });
++        foreach (string binding_type in new string[] { "tls-exporter", "tls-unique", "tls-server-end-point" }) {
++            string type = binding_type;
++            add_test("binding-unused-" + type, () => {
++                try {
++                    string first;
++                    var flag = start_scram(new SaslTestStream(), { "SCRAM-SHA-256" }, "user", "password", false, out first, binding_provider({ type }));
++                    fail_if_not_eq_str(flag.mechanism, "SCRAM-SHA-256");
++                    fail_if_not(first.has_prefix("y,,n=user,r="));
++                } catch (Error e) { fail_if_reached(e.message); }
++            });
++        }
++        add_test("sasl1-valid-success", () => { valid_success(false); });
++        add_test("reject-nul-challenge", () => {
++            try {
++                uint8[] bytes = "r=clientserver,s=c2FsdA==,i=1".data;
++                bytes += 0;
++                bytes += 'x';
++                compute_challenge_response(Base64.encode(bytes), "password", "client", "user", ChecksumType.SHA256, "n,,".data);
++                fail_if_reached("NUL in challenge accepted");
++            } catch (Error e) {}
++        });
++        add_test("reject-nul-server-final", () => {
++            try {
++                uint8[] bytes = { 'v', '=', 'c', '2', 'l', 'n', 0, ',', 'e', '=', 'x' };
++                verify_server_signature(Base64.encode(bytes), "sig".data);
++                fail_if_reached("NUL in server-final accepted");
++            } catch (Error e) {}
++        });
++        add_test("reject-invalid-outer-base64", () => {
++            try {
++                compute_challenge_response("!!!", "password", "client", "user", ChecksumType.SHA256, "n,,".data);
++                fail_if_reached("Invalid base64 accepted");
++            } catch (Error e) {}
++        });
++        add_test("sasl1-invalid-challenge", () => { invalid_challenge(false); });
++    }
++
++    private void expect_invalid(string challenge) {
++        try {
++            compute_challenge_response(Base64.encode(challenge.data), "password", "client", "user", ChecksumType.SHA256, "n,,".data);
++            fail_if_reached("Invalid challenge accepted");
++        } catch (Error e) {}
++    }
++
++    private Flag scram_flag() {
++        var flag = new Flag();
++        flag.mechanism = "SCRAM-SHA-256";
++        flag.name = "user";
++        flag.password = "password";
++        flag.client_nonce = "client";
++        flag.channel_binding = "n,,".data;
++        return flag;
++    }
++
++    // Provides the binding type name as binding data for each of the available types
++    private ChannelBindingProvider binding_provider(string[] available) {
++        return (type) => {
++            string name = type == TlsChannelBindingType.EXPORTER ? "tls-exporter" : type == TlsChannelBindingType.UNIQUE ? "tls-unique" : "tls-server-end-point";
++            return name in available ? name.data : null;
++        };
++    }
++
++    private void expect_binding(string[]? announced, string[] available, bool require_announcement, string? expected) {
++        var stream = new SaslTestStream();
++        if (announced != null) {
++            var binding = new StanzaNode.build("sasl-channel-binding", "urn:xmpp:sasl-cb:0");
++            foreach (string type in announced) {
++                binding.put_node(new StanzaNode.build("channel-binding", "urn:xmpp:sasl-cb:0").put_attribute("type", type));
++            }
++            stream.features.put_node(binding);
++        }
++        try {
++            string first;
++            var flag = start_scram(stream, { "SCRAM-SHA-256-PLUS", "SCRAM-SHA-256" }, "user", "password", require_announcement, out first, binding_provider(available));
++            if (expected == null) {
++                fail_if_reached("Unavailable binding accepted");
++                return;
++            }
++            fail_if_not_eq_str(flag.mechanism, "SCRAM-SHA-256-PLUS");
++            fail_if_not(first.has_prefix(@"p=$expected,,n=user,r="));
++            fail_if_not_eq_str(Base64.encode(flag.channel_binding), Base64.encode(@"p=$expected,,$expected".data));
++        } catch (Error e) {
++            if (expected != null) fail_if_reached(e.message);
++        }
++    }
++
++    private void no_plain_fallback(bool sasl2) {
++        var stream = new SaslTestStream();
++        string ns = sasl2 ? "urn:xmpp:sasl:2" : "urn:ietf:params:xml:ns:xmpp-sasl";
++        var mechanisms = new StanzaNode.build(sasl2 ? "authentication" : "mechanisms", ns);
++        foreach (string mechanism in new string[] { "SCRAM-SHA-256-PLUS", "SCRAM-SHA-256", "PLAIN" }) {
++            mechanisms.put_node(new StanzaNode.build("mechanism", ns).put_node(new StanzaNode.text(mechanism)));
++        }
++        stream.features.put_node(mechanisms);
++        if (!sasl2) {
++            // SASL1 only stays strict when the server announces its channel-binding types.
++            stream.features.put_node(new StanzaNode.build("sasl-channel-binding", "urn:xmpp:sasl-cb:0")
++                .put_node(new StanzaNode.build("channel-binding", "urn:xmpp:sasl-cb:0").put_attribute("type", "tls-exporter")));
++        }
++        bool failed = false;
++        if (!sasl2) {
++            var module = new Sasl.Module("user", "password");
++            module.received_auth_failure.connect(() => { failed = true; });
++            module.received_features_node(stream);
++        }
++        fail_if_not(failed);
++        fail_if(stream.has_flag(Flag.IDENTITY));
++        fail_if(stream.sent != null, "Authentication sent after binding validation failed");
++    }
++
++    private void valid_success(bool sasl2) {
++        var stream = new SaslTestStream();
++        var flag = scram_flag();
++        flag.server_signature = "sig".data;
++        stream.add_flag(flag);
++        string ns = sasl2 ? "urn:xmpp:sasl:2" : "urn:ietf:params:xml:ns:xmpp-sasl";
++        var node = new StanzaNode.build("success", ns);
++        string verifier = Base64.encode("v=c2ln".data);
++        if (!sasl2) {
++            node.put_node(new StanzaNode.text(verifier));
++            var module = new Sasl.Module("user", "password");
++            module.received_nonza(stream, node);
++        }
++        fail_if_not(flag.finished);
++        fail_if_not_eq_str(flag.password, null);
++    }
++
++    private void invalid_challenge(bool sasl2) {
++        var stream = new SaslTestStream();
++        var flag = scram_flag();
++        stream.add_flag(flag);
++        bool failed = false;
++        string ns = sasl2 ? "urn:xmpp:sasl:2" : "urn:ietf:params:xml:ns:xmpp-sasl";
++        var node = new StanzaNode.build("challenge", ns).put_node(new StanzaNode.text(Base64.encode("invalid".data)));
++        if (!sasl2) {
++            var module = new Sasl.Module("user", "password");
++            module.received_auth_failure.connect(() => { failed = true; });
++            module.received_nonza(stream, node);
++        }
++        fail_if_not(failed);
++        fail_if(stream.has_flag(Flag.IDENTITY));
++        fail_if_not_eq_str(stream.sent.name, "abort");
++        fail_if_not_eq_str(flag.password, null);
++    }
++}
++
++class SaslTestStream : XmppStream {
++    public StanzaNode? sent;
++    public SaslTestStream() { base(remote_jid()); }
++    private static Jid remote_jid() {
++        try { return new Jid("example.org"); }
++        catch (InvalidJidError e) { assert_not_reached(); }
++    }
++    public override async void connect() throws IOError {}
++    public override async void disconnect() throws IOError {}
++    public override async StanzaNode read() throws IOError { throw new IOError.CLOSED("No input"); }
++    public override void write(StanzaNode node, int io_priority = Priority.DEFAULT) { sent = node; }
++    public override async void write_async(StanzaNode node, int io_priority = Priority.DEFAULT, Cancellable? cancellable = null) throws IOError { sent = node; }
++    public override async void setup() throws IOError {}
++}
++
++}
