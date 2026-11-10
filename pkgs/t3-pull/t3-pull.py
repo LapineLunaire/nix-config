@@ -58,19 +58,31 @@ def visible_text(text):
 
 
 class Visible:
-    """Writes agent output through visible_text."""
+    """Writes agent output through visible_text.
 
-    def __init__(self, out):
+    With crlf, a carriage return right before a newline is dropped: SSH ends its messages that way, and there it cannot
+    move the cursor over other text. Diffs keep theirs, where it is part of a file.
+    """
+
+    def __init__(self, out, crlf=False):
         self.decoder = codecs.getincrementaldecoder("utf-8")("t3-pull")
         self.out = out
+        self.crlf = crlf
+        self.held = ""
 
     def write(self, data, final=False):
-        self.out.write(visible_text(self.decoder.decode(data, final)).encode())
+        text = self.decoder.decode(data, final)
+        if self.crlf:
+            # A carriage return at the end waits for the next block, which may start with the newline.
+            text = self.held + text
+            self.held = "\r" if text.endswith("\r") and not final else ""
+            text = text[:len(text) - len(self.held)].replace("\r\n", "\n")
+        self.out.write(visible_text(text).encode())
         self.out.flush()
 
 
 def die(message, err=b""):
-    Visible(sys.stderr.buffer).write(err + f"t3-pull: {message}\n".encode(), final=True)
+    Visible(sys.stderr.buffer, crlf=True).write(err + f"t3-pull: {message}\n".encode(), final=True)
     sys.exit(1)
 
 
@@ -120,7 +132,7 @@ def run(label, command, show=False, timeout=None, limit=16 << 20, limited=True, 
     pipes = [proc.stdout] if merged else [proc.stdout, proc.stderr]
     live = pipes[-1] if show else None
     data = {pipe: bytearray() for pipe in pipes}
-    shown = Visible(sys.stderr.buffer)
+    shown = Visible(sys.stderr.buffer, crlf=True)
     deadline = timeout and time.monotonic() + timeout
     total = 0
     try:
@@ -179,7 +191,7 @@ def show_diff(base, tree):
     for at in range(0, len(out), 65536):
         shown.write(out[at:at + 65536], at + 65536 >= len(out))
         if text.tell() > REVIEW_LIMIT:
-            die(f"the diff is over {REVIEW_LIMIT >> 20} MiB when shown; nothing changed")
+            die(f"the diff is over {REVIEW_LIMIT >> 20} MiB when shown, which is too much to review; ask the agent for a smaller change. Nothing changed.")
     # The user's pager could act on the agent's text: nvimpager, for one, follows Vim modelines unless Git started it.
     # LESSSECURE turns off LESSOPEN, lesskey files, and commands that run programs or write files, and other LESS
     # variables such as LESSSECURE_ALLOW could turn them back on. Without a terminal, less copies the text. With K, less
@@ -206,14 +218,14 @@ def landing(raw):
     return head.split(b"\n"), message
 
 
-def merge(parent, base, commit):
-    """Returns the tree that applying commit to base gives, without touching the work tree."""
+def merge(parent, base, commit, upstream):
+    """Returns the tree that applying commit to base, the tip of upstream, gives, without touching the work tree."""
     status, out, err = run("git merge-tree", git_command("merge-tree", "--write-tree", "-z", "--name-only", "--no-messages", f"--merge-base={parent}", base, commit))
     tree, *conflicts = out.split(b"\0")
     if status not in (0, 1):
         die("git merge-tree failed", err)
     if status:
-        die("the commit conflicts with the default branch in these files; ask the agent to rebase it. Nothing changed.\n" + lines(sorted(set(filter(None, conflicts)))).decode("utf-8", "t3-pull").removesuffix("\n"))
+        die(f"the commit conflicts with {upstream} in these files; ask the agent to rebase it onto {upstream}. Nothing changed.\n" + lines(sorted(set(filter(None, conflicts)))).decode("utf-8", "t3-pull").removesuffix("\n"))
     return tree.decode()
 
 
@@ -318,10 +330,11 @@ def main():
     parser = Parser(prog="t3-pull", description="Pulls one commit from a branch in the t3 user's clone, shows it, and lands it as a commit that you author and sign.")
     parser.add_argument("--check", action="store_true", help="run nix fmt -- --check and nix flake check afterwards")
     parser.add_argument("--host", help="pull from the t3 user on another host")
+    parser.add_argument("--onto", metavar="BRANCH", help="land on this branch, which must be checked out, instead of the default branch, such as a pull request's branch")
     parser.add_argument("branch")
     parser.add_argument("source", nargs="?", metavar="t3 repository path")
     args = parser.parse_args()
-    branch, host = args.branch, args.host
+    branch, host, onto = args.branch, args.host, args.onto
     if not NAME.fullmatch(branch) or git("check-ref-format", "--branch", branch, check=False).returncode:
         die(f"not a branch name: {branch}")
     if host is not None and not HOST.fullmatch(host):
@@ -334,34 +347,39 @@ def main():
 
     current = checked_out()
     if not current:
-        die("check out a branch first")
+        die("no branch is checked out; switch to the branch the commit is for with git switch <branch>")
+    # The branch is never inferred: a commit lands on a branch other than the default one only when --onto names it, and
+    # only while it is checked out, so being on another branch than expected cannot send a commit to the wrong place.
+    if onto is not None and onto != current:
+        die(f"--onto names {onto}, but {current} is checked out; run git switch {onto} and then t3-pull again")
     upstream = output("rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}", check=False)
     remote = output("config", f"branch.{current}.remote", check=False)
     if not upstream or not remote:
-        die(f"{current} has no upstream branch")
+        die(f"{current} has no upstream branch; push it with git push --set-upstream <remote> {current}, or set one with git branch --set-upstream-to=<remote>/<branch>")
     if dirty():
-        die("commit or stash your changes first")
+        die("the work tree has changes; commit or stash them first")
     # Merge drivers would run on the agent's files while merging, before the review. Hooks set in Git config ignore
     # core.hooksPath, and would run while fetching and landing the commit. fetch.fsck settings would let malformed objects
     # through the fetch. fetch.uriProtocols and promisor.acceptFromServer would let the t3 side send Git to other URLs,
     # and promisor.acceptFromServer add remotes to the user's config.
     if unsafe := output("config", "--name-only", "--get-regexp", r"^(merge\..*\.driver|hook\..*\.command|fetch\.fsck\..*|fetch\.uriprotocols|promisor\.acceptfromserver(url)?)$", check=False):
-        die(f"t3-pull does not run while Git config sets merge drivers, hooks, fetch.fsck, fetch.uriProtocols, or promisor.acceptFromServer:\n{unsafe}")
+        die(f"t3-pull does not run while Git config sets merge drivers, hooks, fetch.fsck, fetch.uriProtocols, or promisor.acceptFromServer; git config --show-origin --get-regexp <name> shows where each of these is set, to unset it:\n{unsafe}")
     # followRemoteHEAD updates the remote's HEAD in the same fetch, in case the default branch changed. This fetch and the
     # fast-forward only read the user's own repository and remote, and can leave agents such as an SSH control master or
     # a credential cache, which should not keep t3-pull's limits.
     if run("git fetch", git_command("-c", f"remote.{remote}.followRemoteHEAD=always", "fetch", "--quiet", remote), show=True, limited=False)[0]:
-        die(f"cannot fetch {remote}")
+        die(f"cannot fetch {remote}; fix what Git reports above and run t3-pull again")
     default = output("rev-parse", "--abbrev-ref", f"{remote}/HEAD", check=False)
-    if upstream != default:
-        die(f"{current} tracks {upstream}, not the default branch {default or 'of ' + remote}")
-    # The default branch can move while agents work, so a branch that is only behind is fast-forwarded.
+    if onto is None and upstream != default:
+        again = shlex.join(["t3-pull", *(["--check"] if args.check else []), *(["--host", host] if host else []), "--onto", current, branch, *([args.source] if args.source else [])])
+        die(f"{current} tracks {upstream}, not the default branch {default or 'of ' + remote}. If the commit is for {current}, such as a follow-up on its pull request, name the branch: {again}. Otherwise switch to the default branch first.")
+    # The upstream branch can move while agents work, so a branch that is only behind is fast-forwarded.
     base = output("rev-parse", upstream)
     if output("rev-parse", "HEAD") != base:
         if git("merge-base", "--is-ancestor", "HEAD", base, check=False).returncode:
-            die(f"{current} has commits that {upstream} lacks; push or drop them first")
+            die(f"{current} has commits that {upstream} lacks; push them, or drop them with git reset --keep {upstream}, first")
         if run("git merge", git_command("merge", "--ff-only", "--quiet", base), show=True, limited=False)[0]:
-            die(f"cannot fast-forward {current} to {upstream}")
+            die(f"cannot fast-forward {current} to {upstream}; fix what Git reports above and run t3-pull again")
 
     ref = f"refs/t3-pull/{branch}"
     with tempfile.NamedTemporaryFile("w", prefix="t3-pull-") as known:
@@ -381,32 +399,34 @@ def main():
             # Keeping the pack as it arrives stops small deltas from expanding into many huge loose objects on disk.
             fetch = git_command("-c", "fetch.fsckObjects=true", "-c", "fetch.unpackLimit=1", "fetch", "--quiet", "--no-tags", "--no-recurse-submodules", "--no-write-fetch-head", f"--upload-pack={UPLOAD_PACK}", f"ssh://t3@{host or '127.0.0.1'}{source}", f"+refs/heads/{branch}:{ref}")
             if not fetch_agent(fetch, ssh):
-                die(f"cannot fetch {branch} from {source} on {where}")
+                die(f"cannot fetch {branch} from {source} on {where}; check the branch, the repository path, and the host against the agent's report, and pass the path after the branch or the host with --host if they differ")
             commit = output("rev-parse", "--verify", f"{ref}^{{commit}}")
             # The message lands as it is, while Git settings such as the log encoding change what log shows. An encoding
             # header would make the bytes mean other characters than they do as UTF-8.
             raw = git("cat-file", "commit", commit).stdout
             headers, message = landing(raw)
             if len(raw) > 65536:
-                die(f"{branch} has a commit over 64 KiB")
+                die(f"{branch} has a commit over 64 KiB; ask the agent to shorten its message")
             if visible_text(raw.decode("utf-8", "t3-pull")).encode() != raw:
-                die(f"{branch} has control characters, invalid UTF-8, invisible characters, or spaces other than the plain space in its message or headers")
+                die(f"{branch} has control characters, invalid UTF-8, invisible characters, or spaces other than the plain space in its message or headers; ask the agent to reword the commit")
             if any(line.startswith(b"encoding ") for line in headers):
                 die(f"{branch} has an encoding header; ask the agent to commit in UTF-8 without one")
             if not message.split(b"\n", 1)[0].strip():
-                die(f"{branch} has an empty message or one that starts with a blank line")
+                die(f"{branch} has an empty message or one that starts with a blank line; ask the agent to reword the commit")
 
-            # One commit with one parent from the default branch's history. The tree it gives on the reviewed base is
-            # computed first, so what is shown is the tree that lands, even when the default branch moved.
+            # One commit with one parent from the history of the upstream branch, which is the default branch unless
+            # --onto names another. The tree it gives on the reviewed base is computed first, so what is shown is the
+            # tree that lands, even when the upstream branch moved.
             parents = output("rev-list", "--parents", "-n", "1", commit).split()
             if len(parents) != 2:
                 die(f"{branch} must be one commit with one parent; ask the agent to squash it")
             parent = parents[1]
             if git("merge-base", "--is-ancestor", parent, base, check=False).returncode:
-                die(f"{branch} must be one commit on a commit of {upstream}; ask the agent to rebase it")
-            tree = merge(parent, base, commit)
+                other = f"switch to the branch it is for and run t3-pull --onto <that branch> {branch}" if onto is None else "run t3-pull from the branch it is for"
+                die(f"{branch} must be one commit on a commit of {upstream}, and its parent {parent} is not one. If it is for {current}, ask the agent to rebase it onto {upstream}; if it is for another branch, {other}.")
+            tree = merge(parent, base, commit, upstream)
             if tree == output("rev-parse", f"{base}^{{tree}}"):
-                die(f"{branch} changes nothing on {upstream}")
+                die(f"{branch} changes nothing on {upstream}. If you expected a change, check that the commit is the one the agent reported, and tell the agent that {upstream} already has it.")
             changed = changes(base, tree)
             if blocking := in_the_way(changed):
                 die("files that Git does not track, some perhaps ignored, are where the commit puts its files; move them first. Nothing changed.\n" + lines(blocking).decode("utf-8", "t3-pull").removesuffix("\n"))
@@ -426,7 +446,7 @@ def main():
                 print(f"\n{upstream} moved {moved} commit{'s' * (moved != 1)} past the agent's commit. What is shown is what lands on it.", file=sys.stderr)
             print(f"Pull {commit} from {branch} onto {current} and sign it? [y/N] ", end="", file=sys.stderr, flush=True)
             if sys.stdin.readline().strip() != "y":
-                die("nothing changed")
+                die("not confirmed; nothing changed")
         finally:
             # This runs before the commit lands: once the agent's files are checked out, a file that the user's Git config
             # includes can add hooks to the Git commands that follow.
@@ -437,7 +457,7 @@ def main():
         return checked_out() == current and output("rev-parse", "HEAD") == base and not dirty() and not in_the_way(changed)
 
     if not unchanged():
-        die(f"{current} or its untracked files changed during the review; nothing changed")
+        die(f"{current} or its untracked files changed during the review; nothing changed. Run t3-pull again.")
     # commit-tree makes the commit with the user's Git identity as author and committer, and takes the message as it is.
     # The user's commit encoding would otherwise add an encoding header. Nothing has changed yet if signing fails, and agents that signing starts
     # should not keep the limits.
@@ -447,13 +467,13 @@ def main():
         status, out, _ = run("git commit-tree", git_command("-c", "i18n.commitEncoding=UTF-8", "commit-tree", "-S", "-p", base, "-F", text.name, tree), show="stderr", limited=False)
     signed = out.decode().strip()
     if status or not signed:
-        die("cannot make the signed commit; nothing changed")
+        die("cannot make the signed commit; nothing changed. Check that your signing key is available and run t3-pull again.")
     made, landed = landing(git("cat-file", "commit", signed).stdout)
     if made[:2] != [f"tree {tree}".encode(), f"parent {base}".encode()] or any(line.startswith(b"encoding ") for line in made) or landed != message:
         die("the signed commit does not hold the reviewed tree and message; nothing changed")
     # Signing can wait a long time, such as for a YubiKey touch.
     if not unchanged():
-        die(f"{current} or its untracked files changed during the signing; nothing changed")
+        die(f"{current} or its untracked files changed during the signing; nothing changed. Run t3-pull again.")
     # merge-tree already did the merge within the limits, so this only checks the tree out.
     checked = None
     try:

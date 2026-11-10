@@ -35,12 +35,12 @@ Then add the cloned repositories as projects in the app. Check the service with 
 
 ## Pulling agent work
 
-Agents follow [their instructions](../users/t3/agents.md): each change is one commit on a local branch in `t3`'s clone, started from the default branch. They run the checks that cover the change and report the host, the clone's path, the branch, the commit SHA, and the results.
+Agents follow [their instructions](../users/t3/agents.md): each change is one commit on a local branch in `t3`'s clone, started from the default branch. They run the checks that cover the change and report the host, the clone's path, the branch, the commit SHA, and the results. Follow-up work on a pull request starts from that pull request's branch instead; see [pull request branches](#pull-request-branches).
 
 Pull it from a clean checkout of the default branch on Camellya or Kafka, where `t3-pull` is installed. The YubiKey signs and pushes, so work from the host it is plugged into; `--host` pulls from the other desktop, for example `--host camellya` on Kafka. The repository path defaults to `/var/lib/t3/<name of your checkout>`; pass the path the agent reported if it differs, with or without its `/.git`:
 
 ```sh
-t3-pull [--check] [--host <host>] <branch> [t3 repository path]
+t3-pull [--check] [--host <host>] [--onto <your branch>] <branch> [t3 repository path]
 ```
 
 `t3-pull` fetches your branch's remote, updating which branch it records as the remote's default, requires your branch to track the remote's default branch, and fast-forwards it if it is behind. It then fetches the agent's branch over SSH as `t3`. The connection forwards nothing and does not reuse a shared SSH connection. Everything on the `t3` side runs as `t3` and is under the agent's control, so `t3-pull` treats what it receives as hostile. On this host it connects to `127.0.0.1` and trusts only the host key in `/etc/ssh`. Another host must already be in your known hosts, because `t3-pull` does not ask about new host keys; run `ssh t3@<host> true` once and check the key. Each fetch can ask for a YubiKey touch. The fetch from `t3` refuses malformed Git objects, such as trees that hold a path twice, and does not fetch submodules. It stops after 10 minutes or 1 MiB of messages, and keeps what it receives as one pack. Every Git command that reads what came from `t3`, up to the signing, has memory, CPU-time, and file-size limits.
@@ -55,7 +55,7 @@ It does not run while your Git config sets any of these:
 - `fetch.uriProtocols`, which would let the `t3` side send Git to download from other URLs
 - `promisor.acceptFromServer` or `promisor.acceptFromServerUrl`, which would let the `t3` side send Git to other URLs and add remotes to your config
 
-It shows the diff in `less`, not your pager, because a pager can act on the text: nvimpager, for one, follows Vim modelines unless Git started it. `less` runs with `LESSSECURE` and none of your `LESS` variables. The diff is text, with every submodule, without external diff or textconv programs, `.gitattributes` marking files as binary, or your diff settings hiding anything. A renamed or copied file shows in full, as a new file. The commit's SHA, message, and diff stat follow it. In everything it shows, including the output of Git and the fetch, control characters, invalid UTF-8, invisible characters such as bidi controls and zero-width characters, and spaces other than the plain space are shown as `\x{..}` escapes, so they cannot send commands to your terminal or hide in the text. An escape looks the same as its characters typed out, so if the diff has any, `t3-pull` says so after it. A commit with any of them in its message or headers, with an encoding header, with a message that is empty or starts with a blank line, or over 64 KiB, is refused, because the message lands on the default branch as it is. So is a diff over 16 MiB, which is too much to review.
+It shows the diff in `less`, not your pager, because a pager can act on the text: nvimpager, for one, follows Vim modelines unless Git started it. `less` runs with `LESSSECURE` and none of your `LESS` variables. The diff is text, with every submodule, without external diff or textconv programs, `.gitattributes` marking files as binary, or your diff settings hiding anything. A renamed or copied file shows in full, as a new file. The commit's SHA, message, and diff stat follow it. In everything it shows, including the output of Git and the fetch, control characters, invalid UTF-8, invisible characters such as bidi controls and zero-width characters, and spaces other than the plain space are shown as `\x{..}` escapes, so they cannot send commands to your terminal or hide in the text. A carriage return right before a newline, which SSH ends its messages with, is dropped from the output of Git and the fetch; the diff keeps it. An escape looks the same as its characters typed out, so if the diff has any, `t3-pull` says so after it. A commit with any of them in its message or headers, with an encoding header, with a message that is empty or starts with a blank line, or over 64 KiB, is refused, because the message lands on the default branch as it is. So is a diff over 16 MiB, which is too much to review.
 
 It also names changed files that act later. The list is a reminder, not a complete check: read the whole diff, and check that the SHA is the one the agent reported.
 
@@ -76,4 +76,19 @@ After you confirm, it checks that your branch has not changed and that no untrac
 
 From the fast-forward on, the work tree holds the agent's files, and they run as you. The agent's `.gitattributes` picks which files the fast-forward runs your Git filters on, such as Git LFS, and can make Git rewrite the files it checks out, for example with `working-tree-encoding`, so that they differ from the diff you reviewed. Then direnv loads the development shell at your next prompt, `--check` runs the flake's formatter, your next `git commit` or `git push` runs hooks in `.githooks`, and files your Git config includes take effect, with any hooks they set. Review before you confirm, and do not open the `t3` user's directories or enter a development shell from them.
 
-If the commit conflicts with the default branch, ask the agent to rebase. Once you have pushed, the agent deletes its branch.
+If the commit conflicts with the default branch, ask the agent to rebase. Once you have pushed, the agent deletes its branch. When `t3-pull` refuses, its message says what to do next.
+
+### Pull request branches
+
+For a follow-up commit on a pull request, such as a fix for a review, the agent starts from the pull request's branch and reports the command to run. Check that branch out, with nothing unpushed on it, and name it with `--onto`:
+
+```sh
+git switch <your branch>
+t3-pull --onto <your branch> <branch> [t3 repository path]
+```
+
+The branch needs an upstream branch, which can be in a fork and under another name. Everything above then holds with that upstream branch in place of the default branch: `t3-pull` fetches its remote, fast-forwards your branch if it is behind, requires the commit's parent to be in the upstream branch's history, and shows, signs, and lands what the commit gives on its head. The fetch from `t3`, the checks on the message, and the signing are the same.
+
+`t3-pull` does not work out the target from the branch you are on. Without `--onto` it only lands on a branch that tracks the default branch, and with it only on the named branch while that is checked out. A commit therefore cannot land on a pull request's branch because you happened to be on it, or on another branch than the one you named.
+
+The agent's clone is readable only by `t3`, so `git fetch <host>:/var/lib/t3/<name>` under your own login fails. `t3-pull` logs in as `t3`.
