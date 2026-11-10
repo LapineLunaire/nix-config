@@ -111,9 +111,14 @@ def stop(proc):
 
 
 def run(label, command, show=False, timeout=None, limit=16 << 20, limited=True, env=None):
-    """Runs command and returns its status, stdout, and stderr. With show, its output goes through Visible to stderr."""
-    proc = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT if show else subprocess.PIPE, env=env, preexec_fn=limit_resources if limited else None)
-    pipes = [proc.stdout] if show else [proc.stdout, proc.stderr]
+    """Runs command and returns its status, stdout, and stderr.
+
+    With show, its output goes through Visible to stderr. With show="stderr", only its stderr does, and stdout is returned.
+    """
+    merged = show is True
+    proc = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT if merged else subprocess.PIPE, env=env, preexec_fn=limit_resources if limited else None)
+    pipes = [proc.stdout] if merged else [proc.stdout, proc.stderr]
+    live = pipes[-1] if show else None
     data = {pipe: bytearray() for pipe in pipes}
     shown = Visible(sys.stderr.buffer)
     deadline = timeout and time.monotonic() + timeout
@@ -130,7 +135,7 @@ def run(label, command, show=False, timeout=None, limit=16 << 20, limited=True, 
                     pipes.remove(pipe)
                 elif total > limit:
                     die(f"{label} wrote more than {limit} bytes")
-                elif show:
+                elif pipe is live:
                     shown.write(block)
                 else:
                     data[pipe] += block
@@ -196,13 +201,13 @@ def show_diff(base, tree):
 
 
 def landing(raw):
-    """Returns the author and encoding header lines and the message of a raw commit, which the cherry-pick keeps."""
+    """Returns the header lines and the message of a raw commit."""
     head, _, message = raw.partition(b"\n\n")
-    return [line for line in head.split(b"\n") if line.startswith((b"author ", b"encoding "))], message
+    return head.split(b"\n"), message
 
 
 def merge(parent, base, commit):
-    """Returns the tree that cherry-picking commit onto base gives, without touching the work tree."""
+    """Returns the tree that applying commit to base gives, without touching the work tree."""
     status, out, err = run("git merge-tree", git_command("merge-tree", "--write-tree", "-z", "--name-only", "--no-messages", f"--merge-base={parent}", base, commit))
     tree, *conflicts = out.split(b"\0")
     if status not in (0, 1):
@@ -251,8 +256,8 @@ def risky_files(changed, configured):
 
 
 def in_the_way(changed):
-    """Returns the untracked and ignored paths, with a / after directories, that the cherry-pick would overwrite or delete."""
-    # Git treats ignored files as expendable, so the cherry-pick would replace them without asking. One path is in the
+    """Returns the untracked and ignored paths, with a / after directories, that checking out the commit would overwrite or delete."""
+    # Git treats ignored files as expendable, so the checkout would replace them without asking. One path is in the
     # way of another when either is the other or a directory above it.
     found = git("ls-files", "-z", "--others", "--directory").stdout.split(b"\0")
 
@@ -310,7 +315,7 @@ def main():
         signal.signal(number, lambda *_, code=code: sys.exit(code))
     if not glob.glob("/proc/self/task/*/children"):
         die("t3-pull needs Linux with /proc/<pid>/task/<tid>/children, to find what SSH leaves behind")
-    parser = Parser(prog="t3-pull", description="Pulls one commit from a branch in the t3 user's clone, shows it, and cherry-picks it as a signed commit.")
+    parser = Parser(prog="t3-pull", description="Pulls one commit from a branch in the t3 user's clone, shows it, and lands it as a commit that you author and sign.")
     parser.add_argument("--check", action="store_true", help="run nix fmt -- --check and nix flake check afterwards")
     parser.add_argument("--host", help="pull from the t3 user on another host")
     parser.add_argument("branch")
@@ -337,7 +342,7 @@ def main():
     if dirty():
         die("commit or stash your changes first")
     # Merge drivers would run on the agent's files while merging, before the review. Hooks set in Git config ignore
-    # core.hooksPath, and would run while fetching and cherry-picking. fetch.fsck settings would let malformed objects
+    # core.hooksPath, and would run while fetching and landing the commit. fetch.fsck settings would let malformed objects
     # through the fetch. fetch.uriProtocols and promisor.acceptFromServer would let the t3 side send Git to other URLs,
     # and promisor.acceptFromServer add remotes to the user's config.
     if unsafe := output("config", "--name-only", "--get-regexp", r"^(merge\..*\.driver|hook\..*\.command|fetch\.fsck\..*|fetch\.uriprotocols|promisor\.acceptfromserver(url)?)$", check=False):
@@ -378,9 +383,8 @@ def main():
             if not fetch_agent(fetch, ssh):
                 die(f"cannot fetch {branch} from {source} on {where}")
             commit = output("rev-parse", "--verify", f"{ref}^{{commit}}")
-            # The commit object is what lands, while Git settings such as mailmap and the log encoding change what log shows.
-            # An encoding header would let the cherry-pick turn bytes that look harmless here into other characters, and
-            # the cherry-pick drops blank lines at the start of a message.
+            # The message lands as it is, while Git settings such as the log encoding change what log shows. An encoding
+            # header would make the bytes mean other characters than they do as UTF-8.
             raw = git("cat-file", "commit", commit).stdout
             headers, message = landing(raw)
             if len(raw) > 65536:
@@ -409,7 +413,7 @@ def main():
 
             escaped = show_diff(base, tree)
             shown = Visible(sys.stdout.buffer)
-            shown.write(git("log", "-1", "--no-color", "--no-decorate", "--no-show-signature", "--no-abbrev-commit", "--no-mailmap", "--encoding=UTF-8", "--format=fuller", commit).stdout + b"\n")
+            shown.write(git("log", "-1", "--no-color", "--no-decorate", "--no-show-signature", "--no-abbrev-commit", "--encoding=UTF-8", "--format=commit %H%n%n%w(0,4,4)%B", commit).stdout + b"\n")
             shown.write(git("diff", "--stat", *DIFF, base, tree).stdout)
             if risky := risky_files(changed, configured_paths()):
                 shown.write(b"\nThis commit changes files that act later:\n" + lines(risky))
@@ -424,27 +428,45 @@ def main():
             if sys.stdin.readline().strip() != "y":
                 die("nothing changed")
         finally:
-            # This runs before the cherry-pick: once the agent's files are checked out, a file that the user's Git config
+            # This runs before the commit lands: once the agent's files are checked out, a file that the user's Git config
             # includes can add hooks to the Git commands that follow.
             git("update-ref", "-d", ref)
 
     # The review holds only for the branch, base, and untracked files it was computed with.
-    if checked_out() != current or output("rev-parse", "HEAD") != base or dirty() or in_the_way(changed):
+    def unchanged():
+        return checked_out() == current and output("rev-parse", "HEAD") == base and not dirty() and not in_the_way(changed)
+
+    if not unchanged():
         die(f"{current} or its untracked files changed during the review; nothing changed")
-    # The user's commit encoding and message cleanup would otherwise change the author and message that were checked.
-    # merge-tree already did this merge within the limits, which agents that signing starts would keep.
+    # commit-tree makes the commit with the user's Git identity as author and committer, and takes the message as it is.
+    # The user's commit encoding would otherwise add an encoding header. Nothing has changed yet if signing fails, and agents that signing starts
+    # should not keep the limits.
+    with tempfile.NamedTemporaryFile(prefix="t3-pull-") as text:
+        text.write(message)
+        text.flush()
+        status, out, _ = run("git commit-tree", git_command("-c", "i18n.commitEncoding=UTF-8", "commit-tree", "-S", "-p", base, "-F", text.name, tree), show="stderr", limited=False)
+    signed = out.decode().strip()
+    if status or not signed:
+        die("cannot make the signed commit; nothing changed")
+    made, landed = landing(git("cat-file", "commit", signed).stdout)
+    if made[:2] != [f"tree {tree}".encode(), f"parent {base}".encode()] or any(line.startswith(b"encoding ") for line in made) or landed != message:
+        die("the signed commit does not hold the reviewed tree and message; nothing changed")
+    # Signing can wait a long time, such as for a YubiKey touch.
+    if not unchanged():
+        die(f"{current} or its untracked files changed during the signing; nothing changed")
+    # merge-tree already did the merge within the limits, so this only checks the tree out.
     checked = None
     try:
-        if not run("git cherry-pick", git_command("-c", "i18n.commitEncoding=UTF-8", "cherry-pick", "--cleanup=verbatim", "-S", commit), show=True, limited=False)[0]:
-            checked = checked_out() == current and output("rev-parse", "HEAD^") == base and output("rev-parse", "HEAD^{tree}") == tree and landing(git("cat-file", "commit", "HEAD").stdout) == (headers, message)
+        if not run("git merge", git_command("merge", "--ff-only", "--quiet", signed), show=True, limited=False)[0]:
+            checked = checked_out() == current and output("rev-parse", "HEAD") == signed
     finally:
-        # A failure or a stop, such as Ctrl-C while signing waits for a key, can come before or after the commit.
+        # A failure or a stop, such as Ctrl-C, can come before or after the branch moves.
         if checked is None:
-            print(f"t3-pull: the cherry-pick or its check did not finish; if git status shows a cherry-pick in progress, run git cherry-pick --abort, and otherwise check HEAD, or undo it with git reset --keep {base}", file=sys.stderr)
+            print(f"t3-pull: the fast-forward to {signed} or its check did not finish; check HEAD and git status, and undo it with git reset --keep {base}", file=sys.stderr)
     if checked is None:
         sys.exit(1)
     if not checked:
-        die(f"HEAD does not hold the reviewed tree, author, and message; undo it with git reset --keep {base}")
+        die(f"HEAD is not the signed commit {signed}; undo it with git reset --keep {base}")
 
     if args.check:
         checks = [
