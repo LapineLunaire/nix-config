@@ -8,6 +8,7 @@
     };
 
     home.packages = with pkgs; [
+      curseforge
       davinci-resolve
       heroic
       prismlauncher
@@ -16,6 +17,9 @@
     ];
 
     xdg.mimeApps.defaultApplications = {
+      "x-scheme-handler/cfauth" = "curseforge.desktop";
+      "x-scheme-handler/curseforge" = "curseforge.desktop";
+      "x-scheme-handler/curseforge-checkout" = "curseforge.desktop";
       "x-scheme-handler/heroic" = "com.heroicgameslauncher.hgl.desktop";
       "x-scheme-handler/web+wootwoot" = "wootility.desktop";
       "x-scheme-handler/wootwoot" = "wootility.desktop";

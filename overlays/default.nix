@@ -1,6 +1,7 @@
 {
   additions = final: _prev: {
     bunny-web = final.callPackage ../pkgs/bunny-web {};
+    curseforge = final.callPackage ../pkgs/curseforge {};
     t3-pull = final.callPackage ../pkgs/t3-pull {};
   };
 

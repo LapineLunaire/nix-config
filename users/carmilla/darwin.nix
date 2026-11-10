@@ -12,6 +12,7 @@
       "altserver"
       "discord"
       "appcleaner"
+      "curseforge"
       "moonlight"
       "linearmouse"
       "obs"
