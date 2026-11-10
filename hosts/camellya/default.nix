@@ -1,4 +1,8 @@
-{pkgs, ...}: let
+{
+  lib,
+  pkgs,
+  ...
+}: let
   trustedSubnets = import ../trusted-subnets.nix;
 in {
   imports = [
@@ -47,6 +51,12 @@ in {
   programs.obs-studio.package = pkgs.obs-studio.override {cudaSupport = true;};
 
   virtualisation.waydroid.enable = true;
+  # The Waydroid module trusts its whole bridge. Android only needs the host's DNS and DHCP.
+  networking.firewall.trustedInterfaces = lib.mkForce ["lo"];
+  networking.firewall.interfaces.waydroid0 = {
+    allowedTCPPorts = [53 67];
+    allowedUDPPorts = [53 67];
+  };
   programs.anime-games-launcher.enable = true;
   programs.honkers-railway-launcher.enable = true;
 

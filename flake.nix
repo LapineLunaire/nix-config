@@ -67,7 +67,7 @@
 
     unifi-os-server = {
       url = "github:rcambrj/unifi-os-server";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-stable";
     };
 
     aagl = {

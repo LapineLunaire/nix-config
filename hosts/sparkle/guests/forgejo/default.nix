@@ -66,7 +66,6 @@
       service = {
         DISABLE_REGISTRATION = true;
         ALLOW_ONLY_EXTERNAL_REGISTRATION = true;
-        SHOW_REGISTRATION_BUTTON = false;
       };
       actions = {
         ENABLED = true;
