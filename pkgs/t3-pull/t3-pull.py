@@ -10,9 +10,11 @@ import resource
 import select
 import shlex
 import signal
+import stat
 import subprocess
 import sys
 import tempfile
+import termios
 import time
 
 GIT = "@git@"
@@ -122,7 +124,7 @@ def stop(proc):
                 pass
 
 
-def run(label, command, show=False, timeout=None, limit=16 << 20, limited=True, env=None):
+def run(label, command, show=False, timeout=None, limit=16 << 20, limited=True, env=None, overflow=None):
     """Runs command and returns its status, stdout, and stderr.
 
     With show, its output goes through Visible to stderr. With show="stderr", only its stderr does, and stdout is returned.
@@ -146,7 +148,7 @@ def run(label, command, show=False, timeout=None, limit=16 << 20, limited=True, 
                 if not block:
                     pipes.remove(pipe)
                 elif total > limit:
-                    die(f"{label} wrote more than {limit} bytes")
+                    die(overflow or f"{label} wrote more than {limit} bytes")
                 elif pipe is live:
                     shown.write(block)
                 else:
@@ -182,7 +184,8 @@ def dirty():
 
 def show_diff(base, tree):
     """Shows the diff and returns whether it escaped anything."""
-    status, out, err = run("git diff", git_command("diff", *DIFF, base, tree), limit=REVIEW_LIMIT)
+    too_large = f"the diff is over {REVIEW_LIMIT >> 20} MiB when shown, which is too much to review; ask the agent for a smaller change. Nothing changed."
+    status, out, err = run("git diff", git_command("diff", *DIFF, base, tree), limit=REVIEW_LIMIT, overflow=too_large)
     if status:
         die("showing the diff failed; nothing changed", err)
     # Escaping in blocks keeps memory use near the limit.
@@ -191,7 +194,7 @@ def show_diff(base, tree):
     for at in range(0, len(out), 65536):
         shown.write(out[at:at + 65536], at + 65536 >= len(out))
         if text.tell() > REVIEW_LIMIT:
-            die(f"the diff is over {REVIEW_LIMIT >> 20} MiB when shown, which is too much to review; ask the agent for a smaller change. Nothing changed.")
+            die(too_large)
     # The user's pager could act on the agent's text: nvimpager, for one, follows Vim modelines unless Git started it.
     # LESSSECURE turns off LESSOPEN, lesskey files, and commands that run programs or write files, and other LESS
     # variables such as LESSSECURE_ALLOW could turn them back on. Without a terminal, less copies the text. With K, less
@@ -269,15 +272,29 @@ def risky_files(changed, configured):
 
 def in_the_way(changed):
     """Returns the untracked and ignored paths, with a / after directories, that checking out the commit would overwrite or delete."""
-    # Git treats ignored files as expendable, so the checkout would replace them without asking. One path is in the
-    # way of another when either is the other or a directory above it.
+    # Git treats ignored files as expendable. Keep folded directories to avoid listing all their files, and inspect
+    # only the paths the commit needs below them. lstat keeps symlinks from passing as directories.
     found = git("ls-files", "-z", "--others", "--directory").stdout.split(b"\0")
-
-    def blocks(other, path):
-        other, path = other.rstrip(b"/") + b"/", path + b"/"
-        return other.startswith(path) or path.startswith(other)
-
-    return sorted(other for other in found if other and any(blocks(other, path) for path in changed))
+    blocking = set()
+    for other in filter(None, found):
+        top = other.rstrip(b"/")
+        for path in changed:
+            if top == path or top.startswith(path + b"/"):
+                blocking.add(other)
+            elif path.startswith(top + b"/"):
+                parts = path[len(top) + 1:].split(b"/")
+                candidate = top
+                for part in [None, *parts]:
+                    if part is not None:
+                        candidate += b"/" + part
+                    try:
+                        directory = stat.S_ISDIR(os.lstat(candidate).st_mode)
+                    except FileNotFoundError:
+                        break
+                    if not directory or candidate == path:
+                        blocking.add(candidate + (b"/" if directory else b""))
+                        break
+    return sorted(blocking)
 
 
 def encrypted_files(base, tree, changed):
@@ -352,7 +369,8 @@ def main():
     # only while it is checked out, so being on another branch than expected cannot send a commit to the wrong place.
     if onto is not None and onto != current:
         die(f"--onto names {onto}, but {current} is checked out; run git switch {onto} and then t3-pull again")
-    upstream = output("rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}", check=False)
+    upstream_result = git("rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}", check=False)
+    upstream = "" if upstream_result.returncode else upstream_result.stdout.decode("utf-8", "t3-pull").strip()
     remote = output("config", f"branch.{current}.remote", check=False)
     if not upstream or not remote:
         die(f"{current} has no upstream branch; push it with git push --set-upstream <remote> {current}, or set one with git branch --set-upstream-to=<remote>/<branch>")
@@ -369,7 +387,8 @@ def main():
     # a credential cache, which should not keep t3-pull's limits.
     if run("git fetch", git_command("-c", f"remote.{remote}.followRemoteHEAD=always", "fetch", "--quiet", remote), show=True, limited=False)[0]:
         die(f"cannot fetch {remote}; fix what Git reports above and run t3-pull again")
-    default = output("rev-parse", "--abbrev-ref", f"{remote}/HEAD", check=False)
+    default_result = git("rev-parse", "--abbrev-ref", f"{remote}/HEAD", check=False)
+    default = "" if default_result.returncode else default_result.stdout.decode("utf-8", "t3-pull").strip()
     if onto is None and upstream != default:
         again = shlex.join(["t3-pull", *(["--check"] if args.check else []), *(["--host", host] if host else []), "--onto", current, branch, *([args.source] if args.source else [])])
         die(f"{current} tracks {upstream}, not the default branch {default or 'of ' + remote}. If the commit is for {current}, such as a follow-up on its pull request, name the branch: {again}. Otherwise switch to the default branch first.")
@@ -444,6 +463,8 @@ def main():
             shown.write(b"", final=True)
             if moved := int(output("rev-list", "--count", f"{parent}..{base}")):
                 print(f"\n{upstream} moved {moved} commit{'s' * (moved != 1)} past the agent's commit. What is shown is what lands on it.", file=sys.stderr)
+            if sys.stdin.isatty():
+                termios.tcflush(sys.stdin.fileno(), termios.TCIFLUSH)
             print(f"Pull {commit} from {branch} onto {current} and sign it? [y/N] ", end="", file=sys.stderr, flush=True)
             if sys.stdin.readline().strip() != "y":
                 die("not confirmed; nothing changed")
