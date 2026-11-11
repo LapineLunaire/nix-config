@@ -95,31 +95,25 @@ in {
           git -c gpg.format=ssh -c gpg.ssh.allowedSignersFile="$2" -c gpg.ssh.program=${pkgs.openssh}/bin/ssh-keygen verify-commit "$1" 2> /dev/null
         }
 
-        # Allow only changes matching the pattern.
+        # Print a digest of the file with each match of the pattern replaced, followed by the number of matches.
+        # The count catches a match swapped for the literal replacement; the digest keeps bytes that a shell variable drops.
         # awk reads the pattern from the environment so backslashes reach it unchanged.
+        pinned_digest() {
+          git show "$1:$2" | pattern=$3 ${pkgs.gawk}/bin/awk '{ n += gsub(ENVIRON["pattern"], "PINNED") } 1; END { print n + 0 }' | ${pkgs.coreutils}/bin/sha256sum
+        }
+
+        # Allow only changes matching the pattern.
         same_except() {
           local before after
-          before=$(git show "$1:$3" | pattern=$4 ${pkgs.gawk}/bin/awk '{ gsub(ENVIRON["pattern"], "PINNED") } 1')
-          after=$(git show "$2:$3" | pattern=$4 ${pkgs.gawk}/bin/awk '{ gsub(ENVIRON["pattern"], "PINNED") } 1')
+          before=$(pinned_digest "$1" "$3" "$4")
+          after=$(pinned_digest "$2" "$3" "$4")
           [ "$before" = "$after" ] || refuse "CI commit $2 changes $3 beyond its pinned value"
         }
 
         # Keep the dependency graph and sources fixed.
         check_lock() {
-          ${jq} -e -n --slurpfile old <(git show "$1:flake.lock") --slurpfile new <(git show "$2:flake.lock") '
-            def structure: del(.nodes) + {nodes: (.nodes | map_values(del(.locked)))};
-            def source: del(.rev, .narHash, .lastModified, .revCount);
-            ($old | length) == 1 and ($new | length) == 1 and (
-            $old[0] as $old | $new[0] as $new |
-            ($old | structure) == ($new | structure)
-            and all($new.nodes | to_entries[];
-              .key as $key | .value.locked as $next | $old.nodes[$key].locked as $prev
-              | ($prev | source) == ($next | source)
-              and ($prev == $next or (
-                ($prev.lastModified | type) == "number"
-                and ($next.lastModified | type) == "number"
-                and $prev.lastModified <= $next.lastModified))))
-          ' > /dev/null || refuse "CI commit $2 changes a flake input source or moves an input back"
+          ${jq} -e -n --slurpfile old <(git show "$1:flake.lock") --slurpfile new <(git show "$2:flake.lock") -f ${./ci-lock-check.jq} > /dev/null \
+            || refuse "CI commit $2 changes a flake input source or moves an input back"
         }
 
         check_ci_commit() {

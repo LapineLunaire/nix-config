@@ -8,4 +8,9 @@ runs:
       run: |
         : "${ATTIC_PULL_TOKEN:?Runner cache credential is missing}"
         printf '::add-mask::%s\n' "$ATTIC_PULL_TOKEN"
+        # Builds run unsandboxed as other users, so only root may read the credential.
+        umask 077
+        rm -f /etc/nix/netrc
         printf 'machine cache.lunaire.moe password %s\n' "$ATTIC_PULL_TOKEN" > /etc/nix/netrc
+        # A fixed-output derivation can ask Nix for variables in its environment, so later steps get none.
+        echo "ATTIC_PULL_TOKEN=" >> "$GITHUB_ENV"

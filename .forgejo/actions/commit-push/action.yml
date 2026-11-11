@@ -44,14 +44,29 @@ runs:
           exit 1
         fi
 
+        # Keep the push token out of the checkout and argv.
+        remote_git() {
+          GIT_CONFIG_COUNT=1 \
+            GIT_CONFIG_KEY_0="http.${SERVER_URL%/}/.extraheader" \
+            GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$PUSH_TOKEN" | base64 | tr -d '\n')" \
+            git "$@"
+        }
+
+        # The checks ran on this checkout, so a branch that moved since then needs a new run.
+        if ! branch=$(git symbolic-ref --quiet --short HEAD); then
+          echo "The checkout is not on a branch, so there is nothing to push to" >&2
+          exit 1
+        fi
+        remote_head=$(remote_git ls-remote origin "refs/heads/$branch" | cut -f1)
+        if [ "$remote_head" != "$(git rev-parse HEAD)" ]; then
+          echo "$branch moved during this run, so nothing was pushed. Run the workflow again." >&2
+          exit 1
+        fi
+
         git --literal-pathspecs add -- "${paths[@]}"
         git --literal-pathspecs \
           -c user.name=Carmilla -c user.email=carmilla@lunaire.eu \
           -c gpg.format=ssh -c user.signingkey="$key" -c commit.gpgsign=true \
           commit --only -m "$MESSAGE $(date +%Y-%m-%d)" -- "${paths[@]}"
 
-        # Keep the push token out of the checkout and argv.
-        GIT_CONFIG_COUNT=1 \
-          GIT_CONFIG_KEY_0="http.${SERVER_URL%/}/.extraheader" \
-          GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$PUSH_TOKEN" | base64 | tr -d '\n')" \
-          git push
+        remote_git push

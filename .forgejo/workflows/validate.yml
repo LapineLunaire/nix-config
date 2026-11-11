@@ -30,6 +30,22 @@ jobs:
       - name: Evaluate all systems
         run: nix flake check --all-systems --no-build --no-write-lock-file --option allow-import-from-derivation false
 
+      # The update workflow rewrites these values, and the servers accept a CI commit only where the pattern matches.
+      - name: Check the values CI may change
+        run: |
+          set -euo pipefail
+          # shellcheck disable=SC2016
+          pins=$(nix eval --raw --no-write-lock-file .#nixosConfigurations.sparkle.config.host.autoUpdate.ciPins \
+            --apply 'pins: builtins.concatStringsSep "" (map (path: "${path}\t${pins.${path}}\n") (builtins.attrNames pins))')
+          while IFS=$'\t' read -r path pattern; do
+            [ -n "$path" ] || continue
+            count=$(grep -cE -- "$pattern" "$path" || true)
+            if [ "$count" != 1 ]; then
+              echo "$path has $count lines matching its ciPins pattern instead of one" >&2
+              exit 1
+            fi
+          done <<< "$pins"
+
       # The runner cannot build Sparxie or Silverwolf.
       - name: Build systems
         run: |

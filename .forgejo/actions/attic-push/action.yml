@@ -8,8 +8,9 @@ inputs:
     description: Store paths for the server cache, one per line
     required: true
   desktop-paths:
-    description: Store paths for the desktop cache, one per line
-    required: true
+    description: Store paths for the desktop cache, one per line; may be empty
+    required: false
+    default: ""
 runs:
   using: composite
   steps:
@@ -29,7 +30,13 @@ runs:
         export XDG_CONFIG_HOME
         XDG_CONFIG_HOME=$(mktemp -d "$RUNNER_TEMP/attic-config.XXXXXX")
         trap 'rm -rf -- "$XDG_CONFIG_HOME"' EXIT
-        attic login lunaire https://cache.lunaire.moe/ "$ATTIC_TOKEN"
+        # attic login only takes the token as an argument, which other processes can read.
+        mkdir "$XDG_CONFIG_HOME/attic"
+        printf '%s' "$ATTIC_TOKEN" > "$XDG_CONFIG_HOME/attic/token"
         unset ATTIC_TOKEN
+        printf '[servers.lunaire]\nendpoint = "https://cache.lunaire.moe/"\ntoken-file = "%s"\n' \
+          "$XDG_CONFIG_HOME/attic/token" > "$XDG_CONFIG_HOME/attic/config.toml"
         attic push --ignore-upstream-cache-filter lunaire:server "${server[@]}"
-        attic push --ignore-upstream-cache-filter lunaire:desktop "${desktop[@]}"
+        if [ "${#desktop[@]}" -gt 0 ]; then
+          attic push --ignore-upstream-cache-filter lunaire:desktop "${desktop[@]}"
+        fi

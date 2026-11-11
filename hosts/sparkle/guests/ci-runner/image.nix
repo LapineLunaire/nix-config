@@ -14,6 +14,7 @@
       gitMinimal
       gnugrep
       gnused
+      jq
       nix
       nodejs
       openssh
