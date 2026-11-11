@@ -52,6 +52,7 @@ in {
     host.autoUpdate.ciPins = {
       "modules/nixos/services/caddy.nix" = ''^      hash = "sha256-[A-Za-z0-9+/]{43}=";$'';
       "hosts/sparkle/guests/homeassistant/default.nix" = "home-assistant/home-assistant@sha256:[a-f0-9]{64}";
+      "pkgs/curseforge/pin.json" = ''^\{"version": "[0-9]+\.[0-9]+\.[0-9]+-[0-9]+", "hash": "sha512-[A-Za-z0-9+/]{86}=="\}$'';
     };
 
     system.autoUpgrade = {

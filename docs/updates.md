@@ -9,14 +9,14 @@
 
 The [update workflow](../.forgejo/workflows/flake-update.yml) also supports manual runs. Updates queue per branch, and each run checks out the latest branch to include earlier update commits.
 
-On Mondays and manual runs the job refreshes Home Assistant's container digest; if that fails, the digest stays as it was and the run goes on. It then updates the flake inputs in two groups:
+On Mondays and manual runs the job refreshes Home Assistant's container digest; if that fails, the digest stays as it was and the run goes on. Every run sets the CurseForge package to the version and hash in CurseForge's release list, and keeps the change only if the package builds. It then updates the flake inputs in two groups:
 
 - The server-only inputs in `SERVER_INPUTS` update first, with the Caddy plugin hash refreshed if necessary. They must pass the flake check and a Sparkle build.
 - The remaining inputs update next. They must pass the flake check and builds of Sparkle, Camellya, and Kafka.
 
 A group that fails is rolled back, and the other group's update still goes ahead. If anything changed, the job checks all systems again, builds Sparkle, including its guest runners, then Camellya and Kafka, and pushes one signed commit with the combined changes. A desktop that fails this last build does not hold the commit back, because accepted inputs were already built with it. The job compares the new lock file with the old one using the [check the servers run](../modules/nixos/nix/ci-lock-check.jq). A commit that fails it is still pushed, so that it can be [accepted](#server-upgrades). Sparxie and Silverwolf are evaluated but not built by the x86_64 Linux runner.
 
-The run fails after pushing, and names the cause, when the digest or a group was rolled back, a desktop was not built, or the servers will refuse the commit. If the branch moved during the run, nothing is pushed and the run fails; run it again.
+The run fails after pushing, and names the cause, when the digest, the CurseForge update, or a group was rolled back, a desktop was not built, or the servers will refuse the commit. If the branch moved during the run, nothing is pushed and the run fails; run it again.
 
 `CI_SIGNING_KEY` supplies the SSH signing key. The workflow uploads Sparkle to the `server` cache and the built desktops to the `desktop` cache with `ATTIC_TOKEN` before committing and pushing. A missing token or failed upload blocks the push. The temporary signing key and upload credential are removed when their steps finish.
 

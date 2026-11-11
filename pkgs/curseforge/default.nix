@@ -4,11 +4,11 @@
   lib,
 }: let
   pname = "curseforge";
-  version = "1.326.0-42377";
-  # Versions and hashes are listed in https://curseforge.overwolf.com/electron/linux/latest-linux.yml.
+  # The update workflow sets the version and hash from https://curseforge.overwolf.com/electron/linux/latest-linux.yml.
+  inherit (lib.importJSON ./pin.json) version hash;
   src = fetchurl {
     url = "https://curseforge.overwolf.com/electron/linux/CurseForge-${version}.AppImage";
-    hash = "sha512-LpFsA2HGqhT6D3Q0/B3W8gWN320TD1eAziTXFp6sTQubrbfa1sUkTzkLyG5/vVzvr+lBHfzicyojl6lPg6ztFA==";
+    inherit hash;
   };
   contents = appimageTools.extract {inherit pname version src;};
 in

@@ -17,6 +17,7 @@ jobs:
       SERVER_INPUTS: nixpkgs-stable home-manager-stable nixvim-stable microvm unifi-os-server
       CHECK: nix flake check --all-systems --no-build --no-write-lock-file --option allow-import-from-derivation false
       HA_FILE: hosts/sparkle/guests/homeassistant/default.nix
+      CURSEFORGE_FILE: pkgs/curseforge/pin.json
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -64,6 +65,51 @@ jobs:
           set -euo pipefail
           names=$(nix eval --impure --raw --expr 'builtins.concatStringsSep " " (builtins.attrNames (builtins.fromJSON (builtins.readFile ./flake.lock)).nodes.root.inputs)')
           echo "names=$names" >> "$GITHUB_OUTPUT"
+
+      # The runner image has no curl, so Nix fetches the release list.
+      - name: Update CurseForge
+        id: curseforge
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          latest=$(nix eval --impure --raw --option tarball-ttl 0 --expr 'builtins.readFile (builtins.fetchurl "https://curseforge.overwolf.com/electron/linux/latest-linux.yml")')
+          version=$(printf '%s\n' "$latest" | sed -n 's/^version: //p')
+          path=$(printf '%s\n' "$latest" | sed -n 's/^path: //p')
+          hash=sha512-$(printf '%s\n' "$latest" | sed -n 's/^sha512: //p')
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+-[0-9]+$ ]] || [[ ! "$hash" =~ ^sha512-[A-Za-z0-9+/]{86}==$ ]] || [ "$path" != "CurseForge-$version.AppImage" ]; then
+            echo "Unexpected CurseForge release list:" >&2
+            printf '%s\n' "$latest" >&2
+            exit 1
+          fi
+
+          old_version=$(jq -er .version "$CURSEFORGE_FILE")
+          old_hash=$(jq -er .hash "$CURSEFORGE_FILE")
+          if [ "$version" = "$old_version" ] && [ "$hash" = "$old_hash" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$(printf '%s\n' "$old_version" "$version" | sort -V | tail -n 1)" != "$version" ]; then
+            echo "CurseForge $version is older than $old_version, keeping the current version"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # One line, in the form the server upgrade check accepts.
+          printf '{"version": "%s", "hash": "%s"}\n' "$version" "$hash" > "$CURSEFORGE_FILE"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "CurseForge updated: $old_version -> $version"
+
+      # Downloading the AppImage checks the new hash.
+      - name: Check CurseForge
+        id: curseforge-check
+        if: steps.curseforge.outputs.changed == 'true'
+        continue-on-error: true
+        run: nix build --no-link .#nixosConfigurations.camellya.pkgs.curseforge
+
+      - name: Revert CurseForge
+        id: curseforge-revert
+        if: steps.curseforge.outcome == 'failure' || (steps.curseforge.outputs.changed == 'true' && steps.curseforge-check.outcome != 'success')
+        run: git checkout -- "$CURSEFORGE_FILE"
 
       - name: Update server inputs
         id: server
@@ -182,13 +228,13 @@ jobs:
       - name: Check for changes
         id: check
         run: |
-          if git diff --quiet -- flake.lock modules/nixos/services/caddy.nix "$HA_FILE"; then
+          if git diff --quiet -- flake.lock modules/nixos/services/caddy.nix "$HA_FILE" "$CURSEFORGE_FILE"; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # Check the combined result, which also covers a Home Assistant digest change on its own.
+      # Check the combined result, which also covers a Home Assistant digest or CurseForge change on its own.
       - name: Check flake outputs
         if: steps.check.outputs.changed == 'true'
         run: $CHECK
@@ -242,17 +288,20 @@ jobs:
             flake.lock
             modules/nixos/services/caddy.nix
             hosts/sparkle/guests/homeassistant/default.nix
+            pkgs/curseforge/pin.json
           message: "flake: update dependencies"
           ssh-signing-key: ${{ secrets.CI_SIGNING_KEY }}
           push-token: ${{ github.token }}
 
       - name: Report problems
         if: >-
-          steps.ha-revert.outcome == 'success' || steps.server-revert.outcome == 'success'
+          steps.ha-revert.outcome == 'success' || steps.curseforge-revert.outcome == 'success'
+          || steps.server-revert.outcome == 'success'
           || steps.rest-revert.outcome == 'success' || steps.lock-check.outcome == 'failure'
           || steps.build.outputs.failed != ''
         env:
           HA_REVERTED: ${{ steps.ha-revert.outcome == 'success' }}
+          CURSEFORGE_REVERTED: ${{ steps.curseforge-revert.outcome == 'success' }}
           SERVER_REVERTED: ${{ steps.server-revert.outcome == 'success' }}
           REST_REVERTED: ${{ steps.rest-revert.outcome == 'success' }}
           LOCK_REFUSED: ${{ steps.lock-check.outcome == 'failure' }}
@@ -260,6 +309,9 @@ jobs:
         run: |
           if [ "$HA_REVERTED" = "true" ]; then
             echo "The Home Assistant digest was not updated" >&2
+          fi
+          if [ "$CURSEFORGE_REVERTED" = "true" ]; then
+            echo "CurseForge was not updated" >&2
           fi
           if [ "$SERVER_REVERTED" = "true" ]; then
             echo "Server inputs were not updated" >&2
