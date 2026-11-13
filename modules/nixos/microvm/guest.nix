@@ -90,6 +90,8 @@ in {
       ];
     };
 
+    nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+
     microvm = {
       hypervisor = "cloud-hypervisor";
       vcpu = lib.mkDefault 4;

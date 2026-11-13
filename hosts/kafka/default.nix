@@ -11,7 +11,6 @@
     ../../modules/nixos/networking/wireless-regulatory-domain.nix
     ./hardware-configuration.nix
     ../../modules/nixos/system/persistence.nix
-    ./sops.nix
   ];
 
   networking.hostName = "kafka";

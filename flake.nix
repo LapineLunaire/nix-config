@@ -120,7 +120,6 @@
     };
     guestConfigurations = nixpkgs-stable.lib.mapAttrs (name: _:
       nixpkgs-stable.lib.nixosSystem {
-        system = "x86_64-linux";
         specialArgs = {
           inherit dmz net web guestRegistry;
           trustedSubnets = import ./hosts/trusted-subnets.nix;
@@ -192,7 +191,6 @@
       guestConfigurations
       // {
         camellya = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
           modules =
             desktopModules
             ++ [
@@ -204,7 +202,6 @@
         };
 
         kafka = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
           modules =
             desktopModules
             ++ [
@@ -215,7 +212,6 @@
         };
 
         sparkle = nixpkgs-stable.lib.nixosSystem {
-          system = "x86_64-linux";
           specialArgs = {inherit dmz guestRegistry guestConfigurations;};
           modules = [
             microvm.nixosModules.host
@@ -231,7 +227,6 @@
         };
 
         sparxie = nixpkgs-stable.lib.nixosSystem {
-          system = "aarch64-linux";
           modules = [
             impermanence.nixosModules.impermanence
             sops-nix.nixosModules.sops

@@ -8,7 +8,6 @@
 in {
   sops = {
     defaultSopsFile = ./secrets.yaml;
-    age.sshKeyPaths = ["/persist/etc/ssh/ssh_host_ed25519_key"];
 
     secrets =
       lib.genAttrs (map (name: "network/${name}-mac") interfaces) (_: {})
