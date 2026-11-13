@@ -5,6 +5,7 @@
     ../../modules/nixos/services/kmscon.nix
     ../../modules/nixos/services/pipewire.nix
     ../../modules/nixos/services/smartd.nix
+    ../../modules/nixos/system/zswap.nix
     ../../modules/nixos/programs/obs-studio.nix
     ../../modules/nixos/desktop/fonts.nix
     ../../modules/nixos/desktop/plasma.nix

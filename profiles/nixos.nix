@@ -7,7 +7,6 @@
     ../modules/nixos/system/locale.nix
     ../modules/nixos/system/polkit-power.nix
     ../modules/nixos/system/security.nix
-    ../modules/nixos/system/zram.nix
     ../modules/nixos/nix/nh.nix
     ../modules/nixos/networking/firewall.nix
     ../modules/nixos/services/chrony.nix

@@ -26,6 +26,7 @@ in {
   networking.hostName = "camellya";
 
   host.flakePath = "/persist/nix-config";
+  host.swapFileSize = 16;
   host.wirelessRegulatoryDomain = "NL";
   host.trustedSubnets = trustedSubnets.all;
   hardware.steamFrame.lanSubnets = [trustedSubnets.lan];

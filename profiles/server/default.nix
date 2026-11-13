@@ -1,6 +1,7 @@
 {lib, ...}: {
   imports = [
     ../nixos.nix
+    ../../modules/nixos/system/zram.nix
     ../../modules/nixos/networking/networkd.nix
   ];
 

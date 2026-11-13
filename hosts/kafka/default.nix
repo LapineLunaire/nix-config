@@ -18,6 +18,8 @@
 
   host = {
     flakePath = "/persist/nix-config";
+    # 16 GiB of RAM is not enough for parallel Nix builds.
+    swapFileSize = 32;
     wirelessRegulatoryDomain = "NL";
     trustedSubnets = (import ../trusted-subnets.nix).all;
     trustedConnections = [
