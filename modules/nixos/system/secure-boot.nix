@@ -13,7 +13,7 @@ in {
     pkiBundle = "/var/lib/sbctl";
   };
 
-  # Unlocks with tpm2-measure-pcr=yes need this socket, which NixOS puts in the initrd but never starts.
+  # Unlocks with tpm2-measure-pcr=yes need this socket. NixOS starts it with sockets.target, which the unlock does not wait for.
   # Nothing else starts cryptsetup-pre.target, so the socket pulls it in.
   boot.initrd.systemd.sockets.systemd-pcrextend = lib.mkIf measuredUnlock {
     wantedBy = ["cryptsetup.target"];

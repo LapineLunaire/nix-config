@@ -1,4 +1,3 @@
-# The Attic caches on cache.lunaire.moe.
 let
   cache = name: publicKey: {
     url = "https://cache.lunaire.moe/${name}?priority=10";

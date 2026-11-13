@@ -19,7 +19,6 @@ in {
     nfsClients = ["proxy" "kavita" "qbittorrent"];
   in
     builtins.concatStringsSep ", " (map (name: vmAddress.${name}) nfsClients);
-  # NFSv4 needs only port 2049.
   nfsPort = 2049;
   nodeExporterPort = 9100;
 }
