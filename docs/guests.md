@@ -46,9 +46,9 @@ Sparkle and Sparxie back up a snapshot of `/persist` and keep 7 daily, 4 weekly,
 
 Sparkle's backup excludes:
 
-- `/persist/volumes/`: the ci-runner Docker and swap images, and the homeassistant Docker and unifi Podman storage images.
+- `/persist/volumes/`: the ci-runner Docker and swap images, and the homeassistant Docker storage image.
 
-Home Assistant's bind-mounted `/config` and UniFi's `/var/lib/unifi-os-server` stay in the backup. Preserve numeric owners when restoring.
+Home Assistant's bind-mounted `/config` stays in the backup. Preserve numeric owners when restoring.
 
 Borg keeps its security state and cache in `/var/lib/borgbackup/hetzner`. The cache is excluded from backups.
 

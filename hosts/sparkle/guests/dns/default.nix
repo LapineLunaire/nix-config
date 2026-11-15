@@ -22,7 +22,6 @@
     kafka    IN A    ${kafkaWifiAddress}
     kafka    IN A    ${kafkaVpnAddress}
     git-ssh  IN A    ${net.vmAddress.forgejo}
-    unifi    IN A    ${net.vmAddress.unifi}
     vault    IN A    ${net.vmAddress.vault}
     proxy    IN A    ${net.vmAddress.proxy}
     dns      IN A    ${net.vmAddress.dns}
@@ -34,7 +33,6 @@
     ${ptrLabel kafkaWifiAddress}   IN PTR  kafka.${web.domain}.
     ${ptrLabel kafkaVpnAddress}   IN PTR  kafka.${web.domain}.
     ${ptrLabel net.vmAddress.forgejo}   IN PTR  git-ssh.${web.domain}.
-    ${ptrLabel net.vmAddress.unifi}   IN PTR  unifi.${web.domain}.
     ${ptrLabel net.vmAddress.vault}   IN PTR  vault.${web.domain}.
     ${ptrLabel net.vmAddress.proxy}   IN PTR  proxy.${web.domain}.
     ${ptrLabel net.vmAddress.dns}   IN PTR  dns.${web.domain}.

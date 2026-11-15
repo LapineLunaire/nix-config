@@ -5,6 +5,4 @@
   subnet = "10.28.32.0/23";
   guestPrefix = "10.28.33";
   bridge = "dmz0";
-  # Routers, switches, IPMI and UniFi APs.
-  management = "10.28.16.0/24";
 }

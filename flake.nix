@@ -65,11 +65,6 @@
       inputs.nixpkgs.follows = "nixpkgs-stable";
     };
 
-    unifi-os-server = {
-      url = "github:rcambrj/unifi-os-server";
-      inputs.nixpkgs.follows = "nixpkgs-stable";
-    };
-
     aagl = {
       url = "github:ezKEa/aagl-gtk-on-nix/main";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -92,7 +87,6 @@
     lanzaboote,
     sops-nix,
     microvm,
-    unifi-os-server,
     aagl,
     ...
   }: let
@@ -121,25 +115,18 @@
       consoleKey = import ./hosts/sparkle/console-key.nix;
       sparxieWan = import ./hosts/sparxie/wan-net.nix;
     };
-    guestModules = {
-      unifi = [unifi-os-server.nixosModules.unifi-os-server];
-    };
     guestConfigurations = nixpkgs-stable.lib.mapAttrs (name: _:
       nixpkgs-stable.lib.nixosSystem {
         specialArgs = sharedData;
-        modules =
-          [
-            impermanence.nixosModules.impermanence
-            microvm.nixosModules.microvm
-            sops-nix.nixosModules.sops
-          ]
-          ++ (guestModules.${name} or [])
-          ++ [
-            ./modules/nixos/microvm/guest.nix
-            ./modules/nixos/microvm/identity.nix
-            {networking.hostName = name;}
-            (./hosts/sparkle/guests + "/${name}")
-          ];
+        modules = [
+          impermanence.nixosModules.impermanence
+          microvm.nixosModules.microvm
+          sops-nix.nixosModules.sops
+          ./modules/nixos/microvm/guest.nix
+          ./modules/nixos/microvm/identity.nix
+          {networking.hostName = name;}
+          (./hosts/sparkle/guests + "/${name}")
+        ];
       })
     sharedData.guestRegistry;
   in {

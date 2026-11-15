@@ -126,16 +126,6 @@
         iifname "sfp0" oifname "vault" ip daddr 224.0.0.251 udp dport 5353 accept
         iifname "sfp0" oifname "vault" ip daddr 239.255.255.250 udp dport 3702 accept
 
-        # The UniFi controller manages the APs on the management network.
-        iifname "unifi" oifname "sfp0" ip daddr ${dmz.management} accept
-        # UniFi APs reach the controller for inform, adoption and other services.
-        iifname "sfp0" oifname "unifi" ip saddr ${dmz.management} tcp dport { 8080, 8443, 6789, 8880, 8843, 28082, 5671 } accept
-        iifname "sfp0" oifname "unifi" ip saddr ${dmz.management} udp dport { 3478, 10001 } accept
-        # Trusted clients reach the controller web UI directly, not through the proxy.
-        iifname "sfp0" oifname "unifi" ip saddr { ${trusted} } tcp dport 443 accept
-        # This guest-to-guest probe needs a rule separate from off-segment egress.
-        iifname "uptime-kuma" oifname "unifi" tcp dport 443 accept
-
         # DNS serves every client inside the perimeter.
         iifname { ${guests} } oifname "dns" udp dport 53 accept
         iifname { ${guests} } oifname "dns" tcp dport 53 accept

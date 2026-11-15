@@ -2,9 +2,9 @@
 
 ## Sparkle endpoints
 
-Sparkle is `10.28.33.1` and each guest is `10.28.33.<registry index>`. The DMZ is `10.28.32.0/23` with gateway `10.28.32.1`. Trusted clients are `10.28.64.0/24`, `10.28.96.0/24`, `10.100.0.0/24`, and `10.1.0.0/24`; management is `10.28.16.0/24`.
+Sparkle is `10.28.33.1` and each guest is `10.28.33.<registry index>`. The DMZ is `10.28.32.0/23` with gateway `10.28.32.1`. Trusted clients are `10.28.64.0/24`, `10.28.96.0/24`, `10.100.0.0/24`, and `10.1.0.0/24`.
 
-Internal DNS serves the direct-access names: UniFi at `https://unifi.lunaire.moe` (`10.28.33.26`), SMB at `//vault.lunaire.moe` (`10.28.33.17`), and Git SSH at `git-ssh.lunaire.moe` (`10.28.33.20`). The DNS server is `10.28.33.10`.
+Internal DNS serves the direct-access names: SMB at `//vault.lunaire.moe` (`10.28.33.17`), and Git SSH at `git-ssh.lunaire.moe` (`10.28.33.20`). The DNS server is `10.28.33.10`.
 
 These HTTPS names use `.lunaire.moe` and admit trusted clients plus the listed callers. A listed guest also needs a bridge rule to reach proxy; see the guest source table.
 
@@ -33,18 +33,15 @@ Client rules match traffic arriving on `sfp0`. LAN is `10.28.64.0/24`.
 | Trusted | sparkle, forgejo | SSH |
 | Trusted and DMZ | proxy | HTTP TCP 80; HTTPS TCP/UDP 443; vhost allowlists also apply |
 | Trusted | vault | SMB TCP 139 and 445 |
-| Trusted | unifi | HTTPS UI TCP 443 |
 | Trusted | All guests | ICMP echo |
 | LAN and gateway | vault | NetBIOS UDP 137 and 138; WSD TCP 5357 |
 | Any via sfp0 | vault | mDNS to 224.0.0.251; WSD to 239.255.255.250 |
 | Any via sfp0 | dns | TCP/UDP 53 |
-| Management | unifi | TCP 8080, 8443, 6789, 8880, 8843, 28082, 5671; UDP 3478, 10001 |
 
 | Guest source | Local destination | New flows allowed |
 |---|---|---|
 | proxy | Web backends in the HTTPS table | Listed backend ports |
 | uptime-kuma, forgejo, pgadmin, ci-runner | proxy | HTTPS TCP/UDP 443 |
-| uptime-kuma | unifi | HTTPS |
 | uptime-kuma | sparkle, forgejo | SSH checks |
 | monitoring | sparkle and all guests | Node exporter TCP 9100 |
 | attic, authelia, forgejo, vaultwarden, pgadmin, uptime-kuma | postgres | TCP 5432; uptime-kuma has no database role |
@@ -59,7 +56,6 @@ Egress rules without a destination exclude `10.0.0.0/8`, `172.16.0.0/12`, `192.1
 | dns | DNS-over-TLS to 1.1.1.1 and 1.0.0.1 |
 | authelia | SMTP submission |
 | proxy | HTTPS; TCP/UDP DNS; WireGuard to Sparxie |
-| unifi | HTTP and HTTPS; DNS; any protocol to management |
 | qbittorrent | UDP 51820; the application runs in `qbtvpn` |
 | uptime-kuma | Any TCP/UDP; ICMP echo, including 10.69.69.69 |
 | vault | SMTP submission; mDNS and WSD groups; WSD replies to the LAN and gateway |
@@ -67,7 +63,7 @@ Egress rules without a destination exclude `10.0.0.0/8`, `172.16.0.0/12`, `192.1
 | forgejo | TCP 22, 80, 443, 587, and 9418 |
 | kavita, monitoring, vaultwarden | TCP 80, 443, and 587 |
 
-The rules come from `hosts/sparkle/dmz-bridge.nix`, the guest input firewalls, and `microvmGuest.egress`. DNAT bypasses the guest input firewall, so the bridge alone filters UniFi's published container ports. The bridge and guest firewall restrict qBittorrent's UI, which `qbittorrent-webui.socket` passes into `qbtvpn`.
+The rules come from `hosts/sparkle/dmz-bridge.nix`, the guest input firewalls, and `microvmGuest.egress`. The bridge and guest firewall restrict qBittorrent's UI, which `qbittorrent-webui.socket` passes into `qbtvpn`.
 
 Proton assigns qBittorrent's incoming port over NAT-PMP, so its WireGuard configuration must be generated with NAT-PMP enabled. `qbtvpn-port-forward` renews the mapping and restarts qBittorrent when the port changes. `/run/qbtvpn-port-forward/port` holds the last mapped port.
 

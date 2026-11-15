@@ -7,7 +7,6 @@ SOPS files group credentials by their readers. Every recipient can decrypt every
 | `users/carmilla/secrets.yaml` | `carmilla-password-hash` | Camellya, Kafka, Sparkle, Sparxie |
 | `modules/nixos/nix/attic-client.yaml` | `attic-pull-token` | Camellya, Kafka, Sparkle, ci-runner |
 | `hosts/sparkle/smtp.yaml` | `smtp-password` | Sparkle, Vault, Forgejo, Authelia, Vaultwarden |
-| `hosts/sparkle/lunaire-moe-dns.yaml` | `lunaire-moe-dns-api-token` | Sparkle, Proxy, UniFi |
 | `hosts/sparkle/guests/attic/database.yaml` | `attic-db-password` | Sparkle, PostgreSQL, Attic |
 | `hosts/sparkle/guests/authelia/database.yaml` | `authelia-db-password` | Sparkle, PostgreSQL, Authelia |
 | `hosts/sparkle/guests/forgejo/database.yaml` | `forgejo-db-password` | Sparkle, PostgreSQL, Forgejo |
