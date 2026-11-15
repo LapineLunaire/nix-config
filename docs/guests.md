@@ -44,11 +44,7 @@ The guest itself mounts the host store read-only at `/nix/.ro-store` with a tmpf
 
 Sparkle and Sparxie back up a snapshot of `/persist` and keep 7 daily, 4 weekly, and 3 monthly archives. Borg does not cover `/home` or the vault pool; `nixos-install` recreates `/nix`.
 
-Sparkle's backup excludes:
-
-- `/persist/volumes/`: the ci-runner Docker and swap images, and the homeassistant Docker storage image.
-
-Home Assistant's bind-mounted `/config` stays in the backup. Preserve numeric owners when restoring.
+Sparkle's backup excludes `/persist/volumes/`, which holds the ci-runner Docker and swap images and the homeassistant Docker storage image. Home Assistant's bind-mounted `/config` stays in the backup. Preserve numeric owners when restoring.
 
 Borg keeps its security state and cache in `/var/lib/borgbackup/hetzner`. The cache is excluded from backups.
 

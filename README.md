@@ -1,6 +1,6 @@
 # nix-config
 
-NixOS and nix-darwin configuration for Camellya, Kafka, Silverwolf, Sparkle, and Sparxie, including Sparkle’s 16 microVM guests.
+NixOS and nix-darwin configuration for Camellya, Kafka, Silverwolf, Sparkle, and Sparxie, including Sparkle’s 15 microVM guests.
 
 ## Quick start
 
@@ -58,4 +58,4 @@ nix fmt --no-write-lock-file -- --check .
 nix flake check --all-systems --no-build --no-write-lock-file --option allow-import-from-derivation false
 ```
 
-The second command evaluates all five host and 16 guest derivations, the formatter, development shells, and exported module definitions. It does not build or activate the systems.
+The second command evaluates all five host and 15 guest derivations, the formatter, development shells, and exported module definitions. It does not build or activate the systems.
