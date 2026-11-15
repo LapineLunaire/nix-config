@@ -7,10 +7,10 @@ on:
     branches: [main]
   workflow_dispatch: {}
 
-# Only the newest commit on main deploys, so older runs are cancelled.
+# A push waits for the run before it, so a long build still finishes. Without an explicit false, Forgejo cancels on push.
 concurrency:
   group: validation-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   validate:
