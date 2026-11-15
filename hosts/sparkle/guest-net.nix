@@ -3,14 +3,17 @@ let
   dmz = import ./dmz-net.nix;
   names = builtins.attrNames registry;
   vmAddress = builtins.mapAttrs (_: vm: "${dmz.guestPrefix}.${toString vm.index}") registry;
+  # Each gets a PostgreSQL database and role of its own name, with the password
+  # <name>-db-password from hosts/sparkle/guests/<name>/database.yaml.
+  postgresDatabases = ["attic" "authelia" "forgejo" "vaultwarden"];
 in {
-  inherit vmAddress;
+  inherit vmAddress postgresDatabases;
   tapsNft = builtins.concatStringsSep ", " (map (name: "\"${name}\"") names);
   # Pin each tap to its assigned IPv4 address.
   guestIdentityNft = builtins.concatStringsSep ", " (map (name: "\"${name}\" . ${vmAddress.${name}}") names);
   postgresClientsNft = let
-    # The DB-backed apps, pgadmin, and uptime-kuma for its port check.
-    postgresClients = ["authelia" "forgejo" "vaultwarden" "attic" "pgadmin" "uptime-kuma"];
+    # pgadmin, and uptime-kuma for its port check.
+    postgresClients = postgresDatabases ++ ["pgadmin" "uptime-kuma"];
   in
     builtins.concatStringsSep ", " (map (name: vmAddress.${name}) postgresClients);
   postgresPort = 5432;

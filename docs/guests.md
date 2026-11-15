@@ -16,7 +16,8 @@ doas systemctl restart microvm@<name>
 1. Add its directory under `hosts/sparkle/guests/` and a unique index from 10 to 99 in `hosts/sparkle/guest-registry.nix`. Do not change existing indices, because they determine each guest's IP address, VSOCK CID, and hexadecimal MAC suffix.
 2. Add web backends to `hosts/sparkle/guest-web.nix`, which also generates the DNS records and the firewall rules between proxy and the guest. Proxy serves a vhost for each backend that admits trusted clients and uptime-kuma. For other callers or a custom body, add an entry to `vmVhostOverrides` in `hosts/sparkle/guests/proxy/vhosts.nix`. Declare `microvmGuest.egress`, and add any other ingress to `hosts/sparkle/dmz-bridge.nix` and the guest firewall. See [network access](network.md).
 3. For NFS, update `nfsClients` in `hosts/sparkle/guest-net.nix`, the guest's mount, and the vault guest's export.
-4. Restore the guest's keys and state, or create its identity as root:
+4. For a PostgreSQL database, add the guest's name to `postgresDatabases` in `hosts/sparkle/guest-net.nix`. That creates a database and role of that name on the postgres guest, allows the guest through both firewalls and `pg_hba.conf`, and sets the role's password from `<name>-db-password` in `hosts/sparkle/guests/<name>/database.yaml`. Add a creation rule for that file to `.sops.yaml` with the guest, Sparkle, and postgres as recipients, and create the file. On the guest, declare the secret and point the app at postgres with the guest's name as database and role.
+5. Restore the guest's keys and state, or create its identity as root:
 
    ```sh
    mkdir -p /persist/vms/<name>/etc/ssh

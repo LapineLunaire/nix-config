@@ -24,48 +24,32 @@
       effective_cache_size = "1536MB";
       max_connections = 50;
     };
-    ensureDatabases = ["attic" "authelia" "forgejo" "vaultwarden"];
-    ensureUsers = [
-      {
-        name = "attic";
+    ensureDatabases = net.postgresDatabases;
+    ensureUsers =
+      map (name: {
+        inherit name;
         ensureDBOwnership = true;
-      }
-      {
-        name = "authelia";
-        ensureDBOwnership = true;
-      }
-      {
-        name = "forgejo";
-        ensureDBOwnership = true;
-      }
-      {
-        name = "vaultwarden";
-        ensureDBOwnership = true;
-      }
-      {
-        name = "carmilla";
-        ensureClauses.superuser = true;
-      }
-    ];
-    authentication = ''
+      })
+      net.postgresDatabases
+      ++ [
+        {
+          name = "carmilla";
+          ensureClauses.superuser = true;
+        }
+      ];
+    authentication = let
+      apps = lib.concatMapStringsSep "\n" (name: "host  ${name} ${name} ${net.vmAddress.${name}}/32 scram-sha-256") net.postgresDatabases;
+    in ''
       local all             postgres                        peer
-      host  attic           attic       ${net.vmAddress.attic}/32 scram-sha-256
-      host  authelia        authelia    ${net.vmAddress.authelia}/32 scram-sha-256
-      host  forgejo         forgejo     ${net.vmAddress.forgejo}/32 scram-sha-256
-      host  vaultwarden     vaultwarden ${net.vmAddress.vaultwarden}/32 scram-sha-256
+      ${apps}
       host  all             carmilla    ${net.vmAddress.pgadmin}/32 scram-sha-256
       host  all             all         127.0.0.1/32 scram-sha-256
       host  all             all         ::1/128 scram-sha-256
     '';
   };
 
-  services.postgresql.passwordFiles = {
-    attic = config.sops.secrets."attic-db-password".path;
-    authelia = config.sops.secrets."authelia-db-password".path;
-    forgejo = config.sops.secrets."forgejo-db-password".path;
-    vaultwarden = config.sops.secrets."vaultwarden-db-password".path;
-    carmilla = config.sops.secrets."carmilla-db-password".path;
-  };
+  services.postgresql.passwordFiles =
+    lib.genAttrs (net.postgresDatabases ++ ["carmilla"]) (name: config.sops.secrets."${name}-db-password".path);
 
   networking.firewall.extraInputRules = ''
     ip saddr { ${net.postgresClientsNft} } tcp dport ${toString net.postgresPort} accept
