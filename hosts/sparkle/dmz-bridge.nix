@@ -36,6 +36,7 @@
     # Include the router that repeats LAN discovery.
     discoverySources = "${trustedSubnets.lan}, ${dmz.gateway}";
     guests = net.tapsNft;
+    forgejoSshPorts = lib.concatMapStringsSep ", " toString guestConfigurations.forgejo.config.services.openssh.ports;
     guestMacsNft = lib.concatStringsSep ", " (lib.mapAttrsToList (name: _: "\"${name}\" . ${(builtins.head guestConfigurations.${name}.config.microvm.interfaces).mac}") guestRegistry);
     # Flows without their own destinations exclude these private, multicast and reserved ranges.
     privateSpace = "{ 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, 169.254.0.0/16, 224.0.0.0/3 }";
@@ -101,11 +102,11 @@
         ct state established,related accept
 
         # Trusted subnets: Git over SSH to Forgejo, and ICMP to any guest.
-        iifname "sfp0" oifname "forgejo" ip saddr { ${trusted} } tcp dport 22 accept
+        iifname "sfp0" oifname "forgejo" ip saddr { ${trusted} } tcp dport { ${forgejoSshPorts} } accept
         iifname "sfp0" oifname { ${guests} } ip saddr { ${trusted} } icmp type echo-request accept
 
         # Uptime Kuma checks Forgejo's Git-over-SSH service.
-        iifname "uptime-kuma" oifname "forgejo" tcp dport 22 accept
+        iifname "uptime-kuma" oifname "forgejo" tcp dport { ${forgejoSshPorts} } accept
 
         # monitoring: scrape node_exporter on every guest.
         iifname "monitoring" oifname { ${guests} } tcp dport ${toString net.nodeExporterPort} accept

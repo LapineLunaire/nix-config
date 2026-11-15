@@ -1,4 +1,6 @@
 {
+  config,
+  lib,
   dmz,
   net,
   ...
@@ -17,6 +19,6 @@
   networking.firewall.extraInputRules = ''
     ip saddr ${net.vmAddress.monitoring} tcp dport ${toString net.nodeExporterPort} accept
     # Uptime Kuma checks the host's SSH service through the input firewall.
-    ip saddr ${net.vmAddress.uptime-kuma} tcp dport 22 accept
+    ip saddr ${net.vmAddress.uptime-kuma} tcp dport { ${lib.concatMapStringsSep ", " toString config.services.openssh.ports} } accept
   '';
 }

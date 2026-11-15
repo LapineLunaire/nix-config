@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   net,
   trustedSubnets,
@@ -16,7 +17,7 @@
 
   # Also allow Uptime Kuma's SSH check.
   networking.firewall.extraInputRules = ''
-    ip saddr ${net.vmAddress.uptime-kuma} tcp dport 22 accept
+    ip saddr ${net.vmAddress.uptime-kuma} tcp dport { ${lib.concatMapStringsSep ", " toString config.services.openssh.ports} } accept
   '';
 
   microvm = {
