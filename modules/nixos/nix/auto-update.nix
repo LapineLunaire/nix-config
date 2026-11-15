@@ -168,26 +168,17 @@ in {
         '')
       ];
 
-    systemd.services.nixos-upgrade.onFailure = ["nixos-upgrade-failed.service"];
-    systemd.services.nixos-upgrade-failed = {
-      serviceConfig.Type = "oneshot";
-      script = ''
-        {
-          printf 'Subject: ${config.networking.hostName}: nixos-upgrade failed\n\n'
-          ${config.systemd.package}/bin/journalctl -u nixos-upgrade -n 50 --no-pager
-        } | ${config.programs.msmtp.package}/bin/sendmail ${config.host.alertEmail}
-      '';
-    };
+    host.mailOnFailure.nixos-upgrade = "nixos-upgrade failed";
 
     systemd.services.reboot-pending = {
       description = "Mail when the running kernel differs from the installed one";
       serviceConfig.Type = "oneshot";
       script = ''
+        set -euo pipefail
         booted=$(${pkgs.coreutils}/bin/readlink /run/booted-system/{initrd,kernel,kernel-modules})
         current=$(${pkgs.coreutils}/bin/readlink /run/current-system/{initrd,kernel,kernel-modules})
         if [ "$booted" != "$current" ]; then
-          printf 'Subject: ${config.networking.hostName}: reboot pending\n\nThe installed kernel is not running yet.\n' \
-            | ${config.programs.msmtp.package}/bin/sendmail ${config.host.alertEmail}
+          printf 'The installed kernel is not running yet.\n' | ${config.host.sendAlert} 'reboot pending'
         fi
       '';
     };

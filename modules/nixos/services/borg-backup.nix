@@ -96,7 +96,6 @@ in {
   };
 
   systemd.services."borgbackup-job-hetzner" = {
-    onFailure = ["borgbackup-failed.service"];
     # Restarting a waiting backup during an upgrade's switch would deadlock.
     restartIfChanged = false;
     serviceConfig = {
@@ -109,17 +108,7 @@ in {
 
   systemd.services.nixos-upgrade.after = lib.mkIf config.system.autoUpgrade.enable ["borgbackup-job-hetzner.service"];
 
-  systemd.services.borgbackup-failed = {
-    description = "Mail the failed Borg backup log";
-    serviceConfig.Type = "oneshot";
-    script = ''
-      set -euo pipefail
-      {
-        printf 'Subject: ${config.networking.hostName}: Borg backup failed\n\n'
-        ${config.systemd.package}/bin/journalctl -u borgbackup-job-hetzner -n 50 --no-pager
-      } | ${config.programs.msmtp.package}/bin/sendmail ${config.host.alertEmail}
-    '';
-  };
+  host.mailOnFailure.borgbackup-job-hetzner = "Borg backup failed";
 
   # The failure hook cannot report a backup that never runs.
   systemd.services.borgbackup-freshness = {
@@ -128,8 +117,7 @@ in {
     script = ''
       set -euo pipefail
       if [[ -z "$(${pkgs.findutils}/bin/find ${lastSuccess} -mmin -1440 2>/dev/null)" ]]; then
-        printf 'Subject: ${config.networking.hostName}: Borg backup overdue\n\nNo successful backup in the last 24 hours.\n' \
-          | ${config.programs.msmtp.package}/bin/sendmail ${config.host.alertEmail}
+        printf 'No successful backup in the last 24 hours.\n' | ${config.host.sendAlert} 'Borg backup overdue'
       fi
     '';
   };
