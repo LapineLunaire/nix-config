@@ -14,6 +14,7 @@
     ../../modules/nixos/services/mail-relay.nix
     ../../modules/nixos/services/borg-backup.nix
     ../../modules/nixos/microvm/host.nix
+    ../../modules/nixos/system/tmpfs-root.nix
     ./hardware-configuration.nix
     ../../modules/nixos/system/persistence.nix
     ./sops.nix

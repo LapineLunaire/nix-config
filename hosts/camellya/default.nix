@@ -14,6 +14,7 @@
     ../../modules/nixos/nix/desktop-cache.nix
     ../../modules/nixos/networking/trusted-ssh-ingress.nix
     ../../modules/nixos/networking/wireless-regulatory-domain.nix
+    ../../modules/nixos/system/tmpfs-root.nix
     ./hardware-configuration.nix
     ../../modules/nixos/system/persistence.nix
     ./sops.nix

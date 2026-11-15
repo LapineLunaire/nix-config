@@ -11,6 +11,7 @@
     ../../modules/nixos/services/borg-backup.nix
     ../../modules/nixos/networking/wireguard-tunnel.nix
     ../../modules/nixos/services/caddy.nix
+    ../../modules/nixos/system/tmpfs-root.nix
     ./hardware-configuration.nix
     ../../modules/nixos/system/persistence.nix
     ./sops.nix

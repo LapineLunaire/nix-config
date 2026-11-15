@@ -22,25 +22,12 @@
     allowDiscards = true;
   };
 
-  fileSystems = let
-    temporary = {
-      device = "none";
-      fsType = "tmpfs";
-      options = ["defaults" "size=16G" "mode=1777" "nosuid" "nodev" "noexec"];
-    };
-  in {
-    "/" = {
-      device = "none";
-      fsType = "tmpfs";
-      options = [
-        "defaults"
-        "size=2G"
-        "mode=755"
-        "nosuid"
-        "nodev"
-      ];
-    };
+  host.tmpfs = {
+    rootSize = "2G";
+    tmpSize = "16G";
+  };
 
+  fileSystems = {
     "/nix" = {
       device = "/dev/mapper/cryptroot";
       fsType = "btrfs";
@@ -65,9 +52,6 @@
       fsType = "vfat";
       options = ["umask=0077"];
     };
-
-    "/tmp" = temporary;
-    "/var/tmp" = temporary;
   };
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";

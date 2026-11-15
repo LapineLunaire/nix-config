@@ -17,6 +17,7 @@ in {
     ../../shared/nix-settings.nix
     ../system/security.nix
     ../system/zram.nix
+    ../system/tmpfs-root.nix
     ../networking/firewall.nix
     ../services/openssh.nix
     ../programs/ghostty-terminfo.nix
@@ -59,25 +60,20 @@ in {
         message = "Guests with passthrough devices must disable microvm.balloon.";
       }
     ];
-    fileSystems = let
-      temporary = {
-        device = "none";
-        fsType = "tmpfs";
-        options = ["defaults" "size=25%" "mode=1777" "nosuid" "nodev" "noexec"];
-      };
-    in {
+    host.tmpfs = {
+      rootSize = "50%";
+      tmpSize = "25%";
+    };
+    fileSystems = {
       "/" = {
-        device = "rootfs";
-        fsType = "tmpfs";
-        options = ["defaults" "size=50%" "mode=755" "nosuid" "nodev"];
+        # Keep the root device name that microvm.nix uses instead of "none".
+        device = lib.mkForce "rootfs";
         neededForBoot = true;
       };
       "/persist" = {
         neededForBoot = true;
         options = ["nosuid" "nodev"];
       };
-      "/tmp" = temporary;
-      "/var/tmp" = temporary;
     };
     environment.persistence."/persist" = {
       directories = [
