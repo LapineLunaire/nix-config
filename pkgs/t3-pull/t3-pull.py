@@ -221,15 +221,15 @@ def landing(raw):
     return head.split(b"\n"), message
 
 
-def merge(parent, base, commit, upstream):
-    """Returns the tree that applying commit to base, the tip of upstream, gives, without touching the work tree."""
-    status, out, err = run("git merge-tree", git_command("merge-tree", "--write-tree", "-z", "--name-only", "--no-messages", f"--merge-base={parent}", base, commit))
+def merge(parent, onto, commit):
+    """Returns the tree that applying commit to onto gives, without touching the work tree, or None and the files that conflict."""
+    status, out, err = run("git merge-tree", git_command("merge-tree", "--write-tree", "-z", "--name-only", "--no-messages", f"--merge-base={parent}", onto, commit))
     tree, *conflicts = out.split(b"\0")
     if status not in (0, 1):
         die("git merge-tree failed", err)
     if status:
-        die(f"the commit conflicts with {upstream} in these files; ask the agent to rebase it onto {upstream}. Nothing changed.\n" + lines(sorted(set(filter(None, conflicts)))).decode("utf-8", "t3-pull").removesuffix("\n"))
-    return tree.decode()
+        return None, sorted(set(filter(None, conflicts)))
+    return tree.decode(), []
 
 
 def changes(base, tree):
@@ -392,13 +392,18 @@ def main():
     if onto is None and upstream != default:
         again = shlex.join(["t3-pull", *(["--check"] if args.check else []), *(["--host", host] if host else []), "--onto", current, branch, *([args.source] if args.source else [])])
         die(f"{current} tracks {upstream}, not the default branch {default or 'of ' + remote}. If the commit is for {current}, such as a follow-up on its pull request, name the branch: {again}. Otherwise switch to the default branch first.")
-    # The upstream branch can move while agents work, so a branch that is only behind is fast-forwarded.
-    base = output("rev-parse", upstream)
-    if output("rev-parse", "HEAD") != base:
-        if git("merge-base", "--is-ancestor", "HEAD", base, check=False).returncode:
-            die(f"{current} has commits that {upstream} lacks; push them, or drop them with git reset --keep {upstream}, first")
-        if run("git merge", git_command("merge", "--ff-only", "--quiet", base), show=True, limited=False)[0]:
-            die(f"cannot fast-forward {current} to {upstream}; fix what Git reports above and run t3-pull again")
+    # The upstream branch can move while agents work, so a branch that is only behind is fast-forwarded. A branch that is
+    # ahead, such as with commits pulled before and not pushed yet, stays where it is, and the commit lands on top.
+    tip = output("rev-parse", upstream)
+    base = output("rev-parse", "HEAD")
+    if base != tip:
+        if not git("merge-base", "--is-ancestor", base, tip, check=False).returncode:
+            if run("git merge", git_command("merge", "--ff-only", "--quiet", tip), show=True, limited=False)[0]:
+                die(f"cannot fast-forward {current} to {upstream}; fix what Git reports above and run t3-pull again")
+            base = tip
+        elif git("merge-base", "--is-ancestor", tip, base, check=False).returncode:
+            die(f"{current} and {upstream} have diverged; rebase {current} onto {upstream} with git rebase {upstream}, or drop the commits that {upstream} lacks with git reset --keep {upstream}, first")
+    ahead = int(output("rev-list", "--count", f"{tip}..{base}"))
 
     ref = f"refs/t3-pull/{branch}"
     with tempfile.NamedTemporaryFile("w", prefix="t3-pull-") as known:
@@ -434,17 +439,27 @@ def main():
                 die(f"{branch} has an empty message or one that starts with a blank line; ask the agent to reword the commit")
 
             # One commit with one parent from the history of the upstream branch, which is the default branch unless
-            # --onto names another. The tree it gives on the reviewed base is computed first, so what is shown is the
-            # tree that lands, even when the upstream branch moved.
+            # --onto names another. A parent that only the checked-out branch has is refused: agents work from the remote.
+            # The tree it gives on the reviewed base is computed first, so what is shown is the
+            # tree that lands, even when the upstream branch moved or the checked-out branch is ahead of it.
             parents = output("rev-list", "--parents", "-n", "1", commit).split()
             if len(parents) != 2:
                 die(f"{branch} must be one commit with one parent; ask the agent to squash it")
             parent = parents[1]
-            if git("merge-base", "--is-ancestor", parent, base, check=False).returncode:
+            if git("merge-base", "--is-ancestor", parent, tip, check=False).returncode:
                 other = f"switch to the branch it is for and run t3-pull --onto <that branch> {branch}" if onto is None else "run t3-pull from the branch it is for"
                 die(f"{branch} must be one commit on a commit of {upstream}, and its parent {parent} is not one. If it is for {current}, ask the agent to rebase it onto {upstream}; if it is for another branch, {other}.")
-            tree = merge(parent, base, commit, upstream)
+            tree, conflicts = merge(parent, base, commit)
+            if tree is None:
+                files = lines(conflicts).decode("utf-8", "t3-pull").removesuffix("\n")
+                # The agent can only rebase onto what it sees, so a conflict with commits that are not pushed yet is
+                # told apart by merging onto the upstream branch alone.
+                if ahead and merge(parent, tip, commit)[0] is not None:
+                    die(f"the commit conflicts in these files with commits on {current} that {upstream} lacks; push them and then ask the agent to rebase it onto {upstream}, or drop them with git reset --keep {upstream} and run t3-pull again. Nothing changed.\n" + files)
+                die(f"the commit conflicts with {upstream} in these files; ask the agent to rebase it onto {upstream}. Nothing changed.\n" + files)
             if tree == output("rev-parse", f"{base}^{{tree}}"):
+                if ahead:
+                    die(f"{branch} changes nothing on {current}, which may already have it in commits that {upstream} lacks, such as if you pulled it before. If you expected a change, check that the commit is the one the agent reported.")
                 die(f"{branch} changes nothing on {upstream}. If you expected a change, check that the commit is the one the agent reported, and tell the agent that {upstream} already has it.")
             changed = changes(base, tree)
             if blocking := in_the_way(changed):
@@ -461,8 +476,10 @@ def main():
             if escaped:
                 shown.write(b"\nThe diff has control, invisible, or invalid characters, shown as \\x{..} escapes.\n")
             shown.write(b"", final=True)
-            if moved := int(output("rev-list", "--count", f"{parent}..{base}")):
-                print(f"\n{upstream} moved {moved} commit{'s' * (moved != 1)} past the agent's commit. What is shown is what lands on it.", file=sys.stderr)
+            if moved := int(output("rev-list", "--count", f"{parent}..{tip}")):
+                print(f"\n{upstream} moved {moved} commit{'s' * (moved != 1)} past the agent's commit." + ("" if ahead else " What is shown is what lands on it."), file=sys.stderr)
+            if ahead:
+                print(f"\n{current} has {ahead} commit{'s' * (ahead != 1)} that {upstream} lacks, and the agent's commit lands on top of {'them' if ahead != 1 else 'it'}. What is shown is what lands there.", file=sys.stderr)
             if sys.stdin.isatty():
                 termios.tcflush(sys.stdin.fileno(), termios.TCIFLUSH)
             print(f"Pull {commit} from {branch} onto {current} and sign it? [y/N] ", end="", file=sys.stderr, flush=True)
@@ -516,7 +533,8 @@ def main():
         ]
         if any(run(" ".join(check[:2]), check, show=True, limit=1 << 30, limited=False)[0] for check in checks):
             die(f"the checks failed; fix them, or undo the commit with git reset --keep {base}")
-    print(f"Signed {output('rev-parse', '--short', 'HEAD')}. Push it with git push.", file=sys.stderr)
+    others = f" and the {ahead} commit{'s' * (ahead != 1)} before it" if ahead else ""
+    print(f"Signed {output('rev-parse', '--short', 'HEAD')}. Push it{others} with git push.", file=sys.stderr)
 
 
 try:
