@@ -135,7 +135,8 @@ in {
         }
 
         git fetch --prune origin ${branch}
-        rev=$(git rev-parse "origin/${branch}^{commit}")
+        # Git would prefer a tag named origin/${branch}, such as one a manual pull fetched, over the remote-tracking branch.
+        rev=$(git rev-parse --verify "refs/remotes/origin/${branch}^{commit}")
 
         deployed=
         if [ -e ${deployedRev} ]; then
