@@ -79,6 +79,11 @@ in {
       directories = [
         "/var/lib"
         "/var/log"
+        # Keeps the shell history of microvm -s sessions. Impermanence would create the persistent directory world-readable.
+        {
+          directory = "/root";
+          mode = "0700";
+        }
       ];
       files = [
         "/etc/ssh/ssh_host_ed25519_key"

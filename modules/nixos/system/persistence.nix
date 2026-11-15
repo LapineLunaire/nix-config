@@ -10,6 +10,11 @@
       ++ [
         "/var/lib"
         "/var/log"
+        # Keeps root's shell history. Impermanence would create the persistent directory world-readable.
+        {
+          directory = "/root";
+          mode = "0700";
+        }
       ];
     files = [
       "/etc/machine-id"
