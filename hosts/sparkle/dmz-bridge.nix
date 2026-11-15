@@ -1,11 +1,14 @@
 {
   config,
   lib,
+  dmz,
+  net,
+  web,
+  guestRegistry,
+  trustedSubnets,
   guestConfigurations,
   ...
-}: let
-  dmz = import ./dmz-net.nix;
-in {
+}: {
   # Use bridge conntrack. br_netfilter hides the tap names these rules need.
   boot.kernelModules = ["nf_conntrack_bridge"];
 
@@ -30,14 +33,10 @@ in {
   # Filter traffic between taps and sfp0. Traffic to Sparkle itself uses its input firewall.
   networking.nftables.tables.dmz = let
     trusted = config.host.trustedSubnetsNft;
-    trustedSubnets = import ../trusted-subnets.nix;
     # Include the router that repeats LAN discovery.
     discoverySources = "${trustedSubnets.lan}, ${dmz.gateway}";
-    net = import ./guest-net.nix;
-    registry = import ./guest-registry.nix;
-    web = import ./guest-web.nix;
     guests = net.tapsNft;
-    guestMacsNft = lib.concatStringsSep ", " (lib.mapAttrsToList (name: _: "\"${name}\" . ${(builtins.head guestConfigurations.${name}.config.microvm.interfaces).mac}") registry);
+    guestMacsNft = lib.concatStringsSep ", " (lib.mapAttrsToList (name: _: "\"${name}\" . ${(builtins.head guestConfigurations.${name}.config.microvm.interfaces).mac}") guestRegistry);
     # Flows without their own destinations exclude these private, multicast and reserved ranges.
     privateSpace = "{ 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, 169.254.0.0/16, 224.0.0.0/3 }";
     renderFlow = tap: flow: let
@@ -56,7 +55,7 @@ in {
     in "iifname \"${tap}\" oifname \"sfp0\" ${destination}${match}${sports}${ports} accept";
     egressRules = lib.concatStringsSep "\n" (lib.concatLists (lib.mapAttrsToList (name: _:
       map (renderFlow name) guestConfigurations.${name}.config.microvmGuest.egress)
-    registry));
+    guestRegistry));
   in {
     family = "bridge";
     content = ''

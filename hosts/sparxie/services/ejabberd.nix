@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  sparxieWan,
   ...
 }: {
   security.acme.certs."bunny.enterprises".reloadServices = ["ejabberd.service"];
@@ -21,7 +22,6 @@
   };
 
   services.ejabberd = let
-    wan = import ../wan-net.nix;
     ejabberdConfig = pkgs.writeText "ejabberd.yml" ''
       include_config_file: ${config.sops.templates."ejabberd-secrets.yml".path}
 
@@ -131,8 +131,8 @@
             - "169.254.0.0/16"
             - "fc00::/7"
             - "fe80::/10"
-          turn_ipv4_address: "${wan.ipv4}"
-          turn_ipv6_address: "${wan.ipv6}"
+          turn_ipv4_address: "${sparxieWan.ipv4}"
+          turn_ipv6_address: "${sparxieWan.ipv6}"
           turn_min_port: 49152
           turn_max_port: 49500
 
@@ -265,7 +265,7 @@
           access: local
           max_connections: 5
           # Otherwise it listens on 127.0.0.2, the address of the hostname.
-          ip: "${wan.ipv4}"
+          ip: "${sparxieWan.ipv4}"
         mod_pubsub:
           access_createnode: pubsub_createnode
           plugins:

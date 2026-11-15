@@ -1,7 +1,8 @@
-let
-  dmz = import ./dmz-net.nix;
-  net = import ./guest-net.nix;
-in {
+{
+  dmz,
+  net,
+  ...
+}: {
   imports = [
     ../../modules/nixos/services/mail-relay.nix
     ../../modules/nixos/services/smartd.nix

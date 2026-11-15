@@ -1,6 +1,10 @@
-{pkgs, ...}: let
-  dmz = import ./dmz-net.nix;
-in {
+{
+  pkgs,
+  dmz,
+  net,
+  trustedSubnets,
+  ...
+}: {
   imports = [
     ../../modules/nixos/system/boot.nix
     ../../modules/nixos/system/secure-boot.nix
@@ -19,7 +23,7 @@ in {
     ./telemetry.nix
   ];
 
-  host.trustedSubnets = (import ../trusted-subnets.nix).all;
+  host.trustedSubnets = trustedSubnets.all;
 
   host.flakePath = "/persist/nix-config";
   host.smtp.passwordSecret = "smtp-password";
@@ -34,9 +38,7 @@ in {
     exclude = ["pp:/mnt/borg-snapshot/volumes"];
   };
 
-  networking = let
-    net = import ./guest-net.nix;
-  in {
+  networking = {
     hostName = "sparkle";
     hostId = "d38a0d1c";
     # Use the DNS guest as systemd-resolved's upstream.

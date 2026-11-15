@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  tunnelWeb,
   ...
 }: {
   sops.templates."caddy-pub-bnnuy-basicauth" = {
@@ -17,7 +18,6 @@
   services.caddy.virtualHosts = let
     inherit (config.caddy) securityHeaders tlsDns;
     wg = config.host.wireguardTunnel;
-    sparkleTunnelWeb = import ../../sparkle/tunnel-web.nix;
     mkVhost = body: {
       extraConfig =
         ''
@@ -64,7 +64,7 @@
     '';
     "pub.bunny.enterprises" = mkVhost ''
       import ${config.sops.templates."caddy-pub-bnnuy-basicauth".path}
-      reverse_proxy ${wg.peer.ip}:${toString sparkleTunnelWeb.port} {
+      reverse_proxy ${wg.peer.ip}:${toString tunnelWeb.port} {
         header_up Host {upstream_hostport}
       }
     '';

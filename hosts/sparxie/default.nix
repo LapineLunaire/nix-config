@@ -1,6 +1,8 @@
-{pkgs, ...}: let
-  wan = import ./wan-net.nix;
-in {
+{
+  pkgs,
+  sparxieWan,
+  ...
+}: {
   imports = [
     ../../modules/nixos/system/boot.nix
     ../../modules/nixos/networking/ssh-ip-whitelist.nix
@@ -32,7 +34,7 @@ in {
 
   host.wireguardTunnel = {
     prefixLength = "31";
-    listenPort = wan.wireguardPort;
+    listenPort = sparxieWan.wireguardPort;
     local.ip = "10.73.212.1";
     peer = {
       ip = "10.73.212.0";
@@ -48,8 +50,8 @@ in {
     matchConfig.Name = "enp1s0";
     networkConfig.DHCP = "no";
     address = [
-      "${wan.ipv4}/32"
-      "${wan.ipv6}/64"
+      "${sparxieWan.ipv4}/32"
+      "${sparxieWan.ipv6}/64"
     ];
     routes = [
       {

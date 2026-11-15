@@ -30,7 +30,7 @@ NixOS modules are grouped by purpose under `modules/nixos/`: system settings, ne
 
 Packages from this repository live under `pkgs/`. The desktop and server profiles add them to `pkgs` with the `additions` overlay in `overlays/`.
 
-Each host imports upstream modules, a system profile, host configuration, and user configuration. Hardware, networking, and secrets live with each host under `hosts/`; the trusted client subnets are in `hosts/trusted-subnets.nix`.
+Each host imports upstream modules, a system profile, host configuration, and user configuration. Hardware, networking, and secrets live with each host under `hosts/`; the trusted client subnets are in `hosts/trusted-subnets.nix`. `flake.nix` imports these shared data files once, as `sharedData`, and passes them to every NixOS system as module arguments; modules take them as arguments rather than importing the files.
 
 Carmilla's entries share Home Manager programs. Camellya and Kafka use entries under `users/carmilla/hosts/` for per-system packages and settings. Both import the shared desktop configuration. Silverwolf shares application settings and also uses Homebrew for its macOS application list.
 

@@ -1,10 +1,9 @@
 {
   net,
   trustedSubnets,
+  sparxieWan,
   ...
-}: let
-  sparxieWan = import ../../../sparxie/wan-net.nix;
-in {
+}: {
   imports = [
     ../../../../modules/nixos/services/caddy.nix
     ../../../../modules/nixos/networking/wireguard-tunnel.nix

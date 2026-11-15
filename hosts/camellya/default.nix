@@ -1,10 +1,9 @@
 {
   lib,
   pkgs,
+  trustedSubnets,
   ...
-}: let
-  trustedSubnets = import ../trusted-subnets.nix;
-in {
+}: {
   imports = [
     ../../modules/nixos/system/boot.nix
     ../../modules/nixos/system/secure-boot.nix

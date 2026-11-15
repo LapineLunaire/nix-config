@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  trustedSubnets,
+  ...
+}: {
   imports = [
     ../../modules/nixos/system/boot.nix
     ../../modules/nixos/system/secure-boot.nix
@@ -20,7 +24,7 @@
     # 16 GiB of RAM is not enough for parallel Nix builds.
     swapFileSize = 32;
     wirelessRegulatoryDomain = "NL";
-    trustedSubnets = (import ../trusted-subnets.nix).all;
+    trustedSubnets = trustedSubnets.all;
     trustedConnections = [
       "ea502939-2dee-417c-929e-6bd1a1c7b794"
       "6949919a-dabb-4937-9737-e60014ff13c8"

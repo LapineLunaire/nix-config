@@ -111,21 +111,22 @@
       }
       ./profiles/desktop
     ];
-    guestRegistry = import ./hosts/sparkle/guest-registry.nix;
-    dmz = import ./hosts/sparkle/dmz-net.nix;
-    net = import ./hosts/sparkle/guest-net.nix;
-    web = import ./hosts/sparkle/guest-web.nix;
+    sharedData = {
+      trustedSubnets = import ./hosts/trusted-subnets.nix;
+      dmz = import ./hosts/sparkle/dmz-net.nix;
+      net = import ./hosts/sparkle/guest-net.nix;
+      web = import ./hosts/sparkle/guest-web.nix;
+      guestRegistry = import ./hosts/sparkle/guest-registry.nix;
+      tunnelWeb = import ./hosts/sparkle/tunnel-web.nix;
+      consoleKey = import ./hosts/sparkle/console-key.nix;
+      sparxieWan = import ./hosts/sparxie/wan-net.nix;
+    };
     guestModules = {
       unifi = [unifi-os-server.nixosModules.unifi-os-server];
     };
     guestConfigurations = nixpkgs-stable.lib.mapAttrs (name: _:
       nixpkgs-stable.lib.nixosSystem {
-        specialArgs = {
-          inherit dmz net web guestRegistry;
-          trustedSubnets = import ./hosts/trusted-subnets.nix;
-          tunnelWeb = import ./hosts/sparkle/tunnel-web.nix;
-          consoleKey = import ./hosts/sparkle/console-key.nix;
-        };
+        specialArgs = sharedData;
         modules =
           [
             impermanence.nixosModules.impermanence
@@ -140,7 +141,7 @@
             (./hosts/sparkle/guests + "/${name}")
           ];
       })
-    guestRegistry;
+    sharedData.guestRegistry;
   in {
     overlays = import ./overlays;
 
@@ -191,6 +192,7 @@
       guestConfigurations
       // {
         camellya = nixpkgs.lib.nixosSystem {
+          specialArgs = sharedData;
           modules =
             desktopModules
             ++ [
@@ -202,6 +204,7 @@
         };
 
         kafka = nixpkgs.lib.nixosSystem {
+          specialArgs = sharedData;
           modules =
             desktopModules
             ++ [
@@ -212,7 +215,7 @@
         };
 
         sparkle = nixpkgs-stable.lib.nixosSystem {
-          specialArgs = {inherit dmz guestRegistry guestConfigurations;};
+          specialArgs = sharedData // {inherit guestConfigurations;};
           modules = [
             microvm.nixosModules.host
             impermanence.nixosModules.impermanence
@@ -227,6 +230,7 @@
         };
 
         sparxie = nixpkgs-stable.lib.nixosSystem {
+          specialArgs = sharedData;
           modules = [
             impermanence.nixosModules.impermanence
             sops-nix.nixosModules.sops
