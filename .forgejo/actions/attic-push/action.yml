@@ -1,16 +1,12 @@
 name: Push to the cache
-description: Upload built systems to the server and desktop caches. A missing token fails the job.
+description: Upload built systems to the cache. A missing token fails the job.
 inputs:
   token:
-    description: Attic token that can push to both caches
+    description: Attic token that can pull from and push to the cache
     required: true
-  server-paths:
-    description: Store paths for the server cache, one per line
+  paths:
+    description: Store paths, one per line; blank lines are skipped
     required: true
-  desktop-paths:
-    description: Store paths for the desktop cache, one per line; may be empty
-    required: false
-    default: ""
 runs:
   using: composite
   steps:
@@ -18,13 +14,12 @@ runs:
       shell: bash
       env:
         ATTIC_TOKEN: ${{ inputs.token }}
-        SERVER_PATHS: ${{ inputs.server-paths }}
-        DESKTOP_PATHS: ${{ inputs.desktop-paths }}
+        STORE_PATHS: ${{ inputs.paths }}
       run: |
         set -euo pipefail
         : "${ATTIC_TOKEN:?ATTIC_TOKEN is missing, so the cache cannot be filled}"
-        mapfile -t server < <(printf '%s\n' "$SERVER_PATHS" | sed '/^$/d')
-        mapfile -t desktop < <(printf '%s\n' "$DESKTOP_PATHS" | sed '/^$/d')
+        mapfile -t paths < <(printf '%s\n' "$STORE_PATHS" | sed '/^[[:space:]]*$/d')
+        [ "${#paths[@]}" -gt 0 ] || { echo "No store paths to upload" >&2; exit 1; }
         # Protect Attic's cleartext token and remove it even on failure.
         umask 077
         export XDG_CONFIG_HOME
@@ -36,7 +31,4 @@ runs:
         unset ATTIC_TOKEN
         printf '[servers.lunaire]\nendpoint = "https://cache.lunaire.moe/"\ntoken-file = "%s"\n' \
           "$XDG_CONFIG_HOME/attic/token" > "$XDG_CONFIG_HOME/attic/config.toml"
-        attic push --ignore-upstream-cache-filter lunaire:server "${server[@]}"
-        if [ "${#desktop[@]}" -gt 0 ]; then
-          attic push --ignore-upstream-cache-filter lunaire:desktop "${desktop[@]}"
-        fi
+        attic push --ignore-upstream-cache-filter lunaire:lune "${paths[@]}"

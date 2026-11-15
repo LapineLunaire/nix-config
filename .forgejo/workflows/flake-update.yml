@@ -136,7 +136,7 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # This build checks the hash only because no cache holds the plugin source; keep it out of the caches.
+      # This build checks the hash only because no cache holds the plugin source; keep it out of the cache.
       - name: Refresh the caddy plugin hash
         id: caddy
         if: steps.server.outputs.changed == 'true'
@@ -275,8 +275,8 @@ jobs:
         uses: ./.forgejo/actions/attic-push
         with:
           token: ${{ secrets.ATTIC_TOKEN }}
-          server-paths: ${{ steps.build.outputs.sparkle }}
-          desktop-paths: |
+          paths: |
+            ${{ steps.build.outputs.sparkle }}
             ${{ steps.build.outputs.camellya }}
             ${{ steps.build.outputs.kafka }}
 

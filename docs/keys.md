@@ -8,7 +8,7 @@ See [shared secrets](secrets.md) for the profile and service files. When replaci
 
 Camellya and Kafka use the steps below. Run them as root in Bash from the installer's checkout at `/mnt/persist/nix-config`, with `<host>` as `camellya` or `kafka`.
 
-Each host's SSH key pair decrypts the shared user and desktop profile secrets: `profiles/desktop/secrets.yaml` must contain `attic-pull-token`, and `users/carmilla/secrets.yaml` must contain `carmilla-password-hash`. Both files must include the host's key as a recipient. Camellya's key also decrypts `hosts/camellya/secrets.yaml`; Kafka has no host secrets file. Keep the private key outside Git and retain a secure backup.
+Each host's SSH key pair decrypts the shared user secrets and the cache token: `modules/nixos/nix/attic-client.yaml` must contain `attic-pull-token`, and `users/carmilla/secrets.yaml` must contain `carmilla-password-hash`. Both files must include the host's key as a recipient. Camellya's key also decrypts `hosts/camellya/secrets.yaml`; Kafka has no host secrets file. Keep the private key outside Git and retain a secure backup.
 
 Restore the key pair, replacing `<identity-directory>` with its backup location. The private key must be root-owned with mode `0600`. With the original key, existing secrets need no re-encryption.
 
@@ -33,10 +33,10 @@ The other host is a recipient of both shared files and re-encrypts them. On it, 
 
 ```sh
 sops updatekeys -y users/carmilla/secrets.yaml
-sops updatekeys -y profiles/desktop/secrets.yaml
+sops updatekeys -y modules/nixos/nix/attic-client.yaml
 ```
 
-Commit and push the three files, then run `git pull` in the installer's checkout before installing. User creation needs the shared password hash. If the other host is unavailable, re-encrypt `users/carmilla/secrets.yaml` on Sparkle or Sparxie, which are also its recipients. Only Camellya and Kafka can decrypt `profiles/desktop/secrets.yaml`; without one, recreate it from the password manager. The installed `sops` alias is not available in the installer.
+Commit and push the three files, then run `git pull` in the installer's checkout before installing. User creation needs the shared password hash. If the other host is unavailable, re-encrypt both files on Sparkle, which is also a recipient of both. The installed `sops` alias is not available in the installer.
 
 On Camellya, the host key is the only recipient of the host secrets, so a new key cannot decrypt the existing file. Recreate the file with the keys `samba-username` and `samba-password`, taking the values from the password manager:
 

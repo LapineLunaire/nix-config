@@ -51,11 +51,9 @@ jobs:
         run: |
           set -euo pipefail
           for host in sparkle camellya kafka; do
-            cache=desktop
-            [ "$host" != sparkle ] || cache=server
             attr=".#nixosConfigurations.$host.config.system.build.toplevel"
             out=$(nix eval --raw --no-write-lock-file "$attr.outPath")
-            if nix path-info --store "https://cache.lunaire.moe/$cache" "$out" > /dev/null 2>&1; then
+            if nix path-info --store https://cache.lunaire.moe/lune "$out" > /dev/null 2>&1; then
               echo "$host is unchanged from a cached system: $out"
               continue
             fi

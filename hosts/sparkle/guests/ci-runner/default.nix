@@ -11,7 +11,7 @@
     extraTrustedPublicKeys = config.nix.settings.extra-trusted-public-keys;
   };
 in {
-  imports = [../../../../modules/nixos/nix/server-cache.nix ./sops.nix];
+  imports = [../../../../modules/nixos/nix/attic-client.nix ./sops.nix];
 
   microvm = let
     swapImage = "/persist/volumes/ci-runner/swap.img";
@@ -51,13 +51,6 @@ in {
 
   # Use disk swap after zram. Labels survive changes in disk declaration order.
   swapDevices = [{label = "ci-swap";}];
-
-  nix.settings = let
-    inherit ((import ../../../../modules/nixos/nix/caches.nix).desktop) url publicKey;
-  in {
-    extra-substituters = lib.mkAfter [url];
-    extra-trusted-public-keys = lib.mkAfter [publicKey];
-  };
 
   virtualisation.docker.enable = true;
 

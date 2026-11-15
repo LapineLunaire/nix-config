@@ -19,7 +19,7 @@
     ../../modules/nixos/system/persistence.nix
     ./sops.nix
     ./dmz-bridge.nix
-    ../../modules/nixos/nix/server-cache.nix
+    ../../modules/nixos/nix/attic-client.nix
     ./auto-update.nix
     ./telemetry.nix
   ];

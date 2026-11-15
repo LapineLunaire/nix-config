@@ -1,12 +1,7 @@
-{
-  cache,
-  sopsFile,
-}: {
-  config,
-  lib,
-  ...
-}: {
-  sops.secrets."attic-pull-token".sopsFile = lib.mkDefault sopsFile;
+# The one Attic cache. The CI workflows in .forgejo also name it.
+{config, ...}: {
+  # Every host that pulls from the cache is a recipient of this file.
+  sops.secrets."attic-pull-token".sopsFile = ./attic-client.yaml;
   sops.templates."nix-netrc" = {
     mode = "0400";
     content = ''
@@ -15,8 +10,10 @@
   };
 
   nix.settings = {
-    extra-substituters = [cache.url];
-    extra-trusted-public-keys = [cache.publicKey];
+    extra-substituters = ["https://cache.lunaire.moe/lune?priority=10"];
+    extra-trusted-public-keys = [
+      "lune:oM+bGPYSf0rIgczv1jYKHU9zubUjSFwR3IlgmRjJ3GU="
+    ];
     netrc-file = config.sops.templates."nix-netrc".path;
   };
 }

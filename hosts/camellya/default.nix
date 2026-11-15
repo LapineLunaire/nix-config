@@ -11,7 +11,7 @@
     ../../modules/nixos/services/btrfs.nix
     ../../modules/nixos/programs/gaming.nix
     ../../modules/nixos/networking/steam-frame.nix
-    ../../modules/nixos/nix/desktop-cache.nix
+    ../../modules/nixos/nix/attic-client.nix
     ../../modules/nixos/networking/trusted-ssh-ingress.nix
     ../../modules/nixos/networking/wireless-regulatory-domain.nix
     ../../modules/nixos/system/tmpfs-root.nix

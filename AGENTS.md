@@ -25,3 +25,8 @@
 - Write one imperative subject line with no body or trailers, like the existing `git log`.
 - Name the change itself, such as "Share Attic client configuration between desktops and servers", not the reason or the steps.
 - Commit only when asked. Do not push unless asked.
+
+## Shared values
+
+- Define a value that several hosts use once, and have every host read it from there. This covers cache URLs and public keys, addresses, and secrets.
+- Keep a secret that several hosts read in one SOPS file with all of them as recipients. Do not copy it into per-host or per-profile files, where the copies can drift.

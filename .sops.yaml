@@ -19,15 +19,13 @@ keys:
   - &vm_attic age1jefxkwgym3qkjp95udkv60e0eqz8tcm347uea6pvq8lyyywfmy2qdnqy73
 
 creation_rules:
-  - path_regex: profiles/desktop/secrets\.yaml$
+  - path_regex: modules/nixos/nix/attic-client\.yaml$
     key_groups:
       - age:
           - *camellya_host
           - *kafka_host
-  - path_regex: profiles/server/secrets\.yaml$
-    key_groups:
-      - age:
           - *sparkle_host
+          - *vm_ci_runner
   - path_regex: hosts/sparkle/smtp\.yaml$
     key_groups:
       - age:

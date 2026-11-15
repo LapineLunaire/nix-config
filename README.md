@@ -24,7 +24,7 @@ Linux hosts use `/persist/nix-config`; Silverwolf uses `~/projects/nix-config`.
 
 ## Configuration
 
-The flake exports NixOS desktop and server profiles, a Darwin profile, and reusable NixOS modules. Desktop and server profiles live in `profiles/desktop/` and `profiles/server/`, with shared Attic credentials beside each `default.nix`. Both build on the NixOS base in `profiles/nixos.nix`. The server cache is enabled on Sparkle; ci-runner keeps its own token for both caches. Profiles keep simple settings in place and import modules for larger features.
+The flake exports NixOS desktop and server profiles, a Darwin profile, and reusable NixOS modules. Desktop and server profiles live in `profiles/desktop/` and `profiles/server/`. Both build on the NixOS base in `profiles/nixos.nix`. Camellya, Kafka, Sparkle, and ci-runner pull from one Attic cache, `lune`, set in `modules/nixos/nix/attic-client.nix`, with their shared pull token beside it. Profiles keep simple settings in place and import modules for larger features.
 
 NixOS modules are grouped by purpose under `modules/nixos/`: system settings, networking, services, programs, desktop settings, Nix maintenance, and microVMs. Shared NixOS and Darwin settings live under `modules/shared/`.
 

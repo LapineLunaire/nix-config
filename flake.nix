@@ -165,10 +165,10 @@
         ];
       };
       steam-frame = ./modules/nixos/networking/steam-frame.nix;
-      desktop-cache = {
+      attic-client = {
         imports = [
           sops-nix.nixosModules.sops
-          ./modules/nixos/nix/desktop-cache.nix
+          ./modules/nixos/nix/attic-client.nix
         ];
       };
       trusted-ssh-ingress = ./modules/nixos/networking/trusted-ssh-ingress.nix;

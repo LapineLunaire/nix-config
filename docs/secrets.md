@@ -1,12 +1,11 @@
 # Shared secrets
 
-SOPS files group credentials by their readers. Every recipient can decrypt every secret in a file. `.sops.yaml` defines recipients for new files; use `sops updatekeys -y <file>` to update an existing file after changing its recipients.
+SOPS files group credentials by their readers. Every recipient can decrypt every secret in a file. A secret that several hosts read is stored once, in a file with all of them as recipients, so there are no copies that can drift. `.sops.yaml` defines recipients for new files; use `sops updatekeys -y <file>` to update an existing file after changing its recipients.
 
 | File | Keys | Recipients |
 |---|---|---|
 | `users/carmilla/secrets.yaml` | `carmilla-password-hash` | Camellya, Kafka, Sparkle, Sparxie |
-| `profiles/desktop/secrets.yaml` | `attic-pull-token` | Camellya, Kafka |
-| `profiles/server/secrets.yaml` | `attic-pull-token` | Sparkle |
+| `modules/nixos/nix/attic-client.yaml` | `attic-pull-token` | Camellya, Kafka, Sparkle, ci-runner |
 | `hosts/sparkle/smtp.yaml` | `smtp-password` | Sparkle, Vault, Forgejo, Authelia, Vaultwarden |
 | `hosts/sparkle/lunaire-moe-dns.yaml` | `lunaire-moe-dns-api-token` | Sparkle, Proxy, UniFi |
 | `hosts/sparkle/guests/attic/database.yaml` | `attic-db-password` | Sparkle, PostgreSQL, Attic |
@@ -16,7 +15,7 @@ SOPS files group credentials by their readers. Every recipient can decrypt every
 
 Create or edit a file with `sops <file>`. Values such as SMTP passwords, DNS tokens, and Attic tokens are plaintext inside the editor. Keys ending in `-hash` hold hashes: Carmilla's login password, the qBittorrent and Caddy basic-auth passwords, and Authelia's OIDC client secrets. Stage new encrypted files before checking the Git-backed flake.
 
-Desktop and server Attic tokens need read access to their respective caches. ci-runner uses its own `attic-pull-token` in its guest secrets file, with read access to both caches and no write permissions. Every job receives this token as `ATTIC_PULL_TOKEN`; the `configure-nix` action writes it to a netrc file that only root can read and clears the variable for later steps, so builds cannot read it. Nix uses one netrc entry for `cache.lunaire.moe`, so jobs do not select separate credentials by cache URL. The image contains no credentials.
+Camellya, Kafka, Sparkle, and ci-runner share one Attic pull token, which needs read access to the `lune` cache and no write permissions. The Forgejo `ATTIC_TOKEN` secret needs read and push access to it. On ci-runner, every job receives the pull token as `ATTIC_PULL_TOKEN`; the `configure-nix` action writes it to a netrc file that only root can read and clears the variable for later steps, so builds cannot read it. The image contains no credentials.
 
 Sparkle and its applications read SMTP credentials from `hosts/sparkle/smtp.yaml`. Keep that credential valid for their configured SMTP account and sender. Sparxie's SMTP credential is in `hosts/sparxie/secrets.yaml`.
 
