@@ -20,6 +20,12 @@
     ip saddr ${net.vmAddress.uptime-kuma} tcp dport { ${lib.concatMapStringsSep ", " toString config.services.openssh.ports} } accept
   '';
 
+  # Forgejo writes its users' Git keys to its own home, so sshd reads that file for this user only.
+  services.openssh.extraConfig = lib.mkAfter ''
+    Match User ${config.services.forgejo.user}
+      AuthorizedKeysFile %h/.ssh/authorized_keys /etc/ssh/authorized_keys.d/%u
+  '';
+
   microvm = {
     vcpu = 2;
     mem = 1536;

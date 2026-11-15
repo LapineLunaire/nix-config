@@ -7,6 +7,8 @@
       KbdInteractiveAuthentication = false;
       AuthenticationMethods = "publickey";
     };
+    # Take login keys only from the configuration. Anything running as a user can add keys to their home, which persists.
+    authorizedKeysInHomedir = false;
     # Also used as the SOPS decryption identity.
     hostKeys = [
       {

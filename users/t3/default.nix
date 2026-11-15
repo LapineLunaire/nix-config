@@ -24,12 +24,6 @@ in {
     linger = true;
   };
 
-  # Do not trust authorized keys in the agent-writable home.
-  services.openssh.extraConfig = lib.mkAfter ''
-    Match User t3
-      AuthorizedKeysFile /etc/ssh/authorized_keys.d/%u
-  '';
-
   nix.settings.allowed-users = ["t3"];
   host.trustedTCPPorts = [3773];
 
