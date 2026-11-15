@@ -60,6 +60,7 @@
 
     acmeEmail = lib.mkOption {
       type = lib.types.str;
+      default = "certs@lunaire.eu";
       description = "Account email for ACME certificate registration.";
     };
 

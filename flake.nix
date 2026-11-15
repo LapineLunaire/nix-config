@@ -157,6 +157,8 @@
           sops-nix.nixosModules.sops
           ./modules/nixos/nix/attic-client.nix
         ];
+        # This flake's systems get web as a special argument; other users get it here.
+        _module.args = {inherit (sharedData) web;};
       };
       trusted-ssh-ingress = ./modules/nixos/networking/trusted-ssh-ingress.nix;
       wireless-regulatory-domain = ./modules/nixos/networking/wireless-regulatory-domain.nix;

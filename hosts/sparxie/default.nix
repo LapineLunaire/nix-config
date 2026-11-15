@@ -1,6 +1,7 @@
 {
   pkgs,
   sparxieWan,
+  tunnelWeb,
   ...
 }: {
   imports = [
@@ -30,15 +31,14 @@
 
   host.flakePath = "/persist/nix-config";
   host.smtp.passwordSecret = "smtp-password";
-  host.acmeEmail = "certs@lunaire.eu";
   host.dnsApiTokenSecret = "bunny-enterprises-dns-api-token";
 
   host.wireguardTunnel = {
-    prefixLength = "31";
+    inherit (tunnelWeb) prefixLength;
     listenPort = sparxieWan.wireguardPort;
-    local.ip = "10.73.212.1";
+    local.ip = tunnelWeb.sparxieAddress;
     peer = {
-      ip = "10.73.212.0";
+      ip = tunnelWeb.proxyAddress;
       publicKey = "fU36EC/ymy4d1XwJCfqAXKEX8dRK/WuMFBbh6OtKBRM=";
     };
   };

@@ -2,6 +2,7 @@
   net,
   trustedSubnets,
   sparxieWan,
+  tunnelWeb,
   ...
 }: {
   imports = [
@@ -13,14 +14,13 @@
 
   host.trustedSubnets = trustedSubnets.all;
 
-  host.acmeEmail = "certs@lunaire.eu";
   host.dnsApiTokenSecret = "lunaire-moe-dns-api-token";
 
   host.wireguardTunnel = {
-    prefixLength = "31";
-    local.ip = "10.73.212.0";
+    inherit (tunnelWeb) prefixLength;
+    local.ip = tunnelWeb.proxyAddress;
     peer = {
-      ip = "10.73.212.1";
+      ip = tunnelWeb.sparxieAddress;
       publicKey = "VjVuhnnTEHuGssQOp0iM1yU0BLT34VWm3k00e8tDkSg=";
       endpoint = "${sparxieWan.ipv4}:${toString sparxieWan.wireguardPort}";
     };
