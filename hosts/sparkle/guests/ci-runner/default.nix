@@ -64,15 +64,6 @@ in {
     '';
   };
 
-  sops.templates."runner-cache.netrc" = {
-    owner = "root";
-    mode = "0400";
-    restartUnits = ["gitea-runner-sparkle.service"];
-    content = ''
-      machine cache.lunaire.moe password ${config.sops.placeholder."attic-pull-token"}
-    '';
-  };
-
   systemd.services.gitea-runner-sparkle = {
     path = [config.virtualisation.docker.package];
     serviceConfig = {
@@ -104,9 +95,10 @@ in {
           timeout = "6h";
         };
         container = {
-          # Docker reads the root-only host file; unsandboxed nixbld users cannot read the mount.
-          options = "--mount type=bind,source=${config.sops.templates."runner-cache.netrc".path},target=/etc/nix/netrc,readonly";
-          valid_volumes = [config.sops.templates."runner-cache.netrc".path];
+          # Jobs read the guest's own cache credential. Docker reads the root-only file for each new job, so a new
+          # token needs no runner restart; unsandboxed nixbld users cannot read the mount.
+          options = "--mount type=bind,source=${config.sops.templates."nix-netrc".path},target=/etc/nix/netrc,readonly";
+          valid_volumes = [config.sops.templates."nix-netrc".path];
         };
         cache.enabled = false;
       };

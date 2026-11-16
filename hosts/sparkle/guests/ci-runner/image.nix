@@ -10,6 +10,7 @@
       attic-client
       bash
       coreutils
+      curl
       diffutils
       gitMinimal
       gnugrep

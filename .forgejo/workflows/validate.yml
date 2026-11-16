@@ -21,38 +21,17 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Check the cache credential
+        run: bash .forgejo/ci.sh check-cache
+
       - name: Check formatting
-        run: nix fmt --no-write-lock-file -- --check .
+        run: bash .forgejo/ci.sh format
 
       - name: Evaluate all systems
-        run: nix flake check --all-systems --no-build --no-write-lock-file --option allow-import-from-derivation false
+        run: bash .forgejo/ci.sh check
 
-      # The update workflow rewrites these values, and the servers accept a CI commit only where the pattern matches.
       - name: Check the values CI may change
-        run: |
-          set -euo pipefail
-          # shellcheck disable=SC2016
-          pins=$(nix eval --raw --no-write-lock-file .#nixosConfigurations.sparkle.config.host.autoUpdate.ciPins \
-            --apply 'pins: builtins.concatStringsSep "" (map (path: "${path}\t${pins.${path}}\n") (builtins.attrNames pins))')
-          while IFS=$'\t' read -r path pattern; do
-            [ -n "$path" ] || continue
-            count=$(grep -cE -- "$pattern" "$path" || true)
-            if [ "$count" != 1 ]; then
-              echo "$path has $count lines matching its ciPins pattern instead of one" >&2
-              exit 1
-            fi
-          done <<< "$pins"
+        run: bash .forgejo/ci.sh check-pins
 
-      # The runner cannot build Sparxie or Silverwolf.
-      - name: Build systems
-        run: |
-          set -euo pipefail
-          for host in sparkle camellya kafka; do
-            attr=".#nixosConfigurations.$host.config.system.build.toplevel"
-            out=$(nix eval --raw --no-write-lock-file "$attr.outPath")
-            if nix path-info --store https://cache.lunaire.moe/lune "$out" > /dev/null 2>&1; then
-              echo "$host is unchanged from a cached system: $out"
-              continue
-            fi
-            nix build --no-link --no-write-lock-file "$attr"
-          done
+      - name: Build uncached systems
+        run: bash .forgejo/ci.sh build-uncached

@@ -25,10 +25,10 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
         run: |
-          bash .forgejo/update.sh
+          bash .forgejo/ci.sh update
 
       - name: Push to the cache
-        if: steps.update.outputs.changed == 'true'
+        if: steps.update.outputs.publish == 'true'
         env:
           ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
           STORE_PATHS: ${{ steps.update.outputs.paths }}
@@ -51,12 +51,13 @@ jobs:
           attic push --ignore-upstream-cache-filter lunaire:lune "${paths[@]}"
 
       - name: Commit and push
-        if: steps.update.outputs.changed == 'true'
+        if: steps.update.outputs.publish == 'true'
         env:
           SSH_SIGNING_KEY: ${{ secrets.CI_SIGNING_KEY }}
           MESSAGE: "flake: update dependencies"
           PUSH_TOKEN: ${{ github.token }}
           SERVER_URL: ${{ github.server_url }}
+          FILES: ${{ steps.update.outputs.files }}
         run: |
           set -euo pipefail
           umask 077
@@ -64,43 +65,23 @@ jobs:
           trap 'rm -f "$key"' EXIT
           printf '%s\n' "$SSH_SIGNING_KEY" > "$key"
           unset SSH_SIGNING_KEY
+          mapfile -t files < <(printf '%s\n' "$FILES" | sed '/^[[:space:]]*$/d')
 
-          paths=(
-            flake.lock
-            modules/nixos/services/caddy.nix
-            hosts/sparkle/guests/homeassistant/default.nix
-            pkgs/curseforge/pin.json
-          )
-
-          # Keep the push token out of the checkout and argv.
-          remote_git() {
-            GIT_CONFIG_COUNT=1 \
-              GIT_CONFIG_KEY_0="http.${SERVER_URL%/}/.extraheader" \
-              GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$PUSH_TOKEN" | base64 | tr -d '\n')" \
-              git "$@"
-          }
-
-          # The checks ran on this checkout, so a branch that moved since then needs a new run.
-          if ! branch=$(git symbolic-ref --quiet --short HEAD); then
-            echo "The checkout is not on a branch, so there is nothing to push to" >&2
-            exit 1
-          fi
-          remote_head=$(remote_git ls-remote origin "refs/heads/$branch" | cut -f1)
-          if [ "$remote_head" != "$(git rev-parse HEAD)" ]; then
-            echo "$branch moved during this run, so nothing was pushed. Run the workflow again." >&2
-            exit 1
-          fi
-
-          git --literal-pathspecs add -- "${paths[@]}"
           git --literal-pathspecs \
             -c user.name=Carmilla -c user.email=carmilla@lunaire.eu \
             -c gpg.format=ssh -c user.signingkey="$key" -c commit.gpgsign=true \
-            commit --only -m "$MESSAGE $(date +%Y-%m-%d)" -- "${paths[@]}"
+            commit --only -m "$MESSAGE $(date +%Y-%m-%d)" -- "${files[@]}"
 
-          remote_git push
+          # The checks ran on this checkout, and Git refuses the push if the branch moved since then.
+          # Keep the push token out of the checkout and argv.
+          GIT_CONFIG_COUNT=1 \
+            GIT_CONFIG_KEY_0="http.${SERVER_URL%/}/.extraheader" \
+            GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$PUSH_TOKEN" | base64 | tr -d '\n')" \
+            git push
 
+      # Also after a failed upload or push.
       - name: Report problems
-        if: steps.update.outputs.problems != ''
+        if: always() && steps.update.outputs.problems != ''
         env:
           PROBLEMS: ${{ steps.update.outputs.problems }}
         run: |
