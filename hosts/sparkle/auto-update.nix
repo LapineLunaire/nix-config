@@ -5,11 +5,6 @@
 }: {
   imports = [../../modules/nixos/nix/auto-update.nix];
 
-  host.autoUpdate = {
-    owner = "carmilla";
-    branch = "main";
-  };
-
   # The encrypted root pool requires an interactive unlock; reboot manually for kernel updates.
   system.autoUpgrade.allowReboot = false;
   systemd.services.nixos-upgrade.serviceConfig.ExecStartPost =

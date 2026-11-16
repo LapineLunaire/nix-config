@@ -2,7 +2,6 @@
   pkgs,
   dmz,
   net,
-  trustedSubnets,
   ...
 }: {
   imports = [
@@ -24,20 +23,13 @@
     ./telemetry.nix
   ];
 
-  host.trustedSubnets = trustedSubnets.all;
-
-  host.flakePath = "/persist/nix-config";
-  host.smtp.passwordSecret = "smtp-password";
   host.kernel = {
     packages = pkgs.linuxPackages_6_18;
     cpu = "alderlake";
   };
 
-  services.borgbackup.jobs.hetzner = {
-    startAt = "03:00";
-    # Exclude disposable guest disk images.
-    exclude = ["pp:/mnt/borg-snapshot/volumes"];
-  };
+  # Exclude disposable guest disk images.
+  services.borgbackup.jobs.hetzner.exclude = ["pp:/mnt/borg-snapshot/volumes"];
 
   networking = {
     hostName = "sparkle";

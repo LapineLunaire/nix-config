@@ -25,10 +25,8 @@
 
   networking.hostName = "camellya";
 
-  host.flakePath = "/persist/nix-config";
   host.swapFileSize = 16;
   host.wirelessRegulatoryDomain = "NL";
-  host.trustedSubnets = trustedSubnets.all;
   hardware.steamFrame.lanSubnets = [trustedSubnets.lan];
 
   host.kernel = {
@@ -62,5 +60,31 @@
   programs.honkers-railway-launcher.enable = true;
 
   system.stateVersion = "26.11";
-  home-manager.users.carmilla.home.stateVersion = "26.11";
+
+  home-manager.users.carmilla = {
+    home.stateVersion = "26.11";
+
+    programs.plasma = {
+      workspace.wallpaper = "${../../users/carmilla/wallpapers/__camellya_wuthering_waves_drawn_by_lemontea_ekvr5838__1ba4f9536e85b04a5d04733db7eee4e9.png}";
+      kscreenlocker.appearance.wallpaper = "${../../users/carmilla/wallpapers/__camellya_wuthering_waves_drawn_by_bantish__231537f8c01272b8cb8f88e7a518a7a8.jpg}";
+    };
+
+    home.packages = with pkgs; [
+      curseforge
+      davinci-resolve
+      heroic
+      prismlauncher
+      wootility
+      xivlauncher
+    ];
+
+    xdg.mimeApps.defaultApplications = {
+      "x-scheme-handler/cfauth" = "curseforge.desktop";
+      "x-scheme-handler/curseforge" = "curseforge.desktop";
+      "x-scheme-handler/curseforge-checkout" = "curseforge.desktop";
+      "x-scheme-handler/heroic" = "com.heroicgameslauncher.hgl.desktop";
+      "x-scheme-handler/web+wootwoot" = "wootility.desktop";
+      "x-scheme-handler/wootwoot" = "wootility.desktop";
+    };
+  };
 }

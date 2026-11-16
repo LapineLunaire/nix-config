@@ -16,7 +16,7 @@
     ./hardware-configuration.nix
     ../../modules/nixos/system/persistence.nix
     ./sops.nix
-    ./auto-update.nix
+    ../../modules/nixos/nix/auto-update.nix
     ./services/database.nix
     ./services/certificates.nix
     ./services/ejabberd.nix
@@ -29,8 +29,6 @@
     hostId = "33dd4911";
   };
 
-  host.flakePath = "/persist/nix-config";
-  host.smtp.passwordSecret = "smtp-password";
   host.dnsApiTokenSecret = "bunny-enterprises-dns-api-token";
 
   host.wireguardTunnel = {
@@ -43,7 +41,6 @@
     };
   };
 
-  services.borgbackup.jobs.hetzner.startAt = "03:00";
   services.fwupd.enable = false;
 
   # Hetzner's IPv4 gateway is outside the /32, so it needs GatewayOnLink.

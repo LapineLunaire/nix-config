@@ -46,6 +46,8 @@ in {
     environment.BORG_RSH = "ssh -i ${config.sops.secrets."borg-ssh-key".path} -o StrictHostKeyChecking=yes -o UserKnownHostsFile=${config.sops.secrets."borg-known-hosts".path}";
     compression = "auto,zstd";
     exclude = ["pp:/mnt/borg-snapshot/var/lib/borgbackup/hetzner/.cache/borg"];
+    # An hour before the server upgrades.
+    startAt = "03:00";
     persistentTimer = true;
     preHook = ''
       while [ "$(${config.systemd.package}/bin/systemctl show -P ActiveState nixos-upgrade.service)" = activating ] || [ -e /run/systemd/shutdown/scheduled ]; do

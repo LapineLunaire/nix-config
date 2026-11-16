@@ -92,19 +92,6 @@
   }: let
     systems = ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
     forEachSystem = nixpkgs.lib.genAttrs systems;
-    desktopModules = [
-      impermanence.nixosModules.impermanence
-      lanzaboote.nixosModules.lanzaboote
-      sops-nix.nixosModules.sops
-      home-manager.nixosModules.home-manager
-      {
-        home-manager.sharedModules = [
-          nixvim.homeModules.nixvim
-          plasma-manager.homeModules.plasma-manager
-        ];
-      }
-      ./profiles/desktop
-    ];
     sharedData = {
       trustedSubnets = import ./hosts/trusted-subnets.nix;
       dmz = import ./hosts/sparkle/dmz-net.nix;
@@ -115,19 +102,58 @@
       consoleKey = import ./hosts/sparkle/console-key.nix;
       sparxieWan = import ./hosts/sparxie/wan-net.nix;
     };
-    guestConfigurations = nixpkgs-stable.lib.mapAttrs (name: _:
-      nixpkgs-stable.lib.nixosSystem {
+    # Every NixOS host and guest here gets the shared data and trusts the same client subnets.
+    mkSystem = nixpkgsInput: modules:
+      nixpkgsInput.lib.nixosSystem {
         specialArgs = sharedData;
-        modules = [
-          impermanence.nixosModules.impermanence
-          microvm.nixosModules.microvm
-          sops-nix.nixosModules.sops
-          ./modules/nixos/microvm/guest.nix
-          ./modules/nixos/microvm/identity.nix
-          {networking.hostName = name;}
-          (./hosts/sparkle/guests + "/${name}")
-        ];
-      })
+        modules =
+          [
+            impermanence.nixosModules.impermanence
+            sops-nix.nixosModules.sops
+            {host.trustedSubnets = sharedData.trustedSubnets.all;}
+          ]
+          ++ modules;
+      };
+    # Desktops and servers keep their checkout in /persist/nix-config.
+    mkDesktop = modules:
+      mkSystem nixpkgs (
+        [
+          lanzaboote.nixosModules.lanzaboote
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.sharedModules = [
+              nixvim.homeModules.nixvim
+              plasma-manager.homeModules.plasma-manager
+            ];
+          }
+          ./profiles/desktop
+          {host.flakePath = "/persist/nix-config";}
+        ]
+        ++ modules
+        ++ [
+          ./users/carmilla/desktop.nix
+          ./users/t3
+        ]
+      );
+    mkServer = modules:
+      mkSystem nixpkgs-stable (
+        [
+          home-manager-stable.nixosModules.home-manager
+          {home-manager.sharedModules = [nixvim-stable.homeModules.nixvim];}
+          ./profiles/server
+          {host.flakePath = "/persist/nix-config";}
+        ]
+        ++ modules
+        ++ [./users/carmilla/server.nix]
+      );
+    guestConfigurations = nixpkgs-stable.lib.mapAttrs (name: _:
+      mkSystem nixpkgs-stable [
+        microvm.nixosModules.microvm
+        ./modules/nixos/microvm/guest.nix
+        ./modules/nixos/microvm/identity.nix
+        {networking.hostName = name;}
+        (./hosts/sparkle/guests + "/${name}")
+      ])
     sharedData.guestRegistry;
   in {
     overlays = import ./overlays;
@@ -180,69 +206,22 @@
     nixosConfigurations =
       guestConfigurations
       // {
-        camellya = nixpkgs.lib.nixosSystem {
-          specialArgs = sharedData;
-          modules =
-            desktopModules
-            ++ [
-              aagl.nixosModules.default
-              ./hosts/camellya
-              ./users/carmilla/hosts/camellya.nix
-              ./users/t3
-            ];
-        };
-
-        kafka = nixpkgs.lib.nixosSystem {
-          specialArgs = sharedData;
-          modules =
-            desktopModules
-            ++ [
-              ./hosts/kafka
-              ./users/carmilla/hosts/kafka.nix
-              ./users/t3
-            ];
-        };
-
-        sparkle = nixpkgs-stable.lib.nixosSystem {
-          specialArgs = sharedData // {inherit guestConfigurations;};
-          modules = [
-            microvm.nixosModules.host
-            impermanence.nixosModules.impermanence
-            lanzaboote.nixosModules.lanzaboote
-            sops-nix.nixosModules.sops
-            home-manager-stable.nixosModules.home-manager
-            {home-manager.sharedModules = [nixvim-stable.homeModules.nixvim];}
-            ./profiles/server
-            ./hosts/sparkle
-            ./users/carmilla/server.nix
-          ];
-        };
-
-        sparxie = nixpkgs-stable.lib.nixosSystem {
-          specialArgs = sharedData;
-          modules = [
-            impermanence.nixosModules.impermanence
-            sops-nix.nixosModules.sops
-            home-manager-stable.nixosModules.home-manager
-            {home-manager.sharedModules = [nixvim-stable.homeModules.nixvim];}
-            ./profiles/server
-            ./hosts/sparxie
-            ./users/carmilla/server.nix
-          ];
-        };
+        camellya = mkDesktop [aagl.nixosModules.default ./hosts/camellya];
+        kafka = mkDesktop [./hosts/kafka];
+        sparkle = mkServer [
+          microvm.nixosModules.host
+          lanzaboote.nixosModules.lanzaboote
+          {_module.args = {inherit guestConfigurations;};}
+          ./hosts/sparkle
+        ];
+        sparxie = mkServer [./hosts/sparxie];
       };
 
-    checks = {
-      x86_64-linux =
-        (nixpkgs-stable.lib.mapAttrs (_: guest: guest.config.system.build.toplevel) guestConfigurations)
-        // {
-          camellya = self.nixosConfigurations.camellya.config.system.build.toplevel;
-          kafka = self.nixosConfigurations.kafka.config.system.build.toplevel;
-          sparkle = self.nixosConfigurations.sparkle.config.system.build.toplevel;
-        };
-      aarch64-linux.sparxie = self.nixosConfigurations.sparxie.config.system.build.toplevel;
-      aarch64-darwin.silverwolf = self.darwinConfigurations.silverwolf.config.system.build.toplevel;
-    };
+    # nix flake check evaluates each system under its own platform, including Silverwolf.
+    checks = nixpkgs.lib.foldlAttrs (checks: name: system:
+      nixpkgs.lib.recursiveUpdate checks {
+        ${system.config.nixpkgs.hostPlatform.system}.${name} = system.config.system.build.toplevel;
+      }) {} (self.nixosConfigurations // self.darwinConfigurations);
 
     formatter = forEachSystem (system: nixpkgs.legacyPackages.${system}.alejandra);
 

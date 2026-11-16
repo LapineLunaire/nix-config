@@ -14,11 +14,13 @@ in {
   options.host.autoUpdate = {
     owner = lib.mkOption {
       type = lib.types.str;
+      default = "carmilla";
       description = "Checkout owner used for Git operations.";
     };
 
     branch = lib.mkOption {
       type = lib.types.str;
+      default = "main";
       description = "Origin branch verified before each upgrade.";
     };
 

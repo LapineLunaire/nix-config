@@ -54,6 +54,7 @@
 
       passwordSecret = lib.mkOption {
         type = lib.types.str;
+        default = "smtp-password";
         description = "SOPS secret containing the SMTP password.";
       };
     };

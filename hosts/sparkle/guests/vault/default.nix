@@ -18,9 +18,6 @@ in {
     ./sops.nix
   ];
 
-  host.trustedSubnets = trustedSubnets.all;
-  host.smtp.passwordSecret = "smtp-password";
-
   microvm = {
     vcpu = 4;
     mem = 8192;

@@ -3,7 +3,6 @@
   lib,
   pkgs,
   net,
-  trustedSubnets,
   web,
   ...
 }: {
@@ -12,8 +11,6 @@
     ../../../../modules/nixos/networking/trusted-ssh-ingress.nix
     ./sops.nix
   ];
-
-  host.trustedSubnets = trustedSubnets.all;
 
   # Also allow Uptime Kuma's SSH check.
   networking.firewall.extraInputRules = ''

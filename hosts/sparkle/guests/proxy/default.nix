@@ -1,6 +1,5 @@
 {
   net,
-  trustedSubnets,
   sparxieWan,
   tunnelWeb,
   ...
@@ -11,8 +10,6 @@
     ./sops.nix
     ./vhosts.nix
   ];
-
-  host.trustedSubnets = trustedSubnets.all;
 
   host.dnsApiTokenSecret = "lunaire-moe-dns-api-token";
 
