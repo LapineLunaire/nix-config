@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   ...
@@ -6,9 +7,33 @@
   imports = [
     ../modules/shared/host.nix
     ../modules/shared/nix-settings.nix
-    ../modules/darwin/homebrew.nix
-    ../modules/darwin/nh.nix
   ];
+
+  homebrew = {
+    enable = true;
+    enableZshIntegration = true;
+    onActivation = {
+      autoUpdate = true;
+      upgrade = true;
+      cleanup = "uninstall";
+    };
+    global.autoUpdate = false;
+  };
+
+  programs.nh = {
+    enable = true;
+    flake = config.host.flakePath;
+    clean = {
+      enable = true;
+      extraArgs = "--keep 3";
+      interval = [
+        {
+          Hour = 0;
+          Minute = 0;
+        }
+      ];
+    };
+  };
 
   programs.zsh.enable = true;
   environment.systemPackages = [pkgs.ghostty-bin.terminfo];
