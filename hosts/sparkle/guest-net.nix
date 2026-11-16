@@ -1,6 +1,9 @@
 let
   registry = import ./guest-registry.nix;
   dmz = import ./dmz-net.nix;
+  trustedSubnets = import ../trusted-subnets.nix;
+  # Include the router that repeats LAN discovery.
+  discoverySources = [trustedSubnets.lan dmz.gateway];
   names = builtins.attrNames registry;
   vmAddress = builtins.mapAttrs (_: vm: "${dmz.guestPrefix}.${toString vm.index}") registry;
   # Guests whose registry entry sets this flag.
@@ -8,7 +11,8 @@ let
   postgresDatabases = flagged "database";
   addressesNft = guests: builtins.concatStringsSep ", " (map (name: vmAddress.${name}) guests);
 in {
-  inherit vmAddress postgresDatabases;
+  inherit vmAddress postgresDatabases discoverySources;
+  discoverySourcesNft = builtins.concatStringsSep ", " discoverySources;
   tapsNft = builtins.concatStringsSep ", " (map (name: "\"${name}\"") names);
   # Pin each tap to its assigned IPv4 address.
   guestIdentityNft = builtins.concatStringsSep ", " (map (name: "\"${name}\" . ${vmAddress.${name}}") names);

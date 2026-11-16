@@ -5,7 +5,6 @@
   net,
   web,
   guestRegistry,
-  trustedSubnets,
   guestConfigurations,
   ...
 }: {
@@ -33,8 +32,6 @@
   # Filter traffic between taps and sfp0. Traffic to Sparkle itself uses its input firewall.
   networking.nftables.tables.dmz = let
     trusted = config.host.trustedSubnetsNft;
-    # Include the router that repeats LAN discovery.
-    discoverySources = "${trustedSubnets.lan}, ${dmz.gateway}";
     guests = net.tapsNft;
     forgejoSshPorts = lib.concatMapStringsSep ", " toString guestConfigurations.forgejo.config.services.openssh.ports;
     guestMacsNft = lib.concatStringsSep ", " (lib.mapAttrsToList (name: _: "\"${name}\" . ${(builtins.head guestConfigurations.${name}.config.microvm.interfaces).mac}") guestRegistry);
@@ -120,8 +117,8 @@
         # SMB is for trusted clients; guests use NFS.
         iifname "sfp0" oifname "vault" ip saddr { ${trusted} } tcp dport { 139, 445 } accept
         # NetBIOS and wsdd discovery from the LAN and its repeater.
-        iifname "sfp0" oifname "vault" ip saddr { ${discoverySources} } udp dport { 137, 138 } accept
-        iifname "sfp0" oifname "vault" ip saddr { ${discoverySources} } tcp dport 5357 accept
+        iifname "sfp0" oifname "vault" ip saddr { ${net.discoverySourcesNft} } udp dport { 137, 138 } accept
+        iifname "sfp0" oifname "vault" ip saddr { ${net.discoverySourcesNft} } tcp dport 5357 accept
         # Match multicast destinations; repeated discovery may have the router's source address.
         iifname "sfp0" oifname "vault" ip daddr 224.0.0.251 udp dport 5353 accept
         iifname "sfp0" oifname "vault" ip daddr 239.255.255.250 udp dport 3702 accept

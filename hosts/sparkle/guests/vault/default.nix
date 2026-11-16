@@ -1,15 +1,9 @@
 {
   config,
-  dmz,
   net,
-  trustedSubnets,
   pkgs,
   ...
-}: let
-  # The router repeats LAN discovery with its own source address.
-  discoverySources = [trustedSubnets.lan dmz.gateway];
-  discoverySourcesNft = builtins.concatStringsSep ", " discoverySources;
-in {
+}: {
   imports = [
     ../../../../modules/nixos/services/mail-relay.nix
     ../../../../modules/nixos/services/zfs.nix
@@ -64,8 +58,8 @@ in {
   networking.firewall.extraInputRules = ''
     ip saddr { ${net.nfsClientsNft} } tcp dport ${toString net.nfsPort} accept
     ip saddr { ${config.host.trustedSubnetsNft} } tcp dport { 139, 445 } accept
-    ip saddr { ${discoverySourcesNft} } udp dport { 137, 138 } accept
-    ip saddr { ${discoverySourcesNft} } tcp dport 5357 accept
+    ip saddr { ${net.discoverySourcesNft} } udp dport { 137, 138 } accept
+    ip saddr { ${net.discoverySourcesNft} } tcp dport 5357 accept
     ip daddr 224.0.0.251 udp dport 5353 accept
     ip daddr 239.255.255.250 udp dport 3702 accept
   '';
@@ -90,7 +84,7 @@ in {
     {
       proto = "udp";
       sourcePorts = [3702];
-      destinations = discoverySources;
+      destinations = net.discoverySources;
     }
   ];
 
