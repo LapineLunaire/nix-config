@@ -15,7 +15,6 @@
     ../../modules/nixos/system/tmpfs-root.nix
     ./hardware-configuration.nix
     ../../modules/nixos/system/persistence.nix
-    ./sops.nix
     ../../modules/nixos/nix/auto-update.nix
     ./services/database.nix
     ./services/certificates.nix
@@ -28,6 +27,8 @@
     hostName = "sparxie";
     hostId = "33dd4911";
   };
+
+  sops.defaultSopsFile = ./secrets.yaml;
 
   host.dnsApiTokenSecret = "bunny-enterprises-dns-api-token";
 

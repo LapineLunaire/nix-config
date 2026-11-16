@@ -5,6 +5,8 @@
   tunnelWeb,
   ...
 }: {
+  sops.secrets."pub-bnnuy-password-hash" = {};
+
   sops.templates."caddy-pub-bnnuy-basicauth" = {
     owner = "caddy";
     reloadUnits = ["caddy.service"];

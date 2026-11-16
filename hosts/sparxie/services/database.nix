@@ -5,6 +5,15 @@
 }: {
   imports = [../../../modules/nixos/services/postgresql-passwords.nix];
 
+  sops.secrets = {
+    "ejabberd-db-password".restartUnits = ["postgresql-passwords.service"];
+    "carmilla-db-password".restartUnits = ["postgresql-passwords.service"];
+    "redis-password" = {
+      owner = "redis";
+      restartUnits = ["redis.service"];
+    };
+  };
+
   services.postgresql = {
     enable = true;
     package = pkgs.postgresql_18;

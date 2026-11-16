@@ -1,4 +1,6 @@
 {config, ...}: {
+  sops.secrets."tuwunel-registration-token" = {};
+
   sops.templates."tuwunel.env" = {
     restartUnits = ["tuwunel.service"];
     content = ''
