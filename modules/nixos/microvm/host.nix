@@ -39,10 +39,12 @@
     })
   guestRegistry;
 
-  systemd.services = lib.mapAttrs' (name: vm:
+  systemd.services = lib.mapAttrs' (name: vm: let
+    deps = map (dep: "microvm@${dep}.service") (vm.deps or [] ++ lib.optional (vm.database or false) "postgres");
+  in
     lib.nameValuePair "microvm@${name}" {
-      after = map (dep: "microvm@${dep}.service") (vm.deps or []);
-      wants = map (dep: "microvm@${dep}.service") (vm.deps or []);
+      after = deps;
+      wants = deps;
     })
   guestRegistry;
 }

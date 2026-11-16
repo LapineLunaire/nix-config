@@ -111,10 +111,10 @@
         # monitoring: scrape node_exporter on every guest.
         iifname "monitoring" oifname { ${guests} } tcp dport ${toString net.nodeExporterPort} accept
 
-        # PostgreSQL, from the client guests listed in guest-net.nix.
+        # PostgreSQL, from the guests with a database in guest-registry.nix, pgadmin, and uptime-kuma.
         iifname { ${guests} } oifname "postgres" tcp dport ${toString net.postgresPort} ip saddr { ${net.postgresClientsNft} } accept
 
-        # NFSv4 only, so TCP 2049 is enough; allow the client guests listed in guest-net.nix.
+        # NFSv4 only, so TCP 2049 is enough; allow the guests marked nfs in guest-registry.nix.
         iifname { ${guests} } oifname "vault" tcp dport ${toString net.nfsPort} ip saddr { ${net.nfsClientsNft} } accept
 
         # SMB is for trusted clients; guests use NFS.
@@ -138,7 +138,7 @@
         # HTTPS, including HTTP/3, for health checks, OIDC backchannels and CI requests.
         iifname { "uptime-kuma", "forgejo", "pgadmin", "ci-runner" } oifname "proxy" tcp dport 443 accept
         iifname { "uptime-kuma", "forgejo", "pgadmin", "ci-runner" } oifname "proxy" udp dport 443 accept
-        # The proxy reaches each backend on the port guest-web.nix gives it.
+        # The proxy reaches each backend on the port guest-registry.nix gives it.
         ${lib.concatStrings (lib.mapAttrsToList (name: e: "iifname \"proxy\" oifname \"${name}\" tcp dport ${toString e.port} accept\n") web.endpoints)}
 
         # Allow only the egress declared by each guest.
