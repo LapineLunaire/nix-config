@@ -14,7 +14,7 @@ SOPS files group credentials by their readers. Every recipient can decrypt every
 
 Create or edit a file with `sops <file>`. Values such as SMTP passwords, DNS tokens, and Attic tokens are plaintext inside the editor. Keys ending in `-hash` hold hashes: Carmilla's login password, the qBittorrent and Caddy basic-auth passwords, and Authelia's OIDC client secrets. Stage new encrypted files before checking the Git-backed flake.
 
-Camellya, Kafka, Sparkle, and ci-runner share one Attic pull token, which needs read access to the `lune` cache and no write permissions. The Forgejo `ATTIC_TOKEN` secret needs read and push access to it. On ci-runner, every job receives the pull token as `ATTIC_PULL_TOKEN`; the `configure-nix` action writes it to a netrc file that only root can read and clears the variable for later steps, so builds cannot read it. The image contains no credentials.
+Camellya, Kafka, Sparkle, and ci-runner share one Attic pull token, which needs read access to the `lune` cache and no write permissions. The Forgejo `ATTIC_TOKEN` secret needs read and push access to it. On ci-runner, SOPS renders a root-owned, mode 0400 netrc file that the runner mounts read-only at `/etc/nix/netrc` in every job. The token never enters the job environment, and build users cannot read the file. The image contains no credentials.
 
 Sparkle and its applications read SMTP credentials from `hosts/sparkle/smtp.yaml`. Keep that credential valid for their configured SMTP account and sender. Sparxie's SMTP credential is in `hosts/sparxie/secrets.yaml`.
 

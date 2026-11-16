@@ -64,17 +64,18 @@ in {
     '';
   };
 
-  sops.templates."runner-cache.env" = {
+  sops.templates."runner-cache.netrc" = {
+    owner = "root";
+    mode = "0400";
     restartUnits = ["gitea-runner-sparkle.service"];
     content = ''
-      ATTIC_PULL_TOKEN=${config.sops.placeholder."attic-pull-token"}
+      machine cache.lunaire.moe password ${config.sops.placeholder."attic-pull-token"}
     '';
   };
 
   systemd.services.gitea-runner-sparkle = {
     path = [config.virtualisation.docker.package];
     serviceConfig = {
-      LoadCredential = ["cache.env:${config.sops.templates."runner-cache.env".path}"];
       # Docker here only runs CI, so clear what interrupted jobs left and load the image before every runner start.
       ExecStartPre = lib.mkBefore [
         (pkgs.writeShellScript "ci-runner-prepare" ''
@@ -101,7 +102,11 @@ in {
         runner = {
           capacity = 1;
           timeout = "6h";
-          env_file = "/run/credentials/gitea-runner-sparkle.service/cache.env";
+        };
+        container = {
+          # Docker reads the root-only host file; unsandboxed nixbld users cannot read the mount.
+          options = "--mount type=bind,source=${config.sops.templates."runner-cache.netrc".path},target=/etc/nix/netrc,readonly";
+          valid_volumes = [config.sops.templates."runner-cache.netrc".path];
         };
         cache.enabled = false;
       };

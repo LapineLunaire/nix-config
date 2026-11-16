@@ -7,20 +7,22 @@
 | 05:00 | Forgejo update and build workflow |
 | 12:00 | Borg freshness check; Sparkle and Sparxie email daily while a reboot is pending |
 
-The [update workflow](../.forgejo/workflows/flake-update.yml) also supports manual runs. Updates queue per branch, and each run checks out the latest branch to include earlier update commits.
+The [update workflow](../.forgejo/workflows/flake-update.yml) runs [the update script](../.forgejo/update.sh) and also supports manual runs. Updates queue per branch, and each run checks out the latest branch to include earlier update commits.
 
 On Mondays and manual runs the job refreshes Home Assistant's container digest; if that fails, the digest stays as it was and the run goes on. Every run sets the CurseForge package to the version and hash in CurseForge's release list, and keeps the change only if the package builds. It then updates the flake inputs in two groups:
 
 - The server-only inputs in `SERVER_INPUTS` update first, with the Caddy plugin hash refreshed if necessary. They must pass the flake check and a Sparkle build.
 - The remaining inputs update next. They must pass the flake check and builds of Sparkle, Camellya, and Kafka.
 
-A group that fails is rolled back, and the other group's update still goes ahead. If anything changed, the job checks all systems again, builds Sparkle, including its guest runners, then Camellya and Kafka, and pushes one signed commit with the combined changes. A desktop that fails this last build does not hold the commit back, because accepted inputs were already built with it. The job compares the new lock file with the old one using the [check the servers run](../modules/nixos/nix/ci-lock-check.jq). A commit that fails it is still pushed, so that it can be [accepted](#server-upgrades). Sparxie and Silverwolf are evaluated but not built by the x86_64 Linux runner.
+A failed update restores its files and records a problem; the other updates still go ahead. Pinned values are replaced only where the server's `ciPins` pattern matches exactly once. If anything changed, the job checks all systems again, builds Sparkle, including its guest runners, then Camellya and Kafka, and pushes one signed commit with the combined changes. A desktop that fails this last build does not hold the commit back, because accepted inputs were already built with it. The job compares the new lock file with the old one using the [check the servers run](../modules/nixos/nix/ci-lock-check.jq). A commit that fails it is still pushed, so that it can be [accepted](#server-upgrades). Sparxie and Silverwolf are evaluated but not built by the x86_64 Linux runner.
 
 The run fails after pushing, and names the cause, when the digest, the CurseForge update, or a group was rolled back, a desktop was not built, or the servers will refuse the commit. If the branch moved during the run, nothing is pushed and the run fails; run it again.
 
-`CI_SIGNING_KEY` supplies the SSH signing key. The workflow uploads Sparkle and the built desktops to the `lune` cache with `ATTIC_TOKEN` before committing and pushing. A missing token or failed upload blocks the push. The temporary signing key and upload credential are removed when their steps finish.
+`CI_SIGNING_KEY` supplies the SSH signing key. The workflow uploads Sparkle and the built desktops to the `lune` cache with `ATTIC_TOKEN` before committing and pushing. A missing token or failed upload blocks the push. The temporary signing key and upload credential are removed when their steps finish. Neither is present while Nix evaluates or builds.
 
 The [validation workflow](../.forgejo/workflows/validate.yml) checks pushes to `main` and manual runs. It also checks that each `host.autoUpdate.ciPins` pattern matches exactly one line of its file. It reports problems after the push and does not hold back upgrades; a server that cannot build a commit keeps its current system and mails the failure. A host that pulls a commit the cache lacks builds the missing parts itself; the next update run that changes something caches the systems again. Validation builds only uncached systems and uploads nothing. Runs queue, oldest first, so every push gets a result; Forgejo does not skip a waiting run when a newer push arrives. The update workflow pushes with the workflow token, which starts no other workflows, so its commits are checked only by its own run.
+
+After changing how the runner mounts the [cache credential](secrets.md) into jobs, run a workflow manually and check that it substitutes from the `lune` cache. A green run is not enough: without the credential, `fallback = true` builds from source instead of failing.
 
 ## Server upgrades
 
