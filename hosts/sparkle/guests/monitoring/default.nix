@@ -6,8 +6,6 @@
   lib,
   ...
 }: {
-  imports = [./sops.nix];
-
   microvm = {
     vcpu = 2;
     mem = 2048;
@@ -38,6 +36,13 @@
       }
     ];
   };
+
+  sops.defaultSopsFile = ./secrets.yaml;
+  sops.secrets."grafana-secret-key" = {
+    owner = "grafana";
+    restartUnits = ["grafana.service"];
+  };
+  sops.secrets."grafana-admin-password".owner = "grafana";
 
   services.grafana = {
     enable = true;

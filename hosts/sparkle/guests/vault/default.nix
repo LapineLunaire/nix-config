@@ -15,7 +15,6 @@ in {
     ../../../../modules/nixos/services/zfs.nix
     ../../../../modules/nixos/services/smartd.nix
     ./samba.nix
-    ./sops.nix
   ];
 
   microvm = {
@@ -149,5 +148,12 @@ in {
         exec $zfs load-key -L file://${config.sops.secrets."vault-zfs-key".path} vault
       '';
     };
+  };
+
+  sops = {
+    defaultSopsFile = ./secrets.yaml;
+    secrets."smtp-password".sopsFile = ../../smtp.yaml;
+    # Also keep this passphrase available for recovery outside the guest.
+    secrets."vault-zfs-key" = {};
   };
 }

@@ -9,7 +9,6 @@
   imports = [
     # Git over SSH uses the system sshd; open it to trusted subnets.
     ../../../../modules/nixos/networking/trusted-ssh-ingress.nix
-    ./sops.nix
   ];
 
   # Also allow Uptime Kuma's SSH check.
@@ -77,5 +76,15 @@
         ENDLESS_TASK_TIMEOUT = "6h";
       };
     };
+  };
+
+  sops.secrets."forgejo-db-password" = {
+    sopsFile = ./database.yaml;
+    restartUnits = ["forgejo.service"];
+  };
+  sops.secrets."forgejo-smtp-password" = {
+    sopsFile = ../../smtp.yaml;
+    key = "smtp-password";
+    restartUnits = ["forgejo.service"];
   };
 }

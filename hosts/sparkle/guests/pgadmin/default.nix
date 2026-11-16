@@ -6,13 +6,15 @@
   web,
   ...
 }: {
-  imports = [./sops.nix];
-
   microvm = {
     vcpu = 1;
     mem = 1024;
     initialBalloonMem = 256;
   };
+
+  sops.defaultSopsFile = ./secrets.yaml;
+  sops.secrets."pgadmin-admin-password".restartUnits = ["pgadmin.service"];
+  sops.secrets."pgadmin-oidc-client-secret".restartUnits = ["pgadmin.service"];
 
   services.pgadmin = {
     enable = true;

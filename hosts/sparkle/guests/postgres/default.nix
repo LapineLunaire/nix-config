@@ -5,7 +5,7 @@
   pkgs,
   ...
 }: {
-  imports = [../../../../modules/nixos/services/postgresql-passwords.nix ./sops.nix];
+  imports = [../../../../modules/nixos/services/postgresql-passwords.nix];
 
   microvm = {
     vcpu = 2;
@@ -50,6 +50,21 @@
 
   services.postgresql.passwordFiles =
     lib.genAttrs (net.postgresDatabases ++ ["carmilla"]) (name: config.sops.secrets."${name}-db-password".path);
+
+  # Each application's password comes from the file it shares with that application's guest.
+  sops = let
+    restartUnits = ["postgresql-passwords.service"];
+  in {
+    defaultSopsFile = ./secrets.yaml;
+    secrets =
+      lib.listToAttrs (map (name:
+        lib.nameValuePair "${name}-db-password" {
+          sopsFile = ../${name}/database.yaml;
+          inherit restartUnits;
+        })
+      net.postgresDatabases)
+      // {"carmilla-db-password" = {inherit restartUnits;};};
+  };
 
   networking.firewall.extraInputRules = ''
     ip saddr { ${net.postgresClientsNft} } tcp dport ${toString net.postgresPort} accept

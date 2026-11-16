@@ -6,7 +6,7 @@
   pkgs,
   ...
 }: {
-  imports = [./sops.nix ./vpn.nix];
+  imports = [./vpn.nix];
 
   microvm = {
     vcpu = 2;
@@ -58,6 +58,14 @@
         MaxActiveUploads = -1;
       };
     };
+  };
+
+  sops.defaultSopsFile = ./secrets.yaml;
+  sops.secrets."qbittorrent-protonvpn-conf".restartUnits = ["qbtvpn.service"];
+  # Read by the unprivileged ExecStartPre below, which splices it into qBittorrent.conf.
+  sops.secrets."qbittorrent-admin-password-hash" = {
+    owner = "qbittorrent";
+    restartUnits = ["qbittorrent.service"];
   };
 
   # Run as qBittorrent after its generated ExecStartPre installs the configuration.

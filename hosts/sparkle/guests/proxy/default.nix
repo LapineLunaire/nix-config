@@ -7,7 +7,6 @@
   imports = [
     ../../../../modules/nixos/services/caddy.nix
     ../../../../modules/nixos/networking/wireguard-tunnel.nix
-    ./sops.nix
     ./vhosts.nix
   ];
 
@@ -69,4 +68,10 @@
       destinations = [sparxieWan.ipv4];
     }
   ];
+
+  sops = {
+    defaultSopsFile = ./secrets.yaml;
+    secrets."lunaire-moe-dns-api-token" = {};
+    secrets."wireguard-private-key" = {};
+  };
 }

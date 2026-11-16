@@ -5,13 +5,15 @@
   web,
   ...
 }: {
-  imports = [./sops.nix];
-
   microvm = {
     vcpu = 4;
     mem = 2048;
     initialBalloonMem = 512;
   };
+
+  sops.defaultSopsFile = ./secrets.yaml;
+  sops.secrets."attic-token-rs256-secret-base64" = {};
+  sops.secrets."attic-db-password".sopsFile = ./database.yaml;
 
   sops.templates."atticd.env" = {
     restartUnits = ["atticd.service"];

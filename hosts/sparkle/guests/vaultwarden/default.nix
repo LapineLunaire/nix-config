@@ -4,8 +4,6 @@
   web,
   ...
 }: {
-  imports = [./sops.nix];
-
   microvm = {
     vcpu = 1;
     mem = 768;
@@ -19,6 +17,14 @@
       ports = [80 443 587];
     }
   ];
+
+  sops.defaultSopsFile = ./secrets.yaml;
+  sops.secrets."vaultwarden-db-password".sopsFile = ./database.yaml;
+  sops.secrets."vaultwarden-admin-token" = {};
+  sops.secrets."vaultwarden-smtp-password" = {
+    sopsFile = ../../smtp.yaml;
+    key = "smtp-password";
+  };
 
   sops.templates."vaultwarden.env" = {
     restartUnits = ["vaultwarden.service"];

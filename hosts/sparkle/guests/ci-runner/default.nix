@@ -11,7 +11,7 @@
     extraTrustedPublicKeys = config.nix.settings.extra-trusted-public-keys;
   };
 in {
-  imports = [../../../../modules/nixos/nix/attic-client.nix ./sops.nix];
+  imports = [../../../../modules/nixos/nix/attic-client.nix];
 
   microvm = let
     swapImage = "/persist/volumes/ci-runner/swap.img";
@@ -53,6 +53,9 @@ in {
   swapDevices = [{label = "ci-swap";}];
 
   virtualisation.docker.enable = true;
+
+  sops.defaultSopsFile = ./secrets.yaml;
+  sops.secrets."forgejo-runner-token" = {};
 
   sops.templates."runner-token.env" = {
     restartUnits = ["gitea-runner-sparkle.service"];

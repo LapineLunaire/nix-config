@@ -4,8 +4,6 @@
   web,
   ...
 }: {
-  imports = [./sops.nix];
-
   microvm = {
     vcpu = 2;
     mem = 1536;
@@ -35,6 +33,12 @@
       ports = [80 443 587];
     }
   ];
+
+  sops.defaultSopsFile = ./secrets.yaml;
+  sops.secrets."kavita-token-key" = {
+    owner = "kavita";
+    restartUnits = ["kavita.service"];
+  };
 
   services.kavita = {
     enable = true;
