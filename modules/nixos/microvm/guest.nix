@@ -92,6 +92,7 @@ in {
     };
 
     nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+    nixpkgs.overlays = [(import ../../../overlays).guests];
 
     microvm = {
       hypervisor = "cloud-hypervisor";
