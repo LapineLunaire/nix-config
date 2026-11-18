@@ -11,6 +11,7 @@
     ../modules/nixos/networking/firewall.nix
     ../modules/nixos/services/openssh.nix
     ../modules/nixos/programs/ghostty-terminfo.nix
+    ../modules/nixos/nix/overlays.nix
   ];
 
   console = {

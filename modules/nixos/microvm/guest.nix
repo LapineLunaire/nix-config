@@ -21,6 +21,7 @@ in {
     ../networking/firewall.nix
     ../services/openssh.nix
     ../programs/ghostty-terminfo.nix
+    ../nix/overlays.nix
     ./host-clock.nix
   ];
 
@@ -92,7 +93,6 @@ in {
     };
 
     nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-    nixpkgs.overlays = [(import ../../../overlays).guests];
 
     microvm = {
       hypervisor = "cloud-hypervisor";
