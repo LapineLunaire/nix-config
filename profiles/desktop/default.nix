@@ -18,6 +18,17 @@
   nix.daemonCPUSchedPolicy = "idle";
   networking.networkmanager.enable = true;
 
+  # Let WinBox find MikroTik devices on every network.
+  networking.firewall = {
+    allowedUDPPorts = [5678 20561];
+    allowedUDPPortRanges = [
+      {
+        from = 40000;
+        to = 50000;
+      }
+    ];
+  };
+
   services.xserver.xkb = {
     layout = "us,us";
     variant = "colemak,";

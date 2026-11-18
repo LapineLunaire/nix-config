@@ -39,11 +39,6 @@
 
   powerManagement.cpuFreqGovernor = "powersave";
 
-  # WinBox discovery is LAN-only.
-  networking.firewall.extraInputRules = ''
-    ip saddr ${trustedSubnets.lan} udp dport 5678 accept
-  '';
-
   services.udev.packages = [pkgs.wooting-udev-rules];
 
   services.xserver.videoDrivers = ["nvidia"];
