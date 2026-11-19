@@ -59,7 +59,7 @@ Restore the host's SSH key pair to `/mnt/persist/etc/ssh/` and keep the private 
 ```sh
 mkdir -p /mnt/persist/etc/ssh
 ssh-keygen -t ed25519 -N '' -f /mnt/persist/etc/ssh/ssh_host_ed25519_key
-nix --extra-experimental-features 'nix-command flakes' shell --inputs-from . nixpkgs-stable#ssh-to-age \
+nix --extra-experimental-features 'nix-command flakes' shell --inputs-from . nixpkgs#ssh-to-age \
   -c ssh-to-age < /mnt/persist/etc/ssh/ssh_host_ed25519_key.pub
 ```
 
@@ -67,7 +67,7 @@ Set `<hostname>_host` in `.sops.yaml` to the new age recipient. Use the old SSH 
 
 ```sh
 SOPS_AGE_KEY_CMD='ssh-to-age -private-key -i <old-private-key>' \
-  nix --extra-experimental-features 'nix-command flakes' shell --inputs-from . nixpkgs-stable#sops nixpkgs-stable#ssh-to-age \
+  nix --extra-experimental-features 'nix-command flakes' shell --inputs-from . nixpkgs#sops nixpkgs#ssh-to-age \
   -c sops updatekeys -y hosts/<hostname>/secrets.yaml
 ```
 

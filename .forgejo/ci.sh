@@ -2,7 +2,6 @@
 # The update and validation workflows run their steps from here: ci.sh <command>.
 set -euo pipefail
 
-SERVER_INPUTS='nixpkgs-stable home-manager-stable nixvim-stable microvm'
 # The runner cannot build Sparxie or Silverwolf.
 HOSTS='sparkle camellya kafka'
 CACHE=https://cache.lunaire.moe/lune
@@ -135,45 +134,14 @@ refresh_caddy() {
   write_pin "$CADDY_FILE" "      hash = \"$got\";"
 }
 
-update_server() {
-  local input before
-  local -a inputs
-  read -ra inputs <<< "$SERVER_INPUTS"
-  for input in "${inputs[@]}"; do
-    case " $INPUT_NAMES " in
-      *" $input "*) ;;
-      *) echo "SERVER_INPUTS names $input, which is not a flake input" >&2; return 1 ;;
-    esac
-  done
+update_inputs() {
+  local before host
   before=$(git hash-object --no-filters flake.lock)
-  nix flake update "${inputs[@]}"
+  nix flake update
   if [ "$(git hash-object --no-filters flake.lock)" = "$before" ]; then
     return
   fi
   refresh_caddy
-  check
-  build sparkle
-}
-
-update_rest() {
-  local input before host
-  local -a all_inputs inputs=()
-  read -ra all_inputs <<< "$INPUT_NAMES"
-  for input in "${all_inputs[@]}"; do
-    case " $SERVER_INPUTS " in
-      *" $input "*) ;;
-      *) inputs+=("$input") ;;
-    esac
-  done
-  # With no names, nix flake update updates every input.
-  if [ "${#inputs[@]}" -eq 0 ]; then
-    return
-  fi
-  before=$(git hash-object --no-filters flake.lock)
-  nix flake update "${inputs[@]}"
-  if [ "$(git hash-object --no-filters flake.lock)" = "$before" ]; then
-    return
-  fi
   check
   # This is the last update, so these are the systems to push. Report them to the caller.
   for host in $HOSTS; do
@@ -221,13 +189,10 @@ update() {
   load_pins
   pins=$(pin_paths)
   mapfile -t files <<< "flake.lock"$'\n'"$pins"
-  export INPUT_NAMES
-  INPUT_NAMES=$(jq -er '.nodes[.root].inputs | keys | join(" ")' flake.lock)
 
   attempt 'The Home Assistant digest was not updated' update_ha "$HA_FILE"
   attempt 'CurseForge was not updated' update_curseforge "$CURSEFORGE_FILE"
-  attempt 'Server inputs were not updated' update_server flake.lock "$CADDY_FILE"
-  attempt 'Remaining inputs were not updated' update_rest flake.lock
+  attempt 'Flake inputs were not updated' update_inputs flake.lock "$CADDY_FILE"
 
   if ! git diff --quiet -- "${files[@]}"; then
     publish=true

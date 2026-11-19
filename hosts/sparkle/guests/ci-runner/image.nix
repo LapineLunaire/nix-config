@@ -46,7 +46,7 @@
 in
   pkgs.dockerTools.buildLayeredImage {
     name = "localhost/nix-ci";
-    # The runner registers again whenever its labels change, so the tag stays fixed.
+    # A fixed tag moves to each new image and leaves the previous one untagged for the runner's cleanup to prune.
     tag = "current";
     includeNixDB = true;
     contents = [

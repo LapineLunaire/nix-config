@@ -1,18 +1,13 @@
 {
   description = "Carmilla's Nix configuration";
 
+  # Every host and guest uses this one nixpkgs. Home Manager and nixvim have no 26.11 branches yet, so they follow their development branches.
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable-small";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-26.05";
+    nixpkgs.url = "github:nixos/nixpkgs/staging-26.11";
 
     home-manager = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    home-manager-stable = {
-      url = "github:nix-community/home-manager/release-26.05";
-      inputs.nixpkgs.follows = "nixpkgs-stable";
     };
 
     nix-darwin = {
@@ -23,11 +18,6 @@
     nixvim = {
       url = "github:nix-community/nixvim/main";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    nixvim-stable = {
-      url = "github:nix-community/nixvim/nixos-26.05";
-      inputs.nixpkgs.follows = "nixpkgs-stable";
     };
 
     plasma-manager = {
@@ -62,7 +52,7 @@
 
     microvm = {
       url = "github:microvm-nix/microvm.nix";
-      inputs.nixpkgs.follows = "nixpkgs-stable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     aagl = {
@@ -76,12 +66,9 @@
   outputs = {
     self,
     nixpkgs,
-    nixpkgs-stable,
     home-manager,
-    home-manager-stable,
     nix-darwin,
     nixvim,
-    nixvim-stable,
     plasma-manager,
     impermanence,
     lanzaboote,
@@ -103,8 +90,8 @@
       sparxieWan = import ./hosts/sparxie/wan-net.nix;
     };
     # Every NixOS host and guest here gets the shared data and trusts the same client subnets.
-    mkSystem = nixpkgsInput: modules:
-      nixpkgsInput.lib.nixosSystem {
+    mkSystem = modules:
+      nixpkgs.lib.nixosSystem {
         specialArgs = sharedData;
         modules =
           [
@@ -114,20 +101,22 @@
           ]
           ++ modules;
       };
-    # Desktops and servers keep their checkout in /persist/nix-config.
+    # Desktops and servers use Home Manager with nixvim and keep their checkout in /persist/nix-config.
+    mkHost = modules:
+      mkSystem (
+        [
+          home-manager.nixosModules.home-manager
+          {home-manager.sharedModules = [nixvim.homeModules.nixvim];}
+          {host.flakePath = "/persist/nix-config";}
+        ]
+        ++ modules
+      );
     mkDesktop = modules:
-      mkSystem nixpkgs (
+      mkHost (
         [
           lanzaboote.nixosModules.lanzaboote
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.sharedModules = [
-              nixvim.homeModules.nixvim
-              plasma-manager.homeModules.plasma-manager
-            ];
-          }
+          {home-manager.sharedModules = [plasma-manager.homeModules.plasma-manager];}
           ./profiles/desktop
-          {host.flakePath = "/persist/nix-config";}
         ]
         ++ modules
         ++ [
@@ -136,18 +125,13 @@
         ]
       );
     mkServer = modules:
-      mkSystem nixpkgs-stable (
-        [
-          home-manager-stable.nixosModules.home-manager
-          {home-manager.sharedModules = [nixvim-stable.homeModules.nixvim];}
-          ./profiles/server
-          {host.flakePath = "/persist/nix-config";}
-        ]
+      mkHost (
+        [./profiles/server]
         ++ modules
         ++ [./users/carmilla/server.nix]
       );
-    guestConfigurations = nixpkgs-stable.lib.mapAttrs (name: _:
-      mkSystem nixpkgs-stable [
+    guestConfigurations = nixpkgs.lib.mapAttrs (name: _:
+      mkSystem [
         microvm.nixosModules.microvm
         ./modules/nixos/microvm/guest.nix
         ./modules/nixos/microvm/identity.nix

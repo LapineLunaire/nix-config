@@ -30,13 +30,15 @@ Stage new files with `git add` before evaluating or switching, because a Git-bac
 
 ## CI jobs
 
-The ci-runner guest runs each `nixos` Forgejo Actions job in a fresh Docker container. [image.nix](../hosts/sparkle/guests/ci-runner/image.nix) builds the job image from locked Nixpkgs. The image is part of Sparkle's build and needs no registry. Its fixed `localhost/nix-ci:current` tag avoids re-registering the runner when the image changes.
+The ci-runner guest runs each `nixos` Forgejo Actions job in a fresh Docker container. [image.nix](../hosts/sparkle/guests/ci-runner/image.nix) builds the job image from locked Nixpkgs. The image is part of Sparkle's build and needs no registry. Its fixed `localhost/nix-ci:current` tag moves to each new image, which leaves the previous one untagged for the runner's cleanup.
+
+The runner does not register itself. Its UUID, set in [the guest's configuration](../hosts/sparkle/guests/ci-runner/default.nix), and its token, `forgejo-runner-token` in the guest's SOPS file, come from one runner registration in Forgejo. If Forgejo loses that registration, for example after restoring an older database, register a new runner in Forgejo and replace both values.
 
 The runner takes one job at a time, so a job can use all 8 CPUs, 20 GiB RAM, and the swap for large builds. Nix runs up to three builds at once. Update runs and validation runs each queue per branch.
 
-Jobs have separate Nix stores, databases, checkouts, and credentials, removed when they finish. Nix runs without a daemon or its build sandbox; Docker and the microVM provide isolation. Builds run as unprivileged `nixbld` users, so builders cannot create `/homeless-shelter`, which makes unsandboxed Nix refuse to build. Jobs are not privileged and get no host mounts or daemon sockets. They download or build paths absent from the image, using the [read-only cache token](secrets.md). Signing and publishing credentials come from Forgejo workflow secrets.
+Jobs have separate Nix stores, databases, checkouts, and credentials, removed when they finish. Nix runs without a daemon or its build sandbox; Docker and the microVM provide isolation. Builds run as unprivileged `nixbld` users, so builders cannot create `/homeless-shelter`, which makes unsandboxed Nix refuse to build. Jobs are not privileged and get no daemon sockets. Their only mount from the guest is a read-only netrc file with the [read-only cache token](secrets.md). With it they download paths absent from the image, or build them. Signing and publishing credentials come from Forgejo workflow secrets.
 
-Before each start, including after a crash, the runner service removes all containers, volumes, and unused networks, loads the image, and removes the old untagged image. Docker in this guest must therefore only run CI jobs. Docker uses a 192 GiB XFS disk, with 32 GiB swap after zram. The disk images live in `/persist/volumes/ci-runner`. Check the guest with `systemctl status docker gitea-runner-sparkle`.
+Before each start, including after a crash, the runner service removes all containers, volumes, and unused networks, loads the image, and removes the old untagged image. Docker in this guest must therefore only run CI jobs. Docker uses a 192 GiB XFS disk, with 32 GiB swap after zram. The disk images live in `/persist/volumes/ci-runner`. Check the guest with `systemctl status docker forgejo-runner-sparkle`.
 
 The guest itself mounts the host store read-only at `/nix/.ro-store` with a tmpfs upper layer at `/nix/.rw-store`. Do not garbage-collect inside the guest, because overlay whiteouts can hide host paths that later generations need. Job stores live in the containers, not in this overlay.
 

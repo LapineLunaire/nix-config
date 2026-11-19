@@ -30,13 +30,13 @@ NixOS modules are grouped by purpose under `modules/nixos/`: system settings, ne
 
 Packages from this repository live under `pkgs/`. The desktop and server profiles add them to `pkgs` with the `additions` overlay in `overlays/`.
 
-`flake.nix` builds each desktop with `mkDesktop` and each server with `mkServer`, from upstream modules, a system profile, the host's directory, and user configuration. It sets the trusted subnets for every NixOS system and the checkout at `/persist/nix-config` for every Linux host. Hardware, networking, secrets, and per-host user settings live with each host under `hosts/`; the trusted client subnets are in `hosts/trusted-subnets.nix`. `flake.nix` imports these shared data files once, as `sharedData`, and passes them to every NixOS system as module arguments; modules take them as arguments rather than importing the files.
+`flake.nix` builds each desktop with `mkDesktop` and each server with `mkServer`, both through `mkHost`, from upstream modules, a system profile, the host's directory, and user configuration. It sets the trusted subnets for every NixOS system and the checkout at `/persist/nix-config` for every Linux host. Hardware, networking, secrets, and per-host user settings live with each host under `hosts/`; the trusted client subnets are in `hosts/trusted-subnets.nix`. `flake.nix` imports these shared data files once, as `sharedData`, and passes them to every NixOS system as module arguments; modules take them as arguments rather than importing the files.
 
 Carmilla's entries share Home Manager programs. Camellya and Kafka share `users/carmilla/desktop.nix` and set their own packages and wallpapers in `hosts/<host>/default.nix`. Silverwolf shares application settings and also uses Homebrew for its macOS application list.
 
 Camellya and Kafka run the T3 Code server as the separate `t3` user, so coding agents cannot read Carmilla's home, use doas, or reach her YubiKey. Carmilla's desktop app is its client. Agents commit in `t3`'s own clone. Carmilla pulls and signs each commit with `t3-pull`, onto the default branch or onto a pull request's branch, then pushes with Git, after one pull or several. See [T3 Code](docs/t3-code.md).
 
-Camellya, Kafka, and Silverwolf use unstable packages and Home Manager; Sparkle, Sparxie, and the guests use stable packages. Each host sets its system and home state versions.
+Every host and guest uses the same inputs, with nixpkgs from the `staging-26.11` branch. Home Manager and nixvim follow their development branches, since they have no 26.11 branches yet. Each host sets its system and home state versions.
 
 ## Development
 

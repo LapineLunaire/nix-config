@@ -40,13 +40,4 @@
         '';
     });
   };
-
-  guests = _final: prev: {
-    # PostgreSQL 17.12 and 18.7 add an internal pg_attver column option that pgAdmin 9.14 copies into generated SQL.
-    # Backport of pgAdmin commit 88c3ac2d, plus the version-specific templates later releases dropped.
-    # Remove once release-26.05 ships https://github.com/NixOS/nixpkgs/pull/589528.
-    pgadmin4 = prev.pgadmin4.overrideAttrs (old: {
-      patches = (old.patches or []) ++ [./patches/pgadmin-pg-attver.patch];
-    });
-  };
 }

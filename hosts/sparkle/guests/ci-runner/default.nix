@@ -55,16 +55,10 @@ in {
   virtualisation.docker.enable = true;
 
   sops.defaultSopsFile = ./secrets.yaml;
-  sops.secrets."forgejo-runner-token" = {};
+  # The runner token from registration, not the registration token.
+  sops.secrets."forgejo-runner-token".restartUnits = ["forgejo-runner-sparkle.service"];
 
-  sops.templates."runner-token.env" = {
-    restartUnits = ["gitea-runner-sparkle.service"];
-    content = ''
-      TOKEN=${config.sops.placeholder."forgejo-runner-token"}
-    '';
-  };
-
-  systemd.services.gitea-runner-sparkle = {
+  systemd.services.forgejo-runner-sparkle = {
     path = [config.virtualisation.docker.package];
     serviceConfig = {
       # Docker here only runs CI, so clear what interrupted jobs left and load the image before every runner start.
@@ -81,27 +75,26 @@ in {
     };
   };
 
-  services.gitea-actions-runner = {
-    package = pkgs.forgejo-runner;
-    instances.sparkle = {
-      enable = true;
-      name = "sparkle";
-      url = web.origin.forgejo;
-      tokenFile = config.sops.templates."runner-token.env".path;
-      labels = ["nixos:docker://${image.imageName}:${image.imageTag}"];
-      settings = {
-        runner = {
-          capacity = 1;
-          timeout = "6h";
-        };
-        container = {
-          # Jobs read the guest's own cache credential. Docker reads the root-only file for each new job, so a new
-          # token needs no runner restart; unsandboxed nixbld users cannot read the mount.
-          options = "--mount type=bind,source=${config.sops.templates."nix-netrc".path},target=/etc/nix/netrc,readonly";
-          valid_volumes = [config.sops.templates."nix-netrc".path];
-        };
-        cache.enabled = false;
+  services.forgejo-runner.instances.sparkle = {
+    enable = true;
+    secrets.server.connections.default.token_url = config.sops.secrets."forgejo-runner-token".path;
+    settings = {
+      server.connections.default = {
+        url = web.origin.forgejo;
+        uuid = "331cacbe-4bbf-4b7f-95aa-996f48a63293";
       };
+      runner = {
+        labels = ["nixos:docker://${image.imageName}:${image.imageTag}"];
+        capacity = 1;
+        timeout = "6h";
+      };
+      container = {
+        # Jobs read the guest's own cache credential. Docker reads the root-only file for each new job, so a new
+        # token needs no runner restart; unsandboxed nixbld users cannot read the mount.
+        options = "--mount type=bind,source=${config.sops.templates."nix-netrc".path},target=/etc/nix/netrc,readonly";
+        valid_volumes = [config.sops.templates."nix-netrc".path];
+      };
+      cache.enabled = false;
     };
   };
 }

@@ -35,14 +35,12 @@
   ];
 
   sops.defaultSopsFile = ./secrets.yaml;
-  sops.secrets."kavita-token-key" = {
-    owner = "kavita";
-    restartUnits = ["kavita.service"];
-  };
+  sops.secrets."kavita-token-key".restartUnits = ["kavita.service"];
 
   services.kavita = {
     enable = true;
-    tokenKeyFile = config.sops.secrets."kavita-token-key".path;
+    # Fills the default TokenKey placeholder, @token_key@, when the service starts.
+    credentials.token_key = config.sops.secrets."kavita-token-key".path;
     settings = {
       IpAddresses = net.vmAddress.kavita;
       Port = web.endpoints.kavita.port;

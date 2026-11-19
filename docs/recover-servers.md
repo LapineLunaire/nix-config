@@ -1,6 +1,6 @@
 # Recover Sparkle or Sparxie
 
-Use a matching UEFI NixOS installer with ZFS 2.4, the hosts' version, such as the NixOS 26.05 installer. An older ZFS may refuse to import the existing pool read-write, and a newer one can create pools with features the hosts lack. Do not run `zpool upgrade` during recovery. On Sparkle, disable Secure Boot enforcement before booting unsigned recovery media. Run commands as root in Bash. Replace every `<placeholder>`; the hostname is `sparkle` or `sparxie`.
+Use a UEFI NixOS installer with ZFS 2.4, the hosts' version; `zfs version` shows it. An older ZFS may refuse to import the existing pool read-write, and a newer one can create pools with features the hosts lack. Do not run `zpool upgrade` during recovery. On Sparkle, disable Secure Boot enforcement before booting unsigned recovery media. Run commands as root in Bash. Replace every `<placeholder>`; the hostname is `sparkle` or `sparxie`.
 
 Get the Borg credentials and any missing SOPS values from the password manager. On a configured host, use the [Borg helper](guests.md#borg-backup-and-recovery). In an installer, pass the credentials to Borg directly as shown below.
 
@@ -24,7 +24,7 @@ Change into the surviving checkout at `/mnt/persist/nix-config`. Restore [identi
 For replacement storage, follow [storage creation](install-servers.md#1-partition-and-create-datasets) and the [mount commands](install-servers.md#2-mount-and-configure-hardware), but clone the repository from Forgejo or a recovery mirror to `/tmp/nix-config` instead of `/mnt/persist/nix-config`. Put the Borg passphrase, SSH private key, and pinned SSH known-hosts entries in root-owned files with mode `0600`, then enter a shell with the checkout's Borg version:
 
 ```sh
-nix --extra-experimental-features 'nix-command flakes' shell --inputs-from /tmp/nix-config nixpkgs-stable#borgbackup
+nix --extra-experimental-features 'nix-command flakes' shell --inputs-from /tmp/nix-config nixpkgs#borgbackup
 export BORG_REPO='<repository-url>'
 export BORG_PASSCOMMAND='cat /run/borg-passphrase'
 export BORG_RSH='ssh -i /run/borg-ssh-key -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/run/borg-known-hosts'

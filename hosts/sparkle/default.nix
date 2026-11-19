@@ -74,6 +74,6 @@
   # HWP firmware controls frequency scaling in powersave mode.
   powerManagement.cpuFreqGovernor = "powersave";
 
-  system.stateVersion = "26.05";
-  home-manager.users.carmilla.home.stateVersion = "26.05";
+  system.stateVersion = "26.11";
+  home-manager.users.carmilla.home.stateVersion = "26.11";
 }
