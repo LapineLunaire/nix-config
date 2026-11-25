@@ -1,9 +1,8 @@
 {
   description = "Carmilla's Nix configuration";
 
-  # Every host and guest uses this one nixpkgs. Home Manager and nixvim have no 26.11 branches yet, so they follow their development branches.
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/staging-26.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-26.11-small";
 
     home-manager = {
       url = "github:nix-community/home-manager/master";
