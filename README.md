@@ -36,7 +36,7 @@ Carmilla's entries share Home Manager programs. Camellya and Kafka share `users/
 
 Camellya and Kafka run the T3 Code server as the separate `t3` user, so coding agents cannot read Carmilla's home, use doas, or reach her YubiKey. Carmilla's desktop app is its client. Agents commit in `t3`'s own clone. Carmilla pulls and signs each commit with `t3-pull`, onto the default branch or onto a pull request's branch, then pushes with Git, after one pull or several. See [T3 Code](docs/t3-code.md).
 
-Every host and guest uses the same inputs, with nixpkgs from the `staging-26.11` branch. Home Manager and nixvim follow their development branches, since they have no 26.11 branches yet. Each host sets its system and home state versions.
+All hosts and guests run NixOS 26.11 from the same flake inputs.
 
 ## Development
 
