@@ -2,7 +2,7 @@
   description = "Carmilla's Nix configuration";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-26.11-small";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-26.11";
 
     home-manager = {
       url = "github:nix-community/home-manager/master";
